@@ -23,27 +23,59 @@
         buttonState.set("start");
     }
 
+    // TODO: Pull these options from a database.
     let options = ["One", "Two", "Three"];
     let filteredOptions: string[] = [];
+    // Controls whether the modal is visible
+    let showModal = false;
+    // Holds the current input value inside the modal
+    let modalInput = "";
+    // Stores the currently selected option for the button label
+    let selectedOption: string = "Select Option";
 
-    function handleAutocomplete(input: string) {
+    /**
+     * Filters the options array based on user input in the modal.
+     * Updates the filteredOptions and modalInput state.
+     */
+    function handleFilter(input: string) {
         filteredOptions = options.filter((option) =>
             option.toLowerCase().includes(input.toLowerCase()),
         );
-        if (filteredOptions.length === 0) {
-            console.log(`Option '${input}' doesn't exist.`);
-        }
+        modalInput = input;
     }
 
+    /**
+     * Opens the modal and initializes the filter state.
+     */
+    function openModal() {
+        modalInput = "";
+        filteredOptions = options;
+        showModal = true;
+    }
+
+    /**
+     * Called when a user selects an option from the modal.
+     * Updates the button label and closes the modal.
+     */
     function selectOption(option: string) {
-        console.log(`Selected option: ${option}`);
-        const inputElement = document.querySelector(
-            "#autocomplete-input",
-        ) as HTMLInputElement | null;
-        if (inputElement) {
-            inputElement.value = option;
-        }
+        selectedOption = option;
         filteredOptions = [];
+        showModal = false;
+    }
+
+    /**
+     * Closes the modal without making a selection.
+     */
+    function closeModal() {
+        showModal = false;
+    }
+
+    /**
+     * Adds a new option (from modal input) and selects it.
+     */
+    function createNewOption() {
+        options = [...options, modalInput];
+        selectOption(modalInput);
     }
 </script>
 
@@ -55,28 +87,59 @@
     </div>
     <form class="pt-4">
         <div class="mb-3">
-            <input
-                type="text"
-                class="form-control"
-                placeholder="Type to search..."
-                on:input={(e) =>
-                    handleAutocomplete(
-                        (e.target as HTMLInputElement)?.value || "",
-                    )}
-                id="autocomplete-input"
-            />
-            <ul class="list-group mt-2">
-                {#each filteredOptions as option (option)}
-                    <button
-                        type="button"
-                        class="list-group-item list-group-item-action"
-                        on:click={() => selectOption(option)}
-                    >
-                        {option}
-                    </button>
-                {/each}
-            </ul>
-        </div>
+            <!--
+                Button that opens the modal popup for selecting an option.
+                The button label updates to reflect the user's selection.
+            -->
+            <button
+                type="button"
+                class="btn btn-outline-primary w-100"
+                on:click={openModal}
+            >
+                {selectedOption}
+            </button>
+            {#if showModal}
+                <!--
+                    Modal popup for option selection and filtering.
+                    Contains:
+                    - An input for filtering options.
+                    - A list of filtered options as buttons.
+                    - A button to create a new option if none match.
+                    - A cancel button to close the modal.
+                -->
+                <div class="modal-backdrop" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); display:flex; align-items:center; justify-content:center; z-index:1000;">
+                    <div class="modal-content" style="background:white; padding:2rem; border-radius:10px; min-width:300px;">
+                        <h5>Select an option</h5>
+                        <!-- Input for filtering options inside the modal -->
+                        <input
+                            type="text"
+                            class="form-control mb-3"
+                            placeholder="Type to search..."
+                            bind:value={modalInput}
+                            on:input={(e) => handleFilter((e.target as HTMLInputElement)?.value || "")}
+                            autofocus
+                        />
+                        {#if filteredOptions.length > 0}
+                            <!-- List of filtered options as selectable buttons -->
+                            <ul style="list-style:none; padding:0;">
+                                {#each filteredOptions as option (option)}
+                                    <li style="margin-bottom: 0.5rem;">
+                                        <button type="button" class="btn btn-outline-primary w-100" on:click={() => selectOption(option)}>{option}</button>
+                                    </li>
+                                {/each}
+                            </ul>
+                        {:else}
+                            <!-- Option to create a new entry if no matches are found -->
+                            <div>
+                                <p>No options found for "{modalInput}"</p>
+                                <button type="button" class="btn btn-outline-success w-100" on:click={createNewOption}>Create "{modalInput}"</button>
+                            </div>
+                        {/if}
+                        <!-- Cancel button to close the modal without selection -->
+                        <button type="button" class="btn btn-secondary w-100 mt-3" on:click={closeModal}>Cancel</button>
+                    </div>
+                </div>
+            {/if}
 
         <div style="display: flex; align-items: center; margin: 10px 0;">
             <span style="margin-right: 10px;">Goal</span>
