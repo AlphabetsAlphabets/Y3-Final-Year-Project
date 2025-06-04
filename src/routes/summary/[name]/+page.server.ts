@@ -4,9 +4,6 @@ import { activities } from "../data.js";
 // Get the data for the correct activity
 export function load({ params }) {
   const activity = activities.find((activity) => activity.name === params.name);
-  const random = {
-    stuff: "hi",
-  };
 
   if (!activity) error(404);
 
