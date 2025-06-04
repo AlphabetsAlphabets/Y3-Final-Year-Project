@@ -76,11 +76,7 @@
             >
                 {selectedOption}
             </button>
-            <Modal
-                bind:this={modal}
-                title="Select an option"
-                on:close={() => modal?.closeModal()}
-            >
+            <Modal bind:this={modal} title="Select an option">
                 <input
                     type="text"
                     class="form-control mb-3"
