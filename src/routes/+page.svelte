@@ -72,7 +72,7 @@
                 id="activity select"
                 type="button"
                 class="btn btn-outline-primary w-100"
-                on:click={modal?.showModal}
+                onclick={modal?.showModal}
             >
                 {selectedOption}
             </button>
@@ -82,7 +82,7 @@
                     class="form-control mb-3"
                     placeholder="Type to search..."
                     bind:value={modalInput}
-                    on:input={(e) =>
+                    oninput={(e) =>
                         handleFilter(
                             (e.target as HTMLInputElement)?.value || "",
                         )}
@@ -94,7 +94,7 @@
                                 <button
                                     type="button"
                                     class="btn btn-outline-primary w-100"
-                                    on:click={() => selectOption(option)}
+                                    onclick={() => selectOption(option)}
                                     >{option}</button
                                 >
                             </li>
@@ -113,7 +113,7 @@
                 <button
                     type="button"
                     class="btn btn-secondary w-100 mt-3"
-                    on:click={modal?.closeModal}>Cancel</button
+                    onclick={modal?.closeModal}>Cancel</button
                 >
             </Modal>
 
@@ -140,7 +140,7 @@
                 <button
                     type="button"
                     class="btn btn-outline-success w-100 h-100 d-flex justify-content-center align-items-center"
-                    on:click={() => handleStart(buttonState)}>Start</button
+                    onclick={() => handleStart(buttonState)}>Start</button
                 >
             {/if}
             {#if $buttonState === "pause-stop"}
@@ -151,12 +151,12 @@
                         type="button"
                         class="btn btn-outline-warning flex-grow-1"
                         style="margin-right: 10px;"
-                        on:click={() => handlePause(buttonState)}>Pause</button
+                        onclick={() => handlePause(buttonState)}>Pause</button
                     >
                     <button
                         type="button"
                         class="btn btn-outline-danger flex-grow-1"
-                        on:click={() => handleStop(buttonState)}>Stop</button
+                        onclick={() => handleStop(buttonState)}>Stop</button
                     >
                 </div>
             {/if}
@@ -168,13 +168,12 @@
                         type="button"
                         class="btn btn-outline-primary flex-grow-1"
                         style="margin-right: 10px;"
-                        on:click={() => handleResume(buttonState)}
-                        >Resume</button
+                        onclick={() => handleResume(buttonState)}>Resume</button
                     >
                     <button
                         type="button"
                         class="btn btn-outline-danger flex-grow-1"
-                        on:click={() => handleStop(buttonState)}>Stop</button
+                        onclick={() => handleStop(buttonState)}>Stop</button
                     >
                 </div>
             {/if}
