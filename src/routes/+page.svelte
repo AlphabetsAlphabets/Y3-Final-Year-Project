@@ -1,37 +1,22 @@
 <script lang="ts">
     import { writable } from "svelte/store";
+    import Modal from "$lib/Modal.svelte";
+
+    import { handleStart, handlePause, handleResume, handleStop } from "./page";
 
     const buttonState = writable("start");
-
-    function handleStart() {
-        console.log("start to pause-stop");
-        console.log("resume-stop to pause-stop");
-        buttonState.set("pause-stop");
-    }
-
-    function handlePause() {
-        console.log("pause-stop to resume-stop");
-        buttonState.set("resume-stop");
-    }
-
-    function handleResume() {
-        buttonState.set("pause-stop");
-    }
-
-    function handleStop() {
-        console.log("pause-stop or resume-stop to start");
-        buttonState.set("start");
-    }
 
     // TODO: Pull these options from a database.
     let options = ["One", "Two", "Three"];
     let filteredOptions: string[] = [];
-    // Controls whether the modal is visible
-    let showModal = false;
+
+    // An instance to Modal
+    let modal: Modal | null = null;
     // Holds the current input value inside the modal
     let modalInput = "";
+
     // Stores the currently selected option for the button label
-    let selectedOption: string = "Select Option";
+    let selectedOption: string = "Activity";
 
     /**
      * Filters the options array based on user input in the modal.
@@ -41,16 +26,8 @@
         filteredOptions = options.filter((option) =>
             option.toLowerCase().includes(input.toLowerCase()),
         );
-        modalInput = input;
-    }
 
-    /**
-     * Opens the modal and initializes the filter state.
-     */
-    function openModal() {
-        modalInput = "";
-        filteredOptions = options;
-        showModal = true;
+        modalInput = input;
     }
 
     /**
@@ -60,22 +37,7 @@
     function selectOption(option: string) {
         selectedOption = option;
         filteredOptions = [];
-        showModal = false;
-    }
-
-    /**
-     * Closes the modal without making a selection.
-     */
-    function closeModal() {
-        showModal = false;
-    }
-
-    /**
-     * Adds a new option (from modal input) and selects it.
-     */
-    function createNewOption() {
-        options = [...options, modalInput];
-        selectOption(modalInput);
+        modal?.closeModal();
     }
 </script>
 
@@ -85,6 +47,21 @@
             <img src="/gear.svg" alt="gear" />
         </button>
     </div>
+
+    <style>
+        /* Make the Pomodoro button black by default */
+        label[for="btn-check-outlined"] {
+            background-color: black !important;
+            color: white !important;
+            border-color: black !important;
+        }
+        /* When checked, turn it green */
+        #btn-check-outlined:checked + label[for="btn-check-outlined"] {
+            background-color: green !important;
+            color: white !important;
+            border-color: green !important;
+        }
+    </style>
     <form class="pt-4">
         <div class="mb-3">
             <!--
@@ -92,116 +69,120 @@
                 The button label updates to reflect the user's selection.
             -->
             <button
+                id="activity select"
                 type="button"
                 class="btn btn-outline-primary w-100"
-                on:click={openModal}
+                on:click={modal?.showModal}
             >
                 {selectedOption}
             </button>
-            {#if showModal}
-                <!--
-                    Modal popup for option selection and filtering.
-                    Contains:
-                    - An input for filtering options.
-                    - A list of filtered options as buttons.
-                    - A button to create a new option if none match.
-                    - A cancel button to close the modal.
-                -->
-                <div class="modal-backdrop" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); display:flex; align-items:center; justify-content:center; z-index:1000;">
-                    <div class="modal-content" style="background:white; padding:2rem; border-radius:10px; min-width:300px;">
-                        <h5>Select an option</h5>
-                        <!-- Input for filtering options inside the modal -->
-                        <input
-                            type="text"
-                            class="form-control mb-3"
-                            placeholder="Type to search..."
-                            bind:value={modalInput}
-                            on:input={(e) => handleFilter((e.target as HTMLInputElement)?.value || "")}
-                            autofocus
-                        />
-                        {#if filteredOptions.length > 0}
-                            <!-- List of filtered options as selectable buttons -->
-                            <ul style="list-style:none; padding:0;">
-                                {#each filteredOptions as option (option)}
-                                    <li style="margin-bottom: 0.5rem;">
-                                        <button type="button" class="btn btn-outline-primary w-100" on:click={() => selectOption(option)}>{option}</button>
-                                    </li>
-                                {/each}
-                            </ul>
-                        {:else}
-                            <!-- Option to create a new entry if no matches are found -->
-                            <div>
-                                <p>No options found for "{modalInput}"</p>
-                                <button type="button" class="btn btn-outline-success w-100" on:click={createNewOption}>Create "{modalInput}"</button>
-                            </div>
-                        {/if}
-                        <!-- Cancel button to close the modal without selection -->
-                        <button type="button" class="btn btn-secondary w-100 mt-3" on:click={closeModal}>Cancel</button>
+            <Modal
+                bind:this={modal}
+                title="Select an option"
+                on:close={() => modal?.closeModal()}
+            >
+                <input
+                    type="text"
+                    class="form-control mb-3"
+                    placeholder="Type to search..."
+                    bind:value={modalInput}
+                    on:input={(e) =>
+                        handleFilter(
+                            (e.target as HTMLInputElement)?.value || "",
+                        )}
+                />
+                {#if filteredOptions.length == 0}
+                    <ul style="list-style:none; padding:0;">
+                        {#each filteredOptions as option (option)}
+                            <li style="margin-bottom: 0.5rem;">
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-primary w-100"
+                                    on:click={() => selectOption(option)}
+                                    >{option}</button
+                                >
+                            </li>
+                        {/each}
+                    </ul>
+                {:else}
+                    <div>
+                        <p>No options found for "{modalInput}"</p>
+                        <button
+                            type="button"
+                            class="btn btn-outline-success w-100"
+                            >Create "{modalInput}"</button
+                        >
                     </div>
+                {/if}
+                <button
+                    type="button"
+                    class="btn btn-secondary w-100 mt-3"
+                    on:click={modal?.closeModal}>Cancel</button
+                >
+            </Modal>
+
+            <div style="display: flex; align-items: center; margin: 10px 0;">
+                <span style="margin-right: 10px;">Goal</span>
+                <input
+                    type="text"
+                    style="flex-grow: 1; border-radius: 15px; background-color: white; border: 2px solid lightblue; padding: 5px;"
+                />
+            </div>
+            <div class="mb-3">
+                <input
+                    type="checkbox"
+                    class="btn-check"
+                    id="btn-check-outlined"
+                    autocomplete="off"
+                /><label
+                    class="btn w-100 h-100 d-flex justify-content-center align-items-center"
+                    for="btn-check-outlined">Pomodoro</label
+                >
+            </div>
+
+            {#if $buttonState === "start"}
+                <button
+                    type="button"
+                    class="btn btn-outline-success w-100 h-100 d-flex justify-content-center align-items-center"
+                    on:click={() => handleStart(buttonState)}>Start</button
+                >
+            {/if}
+            {#if $buttonState === "pause-stop"}
+                <div
+                    style="display: flex; justify-content: space-between; margin-top: 10px;"
+                >
+                    <button
+                        type="button"
+                        class="btn btn-outline-warning flex-grow-1"
+                        style="margin-right: 10px;"
+                        on:click={() => handlePause(buttonState)}>Pause</button
+                    >
+                    <button
+                        type="button"
+                        class="btn btn-outline-danger flex-grow-1"
+                        on:click={() => handleStop(buttonState)}>Stop</button
+                    >
                 </div>
             {/if}
-
-        <div style="display: flex; align-items: center; margin: 10px 0;">
-            <span style="margin-right: 10px;">Goal</span>
-            <input
-                type="text"
-                style="flex-grow: 1; border-radius: 15px; background-color: white; border: 2px solid lightblue; padding: 5px;"
-            />
+            {#if $buttonState === "resume-stop"}
+                <div
+                    style="display: flex; justify-content: space-between; margin-top: 10px;"
+                >
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary flex-grow-1"
+                        style="margin-right: 10px;"
+                        on:click={() => handleResume(buttonState)}
+                        >Resume</button
+                    >
+                    <button
+                        type="button"
+                        class="btn btn-outline-danger flex-grow-1"
+                        on:click={() => handleStop(buttonState)}>Stop</button
+                    >
+                </div>
+            {/if}
         </div>
-        <div class="mb-3">
-            <input
-                type="checkbox"
-                class="btn-check"
-                id="btn-check-outlined"
-                autocomplete="off"
-            />
-            <label
-                class="btn btn-outline-success w-100 h-100 d-flex justify-content-center align-items-center"
-                for="btn-check-outlined">Pomodoro</label
-            >
-        </div>
-
-        {#if $buttonState === "start"}
-            <button
-                type="button"
-                class="btn btn-outline-success w-100 h-100 d-flex justify-content-center align-items-center"
-                on:click={handleStart}>Start</button
-            >
-        {/if}
-        {#if $buttonState === "pause-stop"}
-            <div
-                style="display: flex; justify-content: space-between; margin-top: 10px;"
-            >
-                <button
-                    type="button"
-                    class="btn btn-outline-warning flex-grow-1"
-                    style="margin-right: 10px;"
-                    on:click={handlePause}>Pause</button
-                >
-                <button
-                    type="button"
-                    class="btn btn-outline-danger flex-grow-1"
-                    on:click={handleStop}>Stop</button
-                >
-            </div>
-        {/if}
-        {#if $buttonState === "resume-stop"}
-            <div
-                style="display: flex; justify-content: space-between; margin-top: 10px;"
-            >
-                <button
-                    type="button"
-                    class="btn btn-outline-primary flex-grow-1"
-                    style="margin-right: 10px;"
-                    on:click={handleResume}>Resume</button
-                >
-                <button
-                    type="button"
-                    class="btn btn-outline-danger flex-grow-1"
-                    on:click={handleStop}>Stop</button
-                >
-            </div>
-        {/if}
     </form>
     <div
         style="display: flex; justify-content: center; align-items: center; margin-top: 20px;"
