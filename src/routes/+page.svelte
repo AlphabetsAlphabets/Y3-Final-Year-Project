@@ -1,6 +1,5 @@
 <script lang="ts">
     import Modal from "$lib/Modal.svelte";
-    import { clickOutside } from "../clickOutside";
 
     import {
         start,

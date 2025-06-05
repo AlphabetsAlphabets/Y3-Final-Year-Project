@@ -1,5 +1,4 @@
 <script lang="ts">
-    import type { Attachment } from "svelte/attachments";
     let { children, title } = $props();
     let visible = $state(false);
 
@@ -10,20 +9,27 @@
     export function closeModal() {
         visible = false;
     }
-
-    const myAttachment: Attachment = (element) => {
-		console.log(element.nodeName); // 'DIV'
-
-		return () => {
-			console.log('cleaning up');
-		};
-	};</script>
+</script>
 
 {#if visible}
     <!-- Trying to d close modal: https://svelte.dev/playground/ae791a22dcd14f40bc56d12f2c63c002?version=5.33.14 -->
-    <button {@attach myAttachment}></button>
-    <div class="modal-backdrop">
-        <div class="modal-content">
+    <div
+        class="modal-backdrop"
+        onclick={() => closeModal()}
+        onkeydown={() => closeModal()}
+        role="button"
+        aria-pressed="false"
+        tabindex="0"
+    >
+        <div
+            id="modal-content"
+            class="modal-content"
+            onclick={(e) => e.stopPropagation()}
+            onkeydown={(e) => e.stopPropagation()}
+            role="button"
+            aria-pressed="false"
+            tabindex="0"
+        >
             <button aria-label="Close" class="modal-close" onclick={closeModal}
                 >&times;</button
             >
