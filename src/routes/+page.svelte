@@ -1,5 +1,6 @@
 <script lang="ts">
     import Modal from "$lib/Modal.svelte";
+    import { clickOutside } from "../clickOutside";
 
     import {
         start,
@@ -87,7 +88,7 @@
                             (e.target as HTMLInputElement)?.value || "",
                         )}
                 />
-                {#if filteredOptions.length == 0}
+                {#if filteredOptions.length >= 0}
                     <ul style="list-style:none; padding:0;">
                         {#each filteredOptions as option (option)}
                             <li style="margin-bottom: 0.5rem;">
