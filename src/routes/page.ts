@@ -1,21 +1,50 @@
-import type { Writable } from "svelte/store";
+import { writable } from "svelte/store";
 
-export function handleStart(buttonState: Writable<string>) {
-  console.log("start to pause-stop");
-  console.log("resume-stop to pause-stop");
-  buttonState.set("pause-stop");
+let id: number | null = 0;
+let paused = 0;
+let is_paused = false;
+
+export const seconds = writable(0);
+
+export enum TimerState {
+  Running,
+  Resumed,
+  Paused,
+  Stopped,
 }
 
-export function handlePause(buttonState: Writable<string>) {
-  console.log("pause-stop to resume-stop");
-  buttonState.set("resume-stop");
+export const timer_state = writable(TimerState.Stopped);
+
+export function start() {
+  timer_state.set(TimerState.Running);
+  id = setInterval(() => {
+    if (!is_paused) {
+      seconds.update((seconds) => seconds + 1);
+    } else {
+      paused++;
+    }
+
+    seconds.subscribe((s) => console.log(s));
+  }, 1000);
 }
 
-export function handleResume(buttonState: Writable<string>) {
-  buttonState.set("pause-stop");
+export function stop() {
+  if (id !== null) {
+    seconds.set(0);
+    timer_state.set(TimerState.Stopped);
+    clearInterval(id);
+    id = null;
+  }
 }
 
-export function handleStop(buttonState: Writable<string>) {
-  console.log("pause-stop or resume-stop to start");
-  buttonState.set("start");
+export function pause() {
+  is_paused = true;
+  timer_state.set(TimerState.Paused);
+}
+
+export function resume() {
+  seconds.update((seconds) => seconds + paused);
+  paused = 0;
+  is_paused = false;
+  timer_state.set(TimerState.Running);
 }

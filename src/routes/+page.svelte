@@ -1,27 +1,31 @@
 <script lang="ts">
-    import { writable } from "svelte/store";
     import Modal from "$lib/Modal.svelte";
 
-    import { handleStart, handlePause, handleResume, handleStop } from "./page";
+    import {
+        start,
+        pause,
+        resume,
+        stop,
+        seconds,
+        timer_state,
+        TimerState,
+    } from "./page";
 
-    const buttonState = writable("start");
+    let new_state = TimerState.Stopped;
+
+    timer_state.subscribe((state) => {
+        new_state = state;
+    });
 
     // TODO: Pull these options from a database.
     let options = ["One", "Two", "Three"];
     let filteredOptions: string[] = [];
 
-    // An instance to Modal
     let modal: Modal | null = null;
-    // Holds the current input value inside the modal
     let modalInput = "";
 
-    // Stores the currently selected option for the button label
     let selectedOption: string = "Activity";
 
-    /**
-     * Filters the options array based on user input in the modal.
-     * Updates the filteredOptions and modalInput state.
-     */
     function handleFilter(input: string) {
         filteredOptions = options.filter((option) =>
             option.toLowerCase().includes(input.toLowerCase()),
@@ -30,10 +34,6 @@
         modalInput = input;
     }
 
-    /**
-     * Called when a user selects an option from the modal.
-     * Updates the button label and closes the modal.
-     */
     function selectOption(option: string) {
         selectedOption = option;
         filteredOptions = [];
@@ -136,14 +136,14 @@
                 >
             </div>
 
-            {#if $buttonState === "start"}
+            {#if new_state === TimerState.Stopped}
                 <button
                     type="button"
                     class="btn btn-outline-success w-100 h-100 d-flex justify-content-center align-items-center"
-                    onclick={() => handleStart(buttonState)}>Start</button
+                    onclick={() => start()}>Start</button
                 >
             {/if}
-            {#if $buttonState === "pause-stop"}
+            {#if new_state === TimerState.Running}
                 <div
                     style="display: flex; justify-content: space-between; margin-top: 10px;"
                 >
@@ -151,16 +151,16 @@
                         type="button"
                         class="btn btn-outline-warning flex-grow-1"
                         style="margin-right: 10px;"
-                        onclick={() => handlePause(buttonState)}>Pause</button
+                        onclick={() => pause()}>Pause</button
                     >
                     <button
                         type="button"
                         class="btn btn-outline-danger flex-grow-1"
-                        onclick={() => handleStop(buttonState)}>Stop</button
+                        onclick={() => stop()}>Stop</button
                     >
                 </div>
             {/if}
-            {#if $buttonState === "resume-stop"}
+            {#if new_state === TimerState.Paused}
                 <div
                     style="display: flex; justify-content: space-between; margin-top: 10px;"
                 >
@@ -168,12 +168,12 @@
                         type="button"
                         class="btn btn-outline-primary flex-grow-1"
                         style="margin-right: 10px;"
-                        onclick={() => handleResume(buttonState)}>Resume</button
+                        onclick={() => resume()}>Resume</button
                     >
                     <button
                         type="button"
                         class="btn btn-outline-danger flex-grow-1"
-                        onclick={() => handleStop(buttonState)}>Stop</button
+                        onclick={() => stop()}>Stop</button
                     >
                 </div>
             {/if}
@@ -185,7 +185,7 @@
         <div
             style="width: 300px; height: 100px; border-radius: 15px; background-color: #f0f0f0; display: flex; justify-content: center; align-items: center;"
         >
-            1 hour 50 minutes
+            {$seconds}s
         </div>
     </div>
 </div>
