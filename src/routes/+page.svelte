@@ -25,7 +25,7 @@
 
     // TODO: Pull these options from a database.
     let options = ["One", "Two", "Three"];
-    let filteredOptions: string[] = [];
+    let filteredOptions: string[] = options;
 
     let modal: Modal | null = null;
     let modalInput = "";
@@ -42,7 +42,7 @@
 
     function selectOption(option: string) {
         selectedOption = option;
-        filteredOptions = [];
+        filteredOptions = options;
         modal?.closeModal();
     }
 </script>
@@ -93,7 +93,7 @@
                             (e.target as HTMLInputElement)?.value || "",
                         )}
                 />
-                {#if filteredOptions.length >= 0}
+                {#if filteredOptions.length > 0}
                     <ul style="list-style:none; padding:0;">
                         {#each filteredOptions as option (option)}
                             <li style="margin-bottom: 0.5rem;">
