@@ -1,10 +1,5 @@
 <script lang="ts">
-    if ("serviceWorker" in navigator) {
-        addEventListener("load", function () {
-            navigator.serviceWorker.register("sw.js");
-        });
-    }
-
+    import { connectToDatabase } from "$lib/database";
     import Modal from "$lib/Modal.svelte";
 
     import {
