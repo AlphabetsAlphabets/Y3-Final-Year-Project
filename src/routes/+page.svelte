@@ -40,6 +40,12 @@
         filteredOptions = options;
         modal?.closeModal();
     }
+
+    connectToDatabase();
+
+    function addEntryToDb(entry: string) {
+        console.log(`Added entry ${entry}`);
+    }
 </script>
 
 <div class="container-md py-4">
@@ -107,6 +113,7 @@
                         <button
                             type="button"
                             class="btn btn-outline-success w-100"
+                            onclick={() => addEntryToDb(modalInput)}
                             >Create "{modalInput}"</button
                         >
                     </div>
