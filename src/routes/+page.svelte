@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { connectToDatabase } from "$lib/database";
     import Modal from "$lib/Modal.svelte";
+    import { onMount } from "svelte";
 
     import {
         start,
@@ -41,11 +41,7 @@
         modal?.closeModal();
     }
 
-    connectToDatabase();
-
-    function addEntryToDb(entry: string) {
-        console.log(`Added entry ${entry}`);
-    }
+    onMount(() => {});
 </script>
 
 <div class="container-md py-4">
@@ -113,7 +109,8 @@
                         <button
                             type="button"
                             class="btn btn-outline-success w-100"
-                            onclick={() => addEntryToDb(modalInput)}
+                            onclick={() =>
+                                console.error("Currently unimplemented.")}
                             >Create "{modalInput}"</button
                         >
                     </div>
