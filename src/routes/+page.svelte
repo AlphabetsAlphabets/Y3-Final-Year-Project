@@ -46,7 +46,7 @@
 
 <div class="container-md py-4">
     <div style="position: fixed; top: 0; right: 0; margin: 10px;">
-        <button>
+        <button id="settings">
             <img src="/gear.svg" alt="gear" />
         </button>
     </div>

@@ -3,3 +3,4 @@ node_modules/
 .ropeproject
 
 .svelte-kit/
+build/
