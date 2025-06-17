@@ -1,6 +1,8 @@
 <script lang="ts">
+    import { db } from "$lib/db";
+    import { liveQuery } from "dexie";
+
     import Modal from "$lib/Modal.svelte";
-    import { onMount } from "svelte";
 
     import {
         start,
@@ -19,7 +21,15 @@
     });
 
     // TODO: Pull these options from a database.
-    let options = ["One", "Two", "Three"];
+
+    let acts = liveQuery(() => db.activities.toArray());
+    let options: string[] = [];
+    acts.subscribe((activities) => {
+        if (activities) {
+            activities.forEach((activity) => options.push(activity.name));
+        }
+    });
+
     let filteredOptions: string[] = options;
 
     let modal: Modal | null = null;
@@ -41,7 +51,21 @@
         modal?.closeModal();
     }
 
-    onMount(() => {});
+    async function addActivity(name: string) {
+        let status = "";
+        try {
+            const id = db.activities.add({
+                name: name,
+                project: "studying",
+            });
+
+            status = `Activity ${name} id of ${id} has been added`;
+        } catch (error) {
+            status = `Failed due to ${error}`;
+        }
+
+        console.log(status);
+    }
 </script>
 
 <div class="container-md py-4">
@@ -109,9 +133,9 @@
                         <button
                             type="button"
                             class="btn btn-outline-success w-100"
-                            onclick={() =>
-                                console.error("Currently unimplemented.")}
-                            >Create "{modalInput}"</button
+                            onclick={async () => {
+                                await addActivity(modalInput);
+                            }}>Create "{modalInput}"</button
                         >
                     </div>
                 {/if}
@@ -145,7 +169,7 @@
                 <button
                     type="button"
                     class="btn btn-outline-success w-100 h-100 d-flex justify-content-center align-items-center"
-                    onclick={() => start()}>Start</button
+                    onclick={start}>Start</button
                 >
             {/if}
             {#if new_state === TimerState.Running}
@@ -156,12 +180,12 @@
                         type="button"
                         class="btn btn-outline-warning flex-grow-1"
                         style="margin-right: 10px;"
-                        onclick={() => pause()}>Pause</button
+                        onclick={pause}>Pause</button
                     >
                     <button
                         type="button"
                         class="btn btn-outline-danger flex-grow-1"
-                        onclick={() => stop()}>Stop</button
+                        onclick={stop}>Stop</button
                     >
                 </div>
             {/if}
@@ -173,12 +197,12 @@
                         type="button"
                         class="btn btn-outline-primary flex-grow-1"
                         style="margin-right: 10px;"
-                        onclick={() => resume()}>Resume</button
+                        onclick={resume}>Resume</button
                     >
                     <button
                         type="button"
                         class="btn btn-outline-danger flex-grow-1"
-                        onclick={() => stop()}>Stop</button
+                        onclick={stop}>Stop</button
                     >
                 </div>
             {/if}
