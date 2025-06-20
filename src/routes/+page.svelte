@@ -135,6 +135,8 @@
                             class="btn btn-outline-success w-100"
                             onclick={async () => {
                                 await addActivity(modalInput);
+                                selectOption(modalInput);
+                                modalInput = "";
                             }}>Create "{modalInput}"</button
                         >
                     </div>
