@@ -5,13 +5,12 @@
 import Dexie, { type EntityTable } from "dexie";
 
 interface Activity {
-  id: number;
   name: string;
   project: string;
 }
 
 const db = new Dexie("activityDB") as Dexie & {
-  activities: EntityTable<Activity, "id">;
+  activities: EntityTable<Activity, "name">;
 };
 
 db.version(1).stores({

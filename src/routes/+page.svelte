@@ -20,11 +20,9 @@
         new_state = state;
     });
 
-    // TODO: Pull these options from a database.
-
     let acts = liveQuery(() => db.activities.toArray());
     let options: string[] = [];
-    acts.subscribe((activities) => {
+    acts.subscribe(async (activities) => {
         if (activities) {
             activities.forEach((activity) => options.push(activity.name));
         }
@@ -48,25 +46,43 @@
     function selectOption(option: string) {
         selectedOption = option;
         filteredOptions = options;
-        modal?.closeModal();
     }
 
     async function addActivity(name: string) {
         let status = "";
         try {
-            const id = db.activities.add({
+            let count = await db.activities.where("name").equals(name).count();
+            if (count !== 0) {
+                console.error("Already exists.");
+                return;
+            }
+
+            db.activities.add({
                 name: name,
                 project: "studying",
             });
 
-            status = `Activity ${name} id of ${id} has been added`;
+            status = `Activity ${name} has been added`;
         } catch (error) {
             status = `Failed due to ${error}`;
         }
 
         console.log(status);
     }
+
+    async function clearItems() {
+        await db.activities.clear();
+        console.log("Cleared");
+    }
 </script>
+
+<button
+    onclick={async () => {
+        let acts = liveQuery(() => db.activities.toArray());
+        acts.getValue();
+        console.log(acts);
+    }}>options</button
+>
 
 <div class="container-md py-4">
     <div style="position: fixed; top: 0; right: 0; margin: 10px;">
@@ -121,8 +137,10 @@
                                 <button
                                     type="button"
                                     class="btn btn-outline-primary w-100"
-                                    onclick={() => selectOption(option)}
-                                    >{option}</button
+                                    onclick={() => {
+                                        selectOption(option);
+                                        modal?.closeModal();
+                                    }}>{option}</button
                                 >
                             </li>
                         {/each}
@@ -208,6 +226,7 @@
                     >
                 </div>
             {/if}
+            <button onclick={clearItems}>Clear db</button>
         </div>
     </form>
     <div
