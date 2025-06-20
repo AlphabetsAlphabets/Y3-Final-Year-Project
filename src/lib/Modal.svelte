@@ -12,7 +12,6 @@
 </script>
 
 {#if visible}
-    <!-- Trying to d close modal: https://svelte.dev/playground/ae791a22dcd14f40bc56d12f2c63c002?version=5.33.14 -->
     <div
         class="modal-backdrop"
         onclick={() => closeModal()}
