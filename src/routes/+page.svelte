@@ -116,7 +116,7 @@
                 />
                 {#if filteredOptions.length > 0}
                     <ul style="list-style:none; padding:0;">
-                        {#each filteredOptions as option (option)}
+                        {#each filteredOptions as option, index (index)}
                             <li style="margin-bottom: 0.5rem;">
                                 <button
                                     type="button"
