@@ -14,10 +14,10 @@
         TimerState,
     } from "./page";
 
-    let new_state = TimerState.Stopped;
+    let newState = $state(TimerState.Stopped);
 
     timer_state.subscribe((state) => {
-        new_state = state;
+        newState = state;
     });
 
     let options: string[] = $state([]);
@@ -93,6 +93,8 @@
     }}>List all items</button
 >
 
+<button onclick={clearItems}>Clear db</button>
+
 <div class="container-md py-4">
     <div style="position: fixed; top: 0; right: 0; margin: 10px;">
         <button id="settings">
@@ -116,10 +118,6 @@
     </style>
     <form class="pt-4">
         <div class="mb-3">
-            <!--
-                Button that opens the modal popup for selecting an option.
-                The button label updates to reflect the user's selection.
-            -->
             <button
                 id="activity select"
                 type="button"
@@ -190,14 +188,14 @@
                 >
             </div>
 
-            {#if new_state === TimerState.Stopped}
+            {#if newState === TimerState.Stopped}
                 <button
                     type="button"
                     class="btn btn-outline-success w-100 h-100 d-flex justify-content-center align-items-center"
                     onclick={start}>Start</button
                 >
             {/if}
-            {#if new_state === TimerState.Running}
+            {#if newState === TimerState.Running}
                 <div
                     style="display: flex; justify-content: space-between; margin-top: 10px;"
                 >
@@ -214,7 +212,7 @@
                     >
                 </div>
             {/if}
-            {#if new_state === TimerState.Paused}
+            {#if newState === TimerState.Paused}
                 <div
                     style="display: flex; justify-content: space-between; margin-top: 10px;"
                 >
@@ -231,7 +229,6 @@
                     >
                 </div>
             {/if}
-            <button onclick={clearItems}>Clear db</button>
         </div>
     </form>
     <div
