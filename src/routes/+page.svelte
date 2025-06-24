@@ -1,8 +1,8 @@
 <script lang="ts">
     import { db } from "$lib/db";
-    import { liveQuery } from "dexie";
 
     import Modal from "$lib/Modal.svelte";
+    import { liveQuery } from "dexie";
 
     import {
         start,
@@ -20,28 +20,37 @@
         new_state = state;
     });
 
-    let acts = liveQuery(() => db.activities.toArray());
-    let options: string[] = [];
-    acts.subscribe(async (activities) => {
-        if (activities) {
-            activities.forEach((activity) => options.push(activity.name));
+    let options: string[] = $state([]);
+    let activities = liveQuery(() => db.activities.toArray());
+    activities.subscribe({
+        next(activities) {
+            activities.map((activity) => {
+                if (!options.includes(activity.name, 0)) {
+                    options.push(activity.name);
+                }
+            });
+        },
+        error(error) {
+            console.log(`Failed to get activities due to :\n${error}`);
+        },
+        complete() {
+            console.log("Done");
+        },
+    });
+
+    let modalInput: string = $state("");
+    let modal: Modal | null = $state(null);
+    let filteredOptions: string[] = $derived.by(() => {
+        if (modalInput.length === 0) {
+            return options;
+        } else {
+            return options.filter((option) =>
+                option.toLowerCase().includes(modalInput.toLowerCase()),
+            );
         }
     });
 
-    let filteredOptions: string[] = options;
-
-    let modal: Modal | null = null;
-    let modalInput = "";
-
-    let selectedOption: string = "Activity";
-
-    function handleFilter(input: string) {
-        filteredOptions = options.filter((option) =>
-            option.toLowerCase().includes(input.toLowerCase()),
-        );
-
-        modalInput = input;
-    }
+    let selectedOption: string = $state("Activity");
 
     function selectOption(option: string) {
         selectedOption = option;
@@ -73,15 +82,15 @@
     async function clearItems() {
         await db.activities.clear();
         console.log("Cleared");
+        options = [];
     }
 </script>
 
 <button
     onclick={async () => {
-        let acts = liveQuery(() => db.activities.toArray());
-        acts.getValue();
-        console.log(acts);
-    }}>options</button
+        let activities = await db.activities.toArray();
+        activities.forEach((activity) => console.log(activity.name));
+    }}>List all items</button
 >
 
 <div class="container-md py-4">
@@ -125,14 +134,10 @@
                     class="form-control mb-3"
                     placeholder="Type to search..."
                     bind:value={modalInput}
-                    oninput={(e) =>
-                        handleFilter(
-                            (e.target as HTMLInputElement)?.value || "",
-                        )}
                 />
-                {#if filteredOptions.length > 0}
+                {#if filteredOptions.length > 0 || modalInput.length === 0}
                     <ul style="list-style:none; padding:0;">
-                        {#each filteredOptions as option, index (index)}
+                        {#each filteredOptions as option (option)}
                             <li style="margin-bottom: 0.5rem;">
                                 <button
                                     type="button"
