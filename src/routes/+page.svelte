@@ -1,27 +1,15 @@
 <script lang="ts">
-    import { db } from "$lib/db";
+    import Modal from "$lib/components/Modal.svelte";
+    import Timer from "$lib/components/Timer.svelte";
 
-    import Modal from "$lib/Modal.svelte";
-    import { liveQuery } from "dexie";
+    import { addActivity, getActivities } from "$lib/activities";
+    import { clearItems, listAllItems } from "$lib/database/dev";
+    import { db } from "$lib/database/db";
 
-    import {
-        start,
-        pause,
-        resume,
-        stop,
-        seconds,
-        timer_state,
-        TimerState,
-    } from "./page";
-
-    let newState = $state(TimerState.Stopped);
-
-    timer_state.subscribe((state) => {
-        newState = state;
-    });
-
+    let seconds = $state(0);
     let options: string[] = $state([]);
-    let activities = liveQuery(() => db.activities.toArray());
+    let activities = getActivities();
+
     activities.subscribe({
         next(activities) {
             activities.map((activity) => {
@@ -56,44 +44,17 @@
         selectedOption = option;
         filteredOptions = options;
     }
-
-    async function addActivity(name: string) {
-        let status = "";
-        try {
-            let count = await db.activities.where("name").equals(name).count();
-            if (count !== 0) {
-                console.error("Already exists.");
-                return;
-            }
-
-            db.activities.add({
-                name: name,
-                project: "studying",
-            });
-
-            status = `Activity ${name} has been added`;
-        } catch (error) {
-            status = `Failed due to ${error}`;
-        }
-
-        console.log(status);
-    }
-
-    async function clearItems() {
-        await db.activities.clear();
-        console.log("Cleared");
-        options = [];
-    }
 </script>
 
+<button onclick={async () => await listAllItems(db.activities)}
+    >List all items</button
+>
 <button
     onclick={async () => {
-        let activities = await db.activities.toArray();
-        activities.forEach((activity) => console.log(activity.name));
-    }}>List all items</button
+        await clearItems();
+        options = [];
+    }}>Clear db</button
 >
-
-<button onclick={clearItems}>Clear db</button>
 
 <div class="container-md py-4">
     <div style="position: fixed; top: 0; right: 0; margin: 10px;">
@@ -188,47 +149,7 @@
                 >
             </div>
 
-            {#if newState === TimerState.Stopped}
-                <button
-                    type="button"
-                    class="btn btn-outline-success w-100 h-100 d-flex justify-content-center align-items-center"
-                    onclick={start}>Start</button
-                >
-            {/if}
-            {#if newState === TimerState.Running}
-                <div
-                    style="display: flex; justify-content: space-between; margin-top: 10px;"
-                >
-                    <button
-                        type="button"
-                        class="btn btn-outline-warning flex-grow-1"
-                        style="margin-right: 10px;"
-                        onclick={pause}>Pause</button
-                    >
-                    <button
-                        type="button"
-                        class="btn btn-outline-danger flex-grow-1"
-                        onclick={stop}>Stop</button
-                    >
-                </div>
-            {/if}
-            {#if newState === TimerState.Paused}
-                <div
-                    style="display: flex; justify-content: space-between; margin-top: 10px;"
-                >
-                    <button
-                        type="button"
-                        class="btn btn-outline-primary flex-grow-1"
-                        style="margin-right: 10px;"
-                        onclick={resume}>Resume</button
-                    >
-                    <button
-                        type="button"
-                        class="btn btn-outline-danger flex-grow-1"
-                        onclick={stop}>Stop</button
-                    >
-                </div>
-            {/if}
+            <Timer {seconds}></Timer>
         </div>
     </form>
     <div
@@ -237,7 +158,7 @@
         <div
             style="width: 300px; height: 100px; border-radius: 15px; background-color: #f0f0f0; display: flex; justify-content: center; align-items: center;"
         >
-            {$seconds}s
+            <p>{seconds}s</p>
         </div>
     </div>
 </div>
