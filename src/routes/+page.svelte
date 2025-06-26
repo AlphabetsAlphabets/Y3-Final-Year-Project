@@ -57,26 +57,12 @@
 >
 
 <div class="container-md py-4">
-    <div style="position: fixed; top: 0; right: 0; margin: 10px;">
+    <div class="settings-container">
         <button id="settings">
             <img src="/gear.svg" alt="gear" />
         </button>
     </div>
 
-    <style>
-        /* Make the Pomodoro button black by default */
-        label[for="btn-check-outlined"] {
-            background-color: black !important;
-            color: white !important;
-            border-color: black !important;
-        }
-        /* When checked, turn it green */
-        #btn-check-outlined:checked + label[for="btn-check-outlined"] {
-            background-color: green !important;
-            color: white !important;
-            border-color: green !important;
-        }
-    </style>
     <form class="pt-4">
         <div class="mb-3">
             <button
@@ -95,9 +81,9 @@
                     bind:value={modalInput}
                 />
                 {#if filteredOptions.length > 0 || modalInput.length === 0}
-                    <ul style="list-style:none; padding:0;">
+                    <ul class="options-list">
                         {#each filteredOptions as option (option)}
-                            <li style="margin-bottom: 0.5rem;">
+                            <li class="option-item">
                                 <button
                                     type="button"
                                     class="btn btn-outline-primary w-100"
@@ -130,12 +116,9 @@
                 >
             </Modal>
 
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <span style="margin-right: 10px;">Goal</span>
-                <input
-                    type="text"
-                    style="flex-grow: 1; border-radius: 15px; background-color: white; border: 2px solid lightblue; padding: 5px;"
-                />
+            <div class="goal-container">
+                <span class="goal-label">Goal</span>
+                <input type="text" class="goal-input" />
             </div>
             <div class="mb-3">
                 <input
@@ -152,13 +135,76 @@
             <Timer></Timer>
         </div>
     </form>
-    <div
-        style="display: flex; justify-content: center; align-items: center; margin-top: 20px;"
-    >
-        <div
-            style="width: 300px; height: 100px; border-radius: 15px; background-color: #f0f0f0; display: flex; justify-content: center; align-items: center;"
-        >
+    <div class="timer-display-container">
+        <div class="timer-display">
             <p>{$seconds}s</p>
         </div>
     </div>
 </div>
+
+<style>
+    .settings-container {
+        position: fixed;
+        top: 0;
+        right: 0;
+        margin: 10px;
+    }
+
+    /* Make the Pomodoro button black by default */
+    label[for="btn-check-outlined"] {
+        background-color: black !important;
+        color: white !important;
+        border-color: black !important;
+    }
+
+    /* When checked, turn it green */
+    #btn-check-outlined:checked + label[for="btn-check-outlined"] {
+        background-color: green !important;
+        color: white !important;
+        border-color: green !important;
+    }
+
+    .options-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .option-item {
+        margin-bottom: 0.5rem;
+    }
+
+    .goal-container {
+        display: flex;
+        align-items: center;
+        margin: 10px 0;
+    }
+
+    .goal-label {
+        margin-right: 10px;
+    }
+
+    .goal-input {
+        flex-grow: 1;
+        border-radius: 15px;
+        background-color: white;
+        border: 2px solid lightblue;
+        padding: 5px;
+    }
+
+    .timer-display-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    .timer-display {
+        width: 300px;
+        height: 100px;
+        border-radius: 15px;
+        background-color: #f0f0f0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+</style>
