@@ -1,48 +1,60 @@
 <script lang="ts">
-    import Modal from "$lib/Modal.svelte";
-    import { onMount } from "svelte";
+    import Modal from "$lib/components/Modal.svelte";
+    import Timer from "$lib/components/Timer.svelte";
 
-    import {
-        start,
-        pause,
-        resume,
-        stop,
-        seconds,
-        timer_state,
-        TimerState,
-    } from "./page";
+    import { addActivity, getActivities } from "$lib/activities";
+    import { clearItems, listAllItems } from "$lib/database/dev";
+    import { db } from "$lib/database/db";
+    import { seconds } from "$lib/timer";
 
-    let new_state = TimerState.Stopped;
+    let options: string[] = $state([]);
+    let activities = getActivities();
 
-    timer_state.subscribe((state) => {
-        new_state = state;
+    activities.subscribe({
+        next(activities) {
+            activities.map((activity) => {
+                if (!options.includes(activity.name, 0)) {
+                    options.push(activity.name);
+                }
+            });
+        },
+        error(error) {
+            console.log(`Failed to get activities due to :\n${error}`);
+        },
+        complete() {
+            console.log("Done");
+        },
     });
 
-    // TODO: Pull these options from a database.
-    let options = ["One", "Two", "Three"];
-    let filteredOptions: string[] = options;
+    let modalInput: string = $state("");
+    let modal: Modal | null = $state(null);
+    let filteredOptions: string[] = $derived.by(() => {
+        if (modalInput.length === 0) {
+            return options;
+        } else {
+            return options.filter((option) =>
+                option.toLowerCase().includes(modalInput.toLowerCase()),
+            );
+        }
+    });
 
-    let modal: Modal | null = null;
-    let modalInput = "";
-
-    let selectedOption: string = "Activity";
-
-    function handleFilter(input: string) {
-        filteredOptions = options.filter((option) =>
-            option.toLowerCase().includes(input.toLowerCase()),
-        );
-
-        modalInput = input;
-    }
+    let selectedOption: string = $state("Activity");
 
     function selectOption(option: string) {
         selectedOption = option;
         filteredOptions = options;
-        modal?.closeModal();
     }
-
-    onMount(() => {});
 </script>
+
+<button onclick={async () => await listAllItems(db.activities)}
+    >List all items</button
+>
+<button
+    onclick={async () => {
+        await clearItems();
+        options = [];
+    }}>Clear db</button
+>
 
 <div class="container-md py-4">
     <div style="position: fixed; top: 0; right: 0; margin: 10px;">
@@ -67,10 +79,6 @@
     </style>
     <form class="pt-4">
         <div class="mb-3">
-            <!--
-                Button that opens the modal popup for selecting an option.
-                The button label updates to reflect the user's selection.
-            -->
             <button
                 id="activity select"
                 type="button"
@@ -85,20 +93,18 @@
                     class="form-control mb-3"
                     placeholder="Type to search..."
                     bind:value={modalInput}
-                    oninput={(e) =>
-                        handleFilter(
-                            (e.target as HTMLInputElement)?.value || "",
-                        )}
                 />
-                {#if filteredOptions.length > 0}
+                {#if filteredOptions.length > 0 || modalInput.length === 0}
                     <ul style="list-style:none; padding:0;">
                         {#each filteredOptions as option (option)}
                             <li style="margin-bottom: 0.5rem;">
                                 <button
                                     type="button"
                                     class="btn btn-outline-primary w-100"
-                                    onclick={() => selectOption(option)}
-                                    >{option}</button
+                                    onclick={() => {
+                                        selectOption(option);
+                                        modal?.closeModal();
+                                    }}>{option}</button
                                 >
                             </li>
                         {/each}
@@ -109,9 +115,11 @@
                         <button
                             type="button"
                             class="btn btn-outline-success w-100"
-                            onclick={() =>
-                                console.error("Currently unimplemented.")}
-                            >Create "{modalInput}"</button
+                            onclick={async () => {
+                                await addActivity(modalInput);
+                                selectOption(modalInput);
+                                modalInput = "";
+                            }}>Create "{modalInput}"</button
                         >
                     </div>
                 {/if}
@@ -141,47 +149,7 @@
                 >
             </div>
 
-            {#if new_state === TimerState.Stopped}
-                <button
-                    type="button"
-                    class="btn btn-outline-success w-100 h-100 d-flex justify-content-center align-items-center"
-                    onclick={() => start()}>Start</button
-                >
-            {/if}
-            {#if new_state === TimerState.Running}
-                <div
-                    style="display: flex; justify-content: space-between; margin-top: 10px;"
-                >
-                    <button
-                        type="button"
-                        class="btn btn-outline-warning flex-grow-1"
-                        style="margin-right: 10px;"
-                        onclick={() => pause()}>Pause</button
-                    >
-                    <button
-                        type="button"
-                        class="btn btn-outline-danger flex-grow-1"
-                        onclick={() => stop()}>Stop</button
-                    >
-                </div>
-            {/if}
-            {#if new_state === TimerState.Paused}
-                <div
-                    style="display: flex; justify-content: space-between; margin-top: 10px;"
-                >
-                    <button
-                        type="button"
-                        class="btn btn-outline-primary flex-grow-1"
-                        style="margin-right: 10px;"
-                        onclick={() => resume()}>Resume</button
-                    >
-                    <button
-                        type="button"
-                        class="btn btn-outline-danger flex-grow-1"
-                        onclick={() => stop()}>Stop</button
-                    >
-                </div>
-            {/if}
+            <Timer></Timer>
         </div>
     </form>
     <div
@@ -190,7 +158,7 @@
         <div
             style="width: 300px; height: 100px; border-radius: 15px; background-color: #f0f0f0; display: flex; justify-content: center; align-items: center;"
         >
-            {$seconds}s
+            <p>{$seconds}s</p>
         </div>
     </div>
 </div>
