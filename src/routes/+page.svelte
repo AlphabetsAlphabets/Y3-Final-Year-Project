@@ -5,8 +5,8 @@
     import { addActivity, getActivities } from "$lib/activities";
     import { clearItems, listAllItems } from "$lib/database/dev";
     import { db } from "$lib/database/db";
+    import { seconds } from "$lib/timer";
 
-    let seconds = $state(0);
     let options: string[] = $state([]);
     let activities = getActivities();
 
@@ -149,7 +149,7 @@
                 >
             </div>
 
-            <Timer {seconds}></Timer>
+            <Timer></Timer>
         </div>
     </form>
     <div
@@ -158,7 +158,7 @@
         <div
             style="width: 300px; height: 100px; border-radius: 15px; background-color: #f0f0f0; display: flex; justify-content: center; align-items: center;"
         >
-            <p>{seconds}s</p>
+            <p>{$seconds}s</p>
         </div>
     </div>
 </div>
