@@ -1,5 +1,10 @@
 import { liveQuery, type Observable } from "dexie";
-import { db, type Activity } from "$lib/database/db";
+import { db } from "$lib/database/db";
+
+export interface Activity {
+  id: number;
+  name: string;
+}
 
 export function getActivities(): Observable<Activity[]> {
   return liveQuery(() => db.activities.toArray());
@@ -16,10 +21,9 @@ export async function addActivity(name: string) {
 
     db.activities.add({
       name: name,
-      project: "studying",
     });
 
-    status = `Activity ${name} has been added`;
+    status = `Activity "${name}" has been added`;
   } catch (error) {
     status = `Failed due to ${error}`;
   }

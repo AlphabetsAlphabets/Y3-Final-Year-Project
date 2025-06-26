@@ -2,7 +2,6 @@
     import Modal from "$lib/components/Modal.svelte";
     import Timer from "$lib/components/Timer.svelte";
 
-    import { addActivity, getActivities } from "$lib/activities";
     import { clearItems, listAllItems } from "$lib/database/dev";
     import { db } from "$lib/database/db";
     import { seconds } from "$lib/timer";
