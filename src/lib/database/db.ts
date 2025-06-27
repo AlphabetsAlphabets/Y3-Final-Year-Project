@@ -9,10 +9,10 @@ const db = new Dexie("activityDB") as Dexie & {
   logs: EntityTable<Log, "id">;
 };
 
-db.version(4).stores({
+db.version(5).stores({
   activities: "++id, name",
   projects: "&name",
-  logs: "++id, activity, project, start, end",
+  logs: "++id, activity, project, elapsed, start, end",
 });
 
 export { db };

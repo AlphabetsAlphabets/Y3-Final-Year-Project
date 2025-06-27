@@ -18,7 +18,7 @@
 
     function stop() {
         timerState.set(TimerState.Stopped);
-        stopCountdown();
+        stopCountdown("hi", "hi");
     }
 
     function pause() {

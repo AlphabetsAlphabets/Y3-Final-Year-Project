@@ -1,11 +1,11 @@
 <script lang="ts">
     import Timer from "$lib/components/Timer.svelte";
+    import ActivityModal from "$lib/components/derived/ActivityModal.svelte";
+    import ProjectModal from "$lib/components/derived/ProjectModal.svelte";
 
     import { clearItems, listAllItems } from "$lib/database/dev";
     import { db } from "$lib/database/db";
     import { seconds } from "$lib/timer";
-    import ActivityModal from "$lib/components/derived/ActivityModal.svelte";
-    import ProjectModal from "$lib/components/derived/ProjectModal.svelte";
 </script>
 
 <button onclick={async () => await listAllItems(db.activities)}
@@ -26,8 +26,8 @@
 
     <form class="pt-4">
         <div class="mb-3">
-            <ActivityModal />
-            <ProjectModal />
+            <ActivityModal></ActivityModal>
+            <ProjectModal></ProjectModal>
 
             <div class="goal-container">
                 <span class="goal-label">Goal</span>
@@ -44,8 +44,7 @@
                     for="btn-check-outlined">Pomodoro</label
                 >
             </div>
-
-            <Timer></Timer>
+            <Timer />
         </div>
     </form>
     <div class="timer-display-container">
