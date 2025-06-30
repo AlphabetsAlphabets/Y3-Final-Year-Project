@@ -1,6 +1,9 @@
 <script lang="ts">
-    import { clearItems, listAllItems } from "$lib/database/dev";
     import { db } from "$lib/database/db";
+    import { clearItems, listAllItems } from "$lib/database/dev";
+    import { addActivity, getActivities } from "$lib/database/schemas/activity";
+    import { addProject, getProjects } from "$lib/database/schemas/project";
+
     import {
         pauseCountdown,
         resumeCountdown,
@@ -9,15 +12,18 @@
         stopCountdown,
         TimerState,
     } from "$lib/timer";
+
     import SelectModal from "$lib/components/derived/SelectModal.svelte";
-    import { addActivity, getActivities } from "$lib/database/schemas/activity";
-    import { addProject, getProjects } from "$lib/database/schemas/project";
+    import MessageModal from "$lib/components/derived/MessageModal.svelte";
+    import Modal from "$lib/components/Modal.svelte";
 
     let activityName: string = $state("Activity");
     let projectName: string = $state("Project");
 
     let timerState = $state(TimerState.Stopped);
     let isPomodoro = $state(false);
+
+    let modal: Modal | null = $state(null);
 </script>
 
 <button onclick={async () => await listAllItems(db.activities)}
@@ -28,6 +34,16 @@
         await clearItems();
     }}>Clear db</button
 >
+
+<button
+    onclick={async () => {
+        modal?.showModal();
+    }}
+>
+    display message
+</button>
+
+<MessageModal bind:modal></MessageModal>
 
 <div class="container-md py-4">
     <div class="settings-container">
