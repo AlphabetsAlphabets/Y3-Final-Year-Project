@@ -1,49 +1,23 @@
 <script lang="ts">
-    import Modal from "$lib/components/Modal.svelte";
-    import Timer from "$lib/components/Timer.svelte";
-
-    import { addActivity, getActivities } from "$lib/activities";
     import { clearItems, listAllItems } from "$lib/database/dev";
     import { db } from "$lib/database/db";
-    import { seconds } from "$lib/timer";
+    import {
+        pauseCountdown,
+        resumeCountdown,
+        seconds,
+        startCountdown,
+        stopCountdown,
+        TimerState,
+    } from "$lib/timer";
+    import SelectModal from "$lib/components/derived/SelectModal.svelte";
+    import { addActivity, getActivities } from "$lib/database/schemas/activity";
+    import { addProject, getProjects } from "$lib/database/schemas/project";
 
-    let options: string[] = $state([]);
-    let activities = getActivities();
+    let activityName: string = $state("Activity");
+    let projectName: string = $state("Project");
 
-    activities.subscribe({
-        next(activities) {
-            activities.map((activity) => {
-                if (!options.includes(activity.name, 0)) {
-                    options.push(activity.name);
-                }
-            });
-        },
-        error(error) {
-            console.log(`Failed to get activities due to :\n${error}`);
-        },
-        complete() {
-            console.log("Done");
-        },
-    });
-
-    let modalInput: string = $state("");
-    let modal: Modal | null = $state(null);
-    let filteredOptions: string[] = $derived.by(() => {
-        if (modalInput.length === 0) {
-            return options;
-        } else {
-            return options.filter((option) =>
-                option.toLowerCase().includes(modalInput.toLowerCase()),
-            );
-        }
-    });
-
-    let selectedOption: string = $state("Activity");
-
-    function selectOption(option: string) {
-        selectedOption = option;
-        filteredOptions = options;
-    }
+    let timerState = $state(TimerState.Stopped);
+    let isPomodoro = $state(false);
 </script>
 
 <button onclick={async () => await listAllItems(db.activities)}
@@ -52,113 +26,150 @@
 <button
     onclick={async () => {
         await clearItems();
-        options = [];
     }}>Clear db</button
 >
 
 <div class="container-md py-4">
-    <div style="position: fixed; top: 0; right: 0; margin: 10px;">
+    <div class="settings-container">
         <button id="settings">
             <img src="/gear.svg" alt="gear" />
         </button>
     </div>
 
-    <style>
-        /* Make the Pomodoro button black by default */
-        label[for="btn-check-outlined"] {
-            background-color: black !important;
-            color: white !important;
-            border-color: black !important;
-        }
-        /* When checked, turn it green */
-        #btn-check-outlined:checked + label[for="btn-check-outlined"] {
-            background-color: green !important;
-            color: white !important;
-            border-color: green !important;
-        }
-    </style>
     <form class="pt-4">
         <div class="mb-3">
-            <button
-                id="activity select"
-                type="button"
-                class="btn btn-outline-primary w-100"
-                onclick={modal?.showModal}
-            >
-                {selectedOption}
-            </button>
-            <Modal bind:this={modal} title="Select an option">
-                <input
-                    type="text"
-                    class="form-control mb-3"
-                    placeholder="Type to search..."
-                    bind:value={modalInput}
-                />
-                {#if filteredOptions.length > 0 || modalInput.length === 0}
-                    <ul style="list-style:none; padding:0;">
-                        {#each filteredOptions as option (option)}
-                            <li style="margin-bottom: 0.5rem;">
-                                <button
-                                    type="button"
-                                    class="btn btn-outline-primary w-100"
-                                    onclick={() => {
-                                        selectOption(option);
-                                        modal?.closeModal();
-                                    }}>{option}</button
-                                >
-                            </li>
-                        {/each}
-                    </ul>
-                {:else}
-                    <div>
-                        <p>No options found for "{modalInput}"</p>
-                        <button
-                            type="button"
-                            class="btn btn-outline-success w-100"
-                            onclick={async () => {
-                                await addActivity(modalInput);
-                                selectOption(modalInput);
-                                modalInput = "";
-                            }}>Create "{modalInput}"</button
-                        >
-                    </div>
-                {/if}
-                <button
-                    type="button"
-                    class="btn btn-secondary w-100 mt-3"
-                    onclick={modal?.closeModal}>Cancel</button
-                >
-            </Modal>
+            <SelectModal
+                bind:name={activityName}
+                getter={() => getActivities()}
+                setter={(name: string) => addActivity(name)}
+            ></SelectModal>
 
-            <div style="display: flex; align-items: center; margin: 10px 0;">
-                <span style="margin-right: 10px;">Goal</span>
-                <input
-                    type="text"
-                    style="flex-grow: 1; border-radius: 15px; background-color: white; border: 2px solid lightblue; padding: 5px;"
-                />
+            <SelectModal
+                bind:name={projectName}
+                getter={() => getProjects()}
+                setter={(name: string) => addProject(name)}
+            ></SelectModal>
+
+            <div class="goal-container">
+                <span class="goal-label">Goal</span>
+                <input type="text" class="goal-input" />
             </div>
             <div class="mb-3">
-                <input
-                    type="checkbox"
-                    class="btn-check"
-                    id="btn-check-outlined"
-                    autocomplete="off"
-                /><label
-                    class="btn w-100 h-100 d-flex justify-content-center align-items-center"
-                    for="btn-check-outlined">Pomodoro</label
+                <button
+                    type="button"
+                    class="btn pomodoro-btn w-100"
+                    class:active={isPomodoro}
+                    onclick={() => (isPomodoro = !isPomodoro)}
                 >
+                    Pomodoro
+                </button>
             </div>
-
-            <Timer></Timer>
+            {#if timerState === TimerState.Stopped}
+                <button
+                    type="button"
+                    class="btn btn-outline-success w-100 h-100 d-flex justify-content-center align-items-center"
+                    onclick={() => {
+                        startCountdown();
+                        timerState = TimerState.Running;
+                    }}>Start</button
+                >
+            {/if}
+            {#if timerState === TimerState.Running || timerState === TimerState.Paused}
+                <div
+                    style="display: flex; justify-content: space-between; margin-top: 10px;"
+                >
+                    {#if timerState === TimerState.Paused}
+                        <button
+                            type="button"
+                            class="btn btn-outline-primary flex-grow-1"
+                            style="margin-right: 10px;"
+                            onclick={() => {
+                                resumeCountdown();
+                                timerState = TimerState.Running;
+                            }}>Resume</button
+                        >
+                    {:else}
+                        <button
+                            type="button"
+                            class="btn btn-outline-warning flex-grow-1"
+                            style="margin-right: 10px;"
+                            onclick={() => {
+                                pauseCountdown();
+                                timerState = TimerState.Paused;
+                            }}>Pause</button
+                        >
+                    {/if}
+                    <button
+                        type="button"
+                        class="btn btn-outline-danger flex-grow-1"
+                        onclick={() => {
+                            stopCountdown(activityName, projectName);
+                            timerState = TimerState.Stopped;
+                        }}>Stop</button
+                    >
+                </div>
+            {/if}
         </div>
     </form>
-    <div
-        style="display: flex; justify-content: center; align-items: center; margin-top: 20px;"
-    >
-        <div
-            style="width: 300px; height: 100px; border-radius: 15px; background-color: #f0f0f0; display: flex; justify-content: center; align-items: center;"
-        >
+    <div class="timer-display-container">
+        <div class="timer-display">
             <p>{$seconds}s</p>
         </div>
     </div>
 </div>
+
+<style>
+    .settings-container {
+        position: fixed;
+        top: 0;
+        right: 0;
+        margin: 10px;
+    }
+
+    .goal-container {
+        display: flex;
+        align-items: center;
+        margin: 10px 0;
+    }
+
+    .goal-label {
+        margin-right: 10px;
+    }
+
+    .goal-input {
+        flex-grow: 1;
+        border-radius: 15px;
+        background-color: white;
+        border: 2px solid lightblue;
+        padding: 5px;
+    }
+
+    .timer-display-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    .timer-display {
+        width: 300px;
+        height: 100px;
+        border-radius: 15px;
+        background-color: #f0f0f0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .pomodoro-btn {
+        background-color: white;
+        border: 2px solid var(--bs-success);
+        color: var(--bs-success);
+    }
+
+    .pomodoro-btn.active,
+    .pomodoro-btn:hover {
+        background-color: var(--bs-success);
+        color: white;
+    }
+</style>
