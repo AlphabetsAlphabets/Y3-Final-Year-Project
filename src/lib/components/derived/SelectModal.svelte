@@ -49,7 +49,10 @@
     id="activity select"
     type="button"
     class="btn btn-outline-primary w-100"
-    onclick={modal?.showModal}
+    onclick={() => {
+        modal?.showModal();
+        name = "";
+    }}
 >
     {selectedOption}
 </button>
