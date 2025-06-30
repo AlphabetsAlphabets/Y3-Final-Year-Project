@@ -2,7 +2,6 @@
     let { children, title } = $props();
     let visible = $state(false);
 
-    // Expose methods for parent to control modal
     export function showModal() {
         visible = true;
     }

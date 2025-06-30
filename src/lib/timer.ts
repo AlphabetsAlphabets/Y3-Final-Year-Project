@@ -11,16 +11,12 @@ export const TimerState = {
   Stopped: "Stopped",
 };
 
-// Writable store for the timer's state, initialized to 'Stopped'
-export const timerState: Writable<string> = writable(TimerState.Stopped);
-
 let start = Date.now();
 let end = Date.now();
 
 let id: ReturnType<typeof setInterval> | null = null;
 let is_paused = false;
 
-// For debugging purposes, logs seconds to the console whenever they change
 seconds.subscribe((value) => console.log(value));
 
 export function startCountdown() {
@@ -34,7 +30,6 @@ export function startCountdown() {
   }, 1000);
 
   start = Date.now();
-  timerState.set(TimerState.Running);
 }
 
 export function stopCountdown(activity: string, projectName: string) {
@@ -49,15 +44,12 @@ export function stopCountdown(activity: string, projectName: string) {
 
   seconds.set(0);
   is_paused = false;
-  timerState.set(TimerState.Stopped);
 }
 
 export function pauseCountdown() {
   is_paused = true;
-  timerState.set(TimerState.Paused);
 }
 
 export function resumeCountdown() {
   is_paused = false;
-  timerState.set(TimerState.Running);
 }

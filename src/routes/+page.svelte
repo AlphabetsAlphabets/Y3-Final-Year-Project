@@ -5,7 +5,23 @@
 
     import { clearItems, listAllItems } from "$lib/database/dev";
     import { db } from "$lib/database/db";
-    import { seconds } from "$lib/timer";
+    import {
+        pauseCountdown,
+        resumeCountdown,
+        seconds,
+        startCountdown,
+        stopCountdown,
+        TimerState,
+    } from "$lib/timer";
+    import SelectModal from "$lib/components/derived/SelectModal.svelte";
+    import { addActivity, getActivities } from "$lib/database/schemas/activity";
+    import { addProject, getProjects } from "$lib/database/schemas/project";
+
+    let activityName: string = $state("Activity");
+    let projectName: string = $state("Project");
+
+    let timerState = $state(TimerState.Stopped);
+    let isPomodoro = $state(false);
 </script>
 
 <button onclick={async () => await listAllItems(db.activities)}
