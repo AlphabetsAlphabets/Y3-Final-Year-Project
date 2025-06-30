@@ -1,10 +1,8 @@
 import { get, writable, type Writable } from "svelte/store";
 import { logEntry } from "./database/schemas/log";
 
-// Writable store for the timer's seconds
 export const seconds: Writable<number> = writable(0);
 
-// Timer state enum
 export const TimerState = {
   Running: "Running",
   Paused: "Paused",
