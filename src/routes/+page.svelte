@@ -34,15 +34,14 @@
                 <input type="text" class="goal-input" />
             </div>
             <div class="mb-3">
-                <input
-                    type="checkbox"
-                    class="btn-check"
-                    id="btn-check-outlined"
-                    autocomplete="off"
-                /><label
-                    class="btn w-100 h-100 d-flex justify-content-center align-items-center"
-                    for="btn-check-outlined">Pomodoro</label
+                <button
+                    type="button"
+                    class="btn pomodoro-btn w-100"
+                    class:active={isPomodoro}
+                    onclick={() => (isPomodoro = !isPomodoro)}
                 >
+                    Pomodoro
+                </button>
             </div>
             <Timer />
         </div>
@@ -60,20 +59,6 @@
         top: 0;
         right: 0;
         margin: 10px;
-    }
-
-    /* Make the Pomodoro button black by default */
-    label[for="btn-check-outlined"] {
-        background-color: black !important;
-        color: white !important;
-        border-color: black !important;
-    }
-
-    /* When checked, turn it green */
-    #btn-check-outlined:checked + label[for="btn-check-outlined"] {
-        background-color: green !important;
-        color: white !important;
-        border-color: green !important;
     }
 
     .goal-container {
@@ -109,5 +94,17 @@
         display: flex;
         justify-content: center;
         align-items: center;
+    }
+
+    .pomodoro-btn {
+        background-color: white;
+        border: 2px solid var(--bs-success);
+        color: var(--bs-success);
+    }
+
+    .pomodoro-btn.active,
+    .pomodoro-btn:hover {
+        background-color: var(--bs-success);
+        color: white;
     }
 </style>
