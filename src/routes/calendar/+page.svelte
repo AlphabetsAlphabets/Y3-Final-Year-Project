@@ -7,7 +7,11 @@
 <p>Calendar</p>
 
 {#if $logs}
-    {#each $logs as log (log.activity)}
-        <li>{log.activity} you did it for {log.elasped} amount of time</li>
-    {/each}
+    <ul>
+        {#each $logs as log (log.activity)}
+            <li>
+                ({log.project.name}) {log.activity} for {log.elasped}s
+            </li>
+        {/each}
+    </ul>
 {/if}
