@@ -38,8 +38,17 @@
 
     <form class="pt-4">
         <div class="mb-3">
-            <ActivityModal></ActivityModal>
-            <ProjectModal></ProjectModal>
+            <SelectModal
+                bind:name={activityName}
+                getter={() => getActivities()}
+                setter={(name: string) => addActivity(name)}
+            ></SelectModal>
+
+            <SelectModal
+                bind:name={projectName}
+                getter={() => getProjects()}
+                setter={(name: string) => addProject(name)}
+            ></SelectModal>
 
             <div class="goal-container">
                 <span class="goal-label">Goal</span>

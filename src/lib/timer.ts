@@ -40,7 +40,8 @@ export function stopCountdown(activity: string, projectName: string) {
 
   const finalSeconds = get(seconds);
   end = Date.now();
-  logEntry(activity, projectName, start, end, finalSeconds);
+  console.log(`Activity: '${activity}' (${projectName})`);
+  // logEntry(activity, projectName, start, end, finalSeconds);
 
   seconds.set(0);
   is_paused = false;

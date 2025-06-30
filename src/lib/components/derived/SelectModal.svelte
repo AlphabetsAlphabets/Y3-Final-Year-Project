@@ -1,15 +1,18 @@
 <script lang="ts">
-    import { addActivity, getActivities } from "$lib/database/schemas/activity";
+    import type { Observable } from "dexie";
     import Modal from "../Modal.svelte";
 
-    let options: string[] = $state([]);
-    let activities = getActivities();
+    let { name = $bindable(), getter, setter } = $props();
 
-    activities.subscribe({
-        next(activities) {
-            activities.map((activity) => {
-                if (!options.includes(activity.name, 0)) {
-                    options.push(activity.name);
+    let options: string[] = $state([]);
+    let observable: Observable<unknown> = getter();
+
+    observable.subscribe({
+        next(entries) {
+            //@ts-expect-error entries is an observable that can contain pretty much anything.
+            entries.map((entry) => {
+                if (!options.includes(entry.name, 0)) {
+                    options.push(entry.name);
                 }
             });
         },
@@ -21,24 +24,24 @@
         },
     });
 
-    let input: string = $state("");
     let modal: Modal | null = $state(null);
 
     let filteredOptions: string[] = $derived.by(() => {
-        if (input.length === 0) {
+        if (name.length === 0) {
             return options;
         } else {
             return options.filter((option) =>
-                option.toLowerCase().includes(input.toLowerCase()),
+                option.toLowerCase().includes(name.toLowerCase()),
             );
         }
     });
 
-    let selectedOption: string = $state("Activity");
+    let selectedOption: string = $state(name);
 
     function selectOption(option: string) {
         selectedOption = option;
         filteredOptions = options;
+        name = option;
     }
 </script>
 
@@ -55,9 +58,9 @@
         type="text"
         class="form-control mb-3"
         placeholder="Type to search..."
-        bind:value={input}
+        bind:value={name}
     />
-    {#if filteredOptions.length > 0 || input.length === 0}
+    {#if filteredOptions.length > 0 || name.length === 0}
         <ul class="options-list">
             {#each filteredOptions as option (option)}
                 <li class="option-item">
@@ -74,15 +77,14 @@
         </ul>
     {:else}
         <div>
-            <p>No options found for "{input}"</p>
+            <p>No options found for "{name}"</p>
             <button
                 type="button"
                 class="btn btn-outline-success w-100"
                 onclick={async () => {
-                    await addActivity(input);
-                    selectOption(input);
-                    input = "";
-                }}>Create "{input}"</button
+                    await setter(name);
+                    selectOption(name);
+                }}>Create "{name}"</button
             >
         </div>
     {/if}
