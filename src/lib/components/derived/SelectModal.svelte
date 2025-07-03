@@ -56,6 +56,7 @@
 >
     {selectedOption}
 </button>
+
 <Modal bind:this={modal} title="Select an option">
     <input
         type="text"

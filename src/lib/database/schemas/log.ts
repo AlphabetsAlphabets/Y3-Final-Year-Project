@@ -11,6 +11,9 @@ export interface Log {
   end: number;
 }
 
+export const colors: Map<string, string> = new Map();
+colors.set("reading", "red");
+
 export async function logEntry(
   activity: string,
   projectName: string,

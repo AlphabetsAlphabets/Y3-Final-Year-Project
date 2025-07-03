@@ -16,6 +16,7 @@
     import SelectModal from "$lib/components/derived/SelectModal.svelte";
     import MessageModal from "$lib/components/derived/MessageModal.svelte";
     import Modal from "$lib/components/Modal.svelte";
+    import ProjectModal from "$lib/components/derived/ProjectModal.svelte";
 
     let activityName: string = $state("Activity");
     let projectName: string = $state("Project");
@@ -60,11 +61,11 @@
                 setter={(name: string) => addActivity(name)}
             ></SelectModal>
 
-            <SelectModal
+            <ProjectModal
                 bind:name={projectName}
                 getter={() => getProjects()}
                 setter={(name: string) => addProject(name)}
-            ></SelectModal>
+            ></ProjectModal>
 
             <div class="goal-container">
                 <span class="goal-label">Goal</span>
