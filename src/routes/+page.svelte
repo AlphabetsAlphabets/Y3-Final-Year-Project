@@ -1,8 +1,17 @@
 <script lang="ts">
     import { db } from "$lib/database/db";
-    import { clearItems, listAllItems } from "$lib/database/dev";
+    import {
+        clearActivities,
+        clearProjects,
+        listAllItems,
+    } from "$lib/database/dev";
     import { addActivity, getActivities } from "$lib/database/schemas/activity";
     import { addProject, getProjects } from "$lib/database/schemas/project";
+
+    import Modal from "$lib/components/Modal.svelte";
+    import SelectModal from "$lib/components/derived/SelectModal.svelte";
+    import MessageModal from "$lib/components/derived/MessageModal.svelte";
+    import ProjectModal from "$lib/components/derived/ProjectModal.svelte";
 
     import {
         pauseCountdown,
@@ -13,11 +22,6 @@
         TimerState,
     } from "$lib/timer";
 
-    import SelectModal from "$lib/components/derived/SelectModal.svelte";
-    import MessageModal from "$lib/components/derived/MessageModal.svelte";
-    import Modal from "$lib/components/Modal.svelte";
-    import ProjectModal from "$lib/components/derived/ProjectModal.svelte";
-
     let activityName: string = $state("Activity");
     let projectName: string = $state("Project");
 
@@ -27,22 +31,32 @@
     let modal: Modal | null = $state(null);
 </script>
 
-<button onclick={async () => await listAllItems(db.activities)}
-    >List all items</button
->
-<button
-    onclick={async () => {
-        await clearItems();
-    }}>Clear db</button
->
+<div>
+    <button onclick={async () => await listAllItems(db.activities)}
+        >List activities items</button
+    >
+    <button onclick={async () => await listAllItems(db.projects)}
+        >List projects items</button
+    >
+    <button
+        onclick={async () => {
+            await clearActivities();
+        }}>Clear activities</button
+    >
+    <button
+        onclick={async () => {
+            await clearProjects();
+        }}>Clear projects</button
+    >
 
-<button
-    onclick={async () => {
-        modal?.showModal();
-    }}
->
-    display message
-</button>
+    <button
+        onclick={async () => {
+            modal?.showModal();
+        }}
+    >
+        display message
+    </button>
+</div>
 
 <MessageModal bind:modal></MessageModal>
 
@@ -64,7 +78,8 @@
             <ProjectModal
                 bind:name={projectName}
                 getter={() => getProjects()}
-                setter={(name: string) => addProject(name)}
+                setter={(name: string, color: string) =>
+                    addProject(name, color)}
             ></ProjectModal>
 
             <div class="goal-container">
