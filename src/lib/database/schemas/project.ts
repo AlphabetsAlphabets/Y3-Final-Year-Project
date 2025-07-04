@@ -3,13 +3,14 @@ import { db } from "../db";
 
 export interface Project {
   name: string;
+  color: string;
 }
 
 export function getProjects(): Observable<Project[]> {
   return liveQuery(() => db.projects.toArray());
 }
 
-export async function addProject(name: string) {
+export async function addProject(name: string, color: string) {
   let status = "";
   try {
     const count = await db.projects.where("name").equals(name).count();
@@ -19,7 +20,8 @@ export async function addProject(name: string) {
     }
 
     db.projects.add({
-      name: name,
+      name,
+      color,
     });
 
     status = `Project "${name}" has been added`;
