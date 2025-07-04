@@ -12,7 +12,6 @@ export interface Log {
 }
 
 export const colors: Map<string, string> = new Map();
-colors.set("reading", "red");
 
 export async function logEntry(
   activity: string,

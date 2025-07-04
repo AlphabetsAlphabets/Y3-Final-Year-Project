@@ -3,12 +3,11 @@
     import Modal from "../Modal.svelte";
 
     let { name: selected = $bindable(), getter, setter } = $props();
+    import { getProjectColor } from "$lib/database/schemas/project";
 
     let modal: Modal | null = $state(null);
     let projects: string[] = $state([]);
     let observable: Observable<unknown> = getter();
-
-    let color: string = "#fffff";
 
     observable.subscribe({
         next(entries) {
@@ -34,21 +33,21 @@
         }
     });
 
-    // State for selected option and colors
-    let optionColors = $state(new Map<string, string>());
-
     function selectOption(option: string) {
         selected = option;
     }
 
-    function handleColorChange(event: Event, option: string) {
-        const target = event.target as HTMLInputElement;
-        optionColors.set(option, target.value);
-        optionColors = new Map(optionColors);
-    }
+    let color = $state("#fffff");
+    let projectColors = $state(new Map<string, string>());
 
     $effect(() => {
-        // detects changes
+        for (const project of projects) {
+            if (!projectColors.has(project)) {
+                getProjectColor(project).then((color) => {
+                    projectColors.set(project, color);
+                });
+            }
+        }
     });
 </script>
 
@@ -72,29 +71,34 @@
     />
     {#if filtered.length > 0 || selected.length === 0}
         <ul class="options-list">
-            {#each filtered as option (option)}
+            {#each filtered as project (project)}
                 <li class="option-item">
                     <div class="split-button-container">
                         <button
                             type="button"
                             class="select-part"
                             onclick={() => {
-                                selectOption(option);
+                                selectOption(project);
                                 modal?.closeModal();
                             }}
                         >
-                            {option}
+                            {project}
                         </button>
                         <div
                             class="color-part"
-                            style:background-color={optionColors.get(option) ||
-                                "#fffff"}
+                            style:background-color={projectColors.get(project)}
                         >
                             <input
                                 type="color"
                                 class="color-input"
-                                title="Choose a color for '{option}'"
-                                onchange={(e) => (color = option)}
+                                title="Choose a color for '{project}'"
+                                onchange={(e) => {
+                                    // TODO: There should be an update the color here as well.
+                                    projectColors.set(
+                                        project,
+                                        (e.target as HTMLInputElement).value,
+                                    );
+                                }}
                             />
                         </div>
                     </div>
@@ -102,18 +106,44 @@
             {/each}
         </ul>
     {:else}
+        <!-- Create a new entry -->
         <div>
             <p>No project found for "{selected}"</p>
+
+            <div class="split-button-container">
+                <div class="split-button-container">
+                    <button class="btn btn-light" disabled>
+                        {selected}
+                    </button>
+                    <div class="color-part" style:background-color={color}>
+                        <input
+                            type="color"
+                            class="color-input"
+                            title="Choose a color"
+                            onchange={(e) =>
+                                (color = (e.target as HTMLInputElement).value)}
+                        />
+                    </div>
+                </div>
+            </div>
             <button
                 type="button"
                 class="btn btn-outline-success w-100"
                 onclick={async () => {
+                    if (color === "#fffff" || selected.length === 0) {
+                        console.error(
+                            "Color is default and no name for project.",
+                        );
+
+                        return;
+                    }
+
                     await setter(selected, color);
                     selectOption(selected);
                     modal?.closeModal();
                 }}
             >
-                Create "{selected}"
+                Create project "{selected}"
             </button>
         </div>
     {/if}
