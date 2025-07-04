@@ -11,6 +11,11 @@ export async function clearProjects() {
   console.log("Cleared projects.");
 }
 
+export async function clearLogs() {
+  await db.logs.clear();
+  console.log("Cleared logs.");
+}
+
 export async function listAllItems<T, U>(table: Table<T, U>) {
   const values = await table.toArray();
   console.log(`Items in table "${table.name}":`);

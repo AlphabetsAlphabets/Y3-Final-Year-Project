@@ -2,9 +2,11 @@
     import { db } from "$lib/database/db";
     import {
         clearActivities,
+        clearLogs,
         clearProjects,
         listAllItems,
     } from "$lib/database/dev";
+
     import { addActivity, getActivities } from "$lib/database/schemas/activity";
     import { addProject, getProjects } from "$lib/database/schemas/project";
 
@@ -47,6 +49,11 @@
         onclick={async () => {
             await clearProjects();
         }}>Clear projects</button
+    >
+    <button
+        onclick={async () => {
+            await clearLogs();
+        }}>Clear logs</button
     >
 
     <button
