@@ -16,7 +16,7 @@
                     title: log.activity,
                     start: new Date(log.start).toISOString(),
                     end: new Date(log.end).toISOString(),
-                    backgroundColor: "white",
+                    backgroundColor: log.project.color,
                 };
 
                 if (colors.has(log.project.name)) {

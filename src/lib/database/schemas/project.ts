@@ -10,6 +10,11 @@ export function getProjects(): Observable<Project[]> {
   return liveQuery(() => db.projects.toArray());
 }
 
+export async function getProjectColor(name: string): Promise<string> {
+  const project = await db.projects.where("name").equals(name).first();
+  return project ? project.color : "#fffff";
+}
+
 export async function addProject(name: string, color: string) {
   let status = "";
   try {
