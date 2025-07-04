@@ -9,7 +9,6 @@
 
     logs.subscribe({
         next(logs) {
-            // By reassigning the array, we ensure Svelte's reactivity is triggered.
             events = logs.map((log) => {
                 const event = {
                     id: log.id,
