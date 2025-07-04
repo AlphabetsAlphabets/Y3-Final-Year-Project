@@ -15,6 +15,18 @@ export async function getProjectColor(name: string): Promise<string> {
   return project ? project.color : "#fffff";
 }
 
+export async function updatedProjectColor(
+  name: string,
+  color: string,
+): Promise<void> {
+  try {
+    console.log(`Changing color of ${name} to ${color}`);
+    await db.projects.where("name").equals(name).modify({ color: color });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 export async function addProject(name: string, color: string) {
   let status = "";
   try {

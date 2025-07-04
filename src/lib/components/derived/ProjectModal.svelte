@@ -3,7 +3,10 @@
     import Modal from "../Modal.svelte";
 
     let { name: selected = $bindable(), getter, setter } = $props();
-    import { getProjectColor } from "$lib/database/schemas/project";
+    import {
+        getProjectColor,
+        updatedProjectColor,
+    } from "$lib/database/schemas/project";
 
     let modal: Modal | null = $state(null);
     let projects: string[] = $state([]);
@@ -69,6 +72,7 @@
         placeholder="Type to search..."
         bind:value={selected}
     />
+    <!-- Has entries already -->
     {#if filtered.length > 0 || selected.length === 0}
         <ul class="options-list">
             {#each filtered as project (project)}
@@ -93,11 +97,13 @@
                                 class="color-input"
                                 title="Choose a color for '{project}'"
                                 onchange={(e) => {
-                                    // TODO: There should be an update the color here as well.
-                                    projectColors.set(
-                                        project,
-                                        (e.target as HTMLInputElement).value,
-                                    );
+                                    let newColor = (
+                                        e.target as HTMLInputElement
+                                    ).value;
+
+                                    projectColors.set(project, newColor);
+                                    updatedProjectColor(project, newColor);
+                                    projectColors = new Map(projectColors);
                                 }}
                             />
                         </div>
