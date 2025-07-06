@@ -19,7 +19,7 @@ self.addEventListener("install", (event) => {
   });
 });
 
-// TODO: STILL MISSING THE ACTIVATE EVENT.
+// TODO: This is from gemini, will need to vet through it.
 // https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Tutorials/CycleTracker/Service_workers
 self.addEventListener("activate", (event) => {
   event.waitUntil(
