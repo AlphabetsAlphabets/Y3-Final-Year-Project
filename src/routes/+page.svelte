@@ -35,11 +35,12 @@
 
 <div>
     <button onclick={async () => await listAllItems(db.activities)}
-        >List activities items</button
+        >List activities</button
     >
     <button onclick={async () => await listAllItems(db.projects)}
-        >List projects items</button
+        >List projects</button
     >
+    <button onclick={async () => await listAllItems(db.logs)}>List logs</button>
     <button
         onclick={async () => {
             await clearActivities();
