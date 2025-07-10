@@ -1,5 +1,4 @@
 import sqlite3Worker1Promiser from "$lib/sqlite/jswasm/sqlite3-worker1-promiser.mjs";
-import sqlite3InitModule from "$lib/sqlite/jswasm/sqlite3";
 import { DB_NAME } from "$lib/common/constants";
 
 // This import is crucial for Vite to correctly bundle the worker
@@ -8,9 +7,7 @@ import "$lib/sqlite/jswasm/sqlite3-worker1?worker";
 let promiser: any = null;
 
 const initializeDB = async () => {
-  console.log("WORKER: Initializing SQLite...");
-  const sqlite3 = await sqlite3InitModule();
-  console.log("WORKER: SQLite module loaded.", sqlite3);
+  console.log("WORKER: Initializing SQLite promiser");
 
   promiser = await sqlite3Worker1Promiser({
     onready: () => {
