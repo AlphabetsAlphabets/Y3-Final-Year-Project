@@ -1,29 +1,35 @@
 import sqlite3Worker1Promiser from "$lib/sqlite/jswasm/sqlite3-worker1-promiser.mjs";
 import { DB_NAME } from "$lib/common/constants";
 
-// This import is crucial for Vite to correctly bundle the worker
-import "$lib/sqlite/jswasm/sqlite3-worker1?worker";
+import type { Promiser } from "$lib/types/database";
 
-let promiser: any = null;
+let promiser: Promiser | null = null;
+
+function isPromiserReady(
+  promiser: Promiser | null,
+): asserts promiser is Promiser {
+  if (!promiser) {
+    throw new Error("Promiser not ready.");
+  }
+}
 
 const initializeDB = async () => {
-  console.log("WORKER: Initializing SQLite promiser");
-
   promiser = await sqlite3Worker1Promiser({
     onready: () => {
       console.log("WORKER: SQLite promiser is ready.");
     },
   });
 
-  console.log("WORKER: Opening database...");
-  const openResponse = await promiser("open", {
-    filename: `opfs:${DB_NAME}`,
+  isPromiserReady(promiser);
+  await promiser("open", {
+    filename: DB_NAME,
     vfs: "opfs",
   });
-  console.log("WORKER: Database opened.", openResponse);
 };
 
 const setupSchema = async () => {
+  isPromiserReady(promiser);
+
   console.log("WORKER: Creating table...");
   await promiser("exec", {
     sql: `
@@ -33,26 +39,27 @@ const setupSchema = async () => {
       );
     `,
   });
-  console.log("WORKER: Table created.");
 
-  console.log("WORKER: Inserting initial data...");
   await promiser("exec", {
     sql: "INSERT INTO users (name) VALUES (?);",
     bind: ["John Doe"],
   });
-  console.log("WORKER: Initial data inserted.");
 };
 
 const listUsers = async () => {
-  console.log("WORKER: Querying all users...");
+  isPromiserReady(promiser);
+
   const users = await promiser("exec", {
     sql: "SELECT * FROM users;",
-    rowMode: "object",
+    rowMode: "array",
   });
-  console.log("WORKER: User list retrieved.");
+
+  console.log(users);
+
   return users.result;
 };
 
+// TODO: Will need to fix this
 onmessage = async (e) => {
   console.log("WORKER: A message was received from the main thread.", e.data);
   const { command } = e.data;
