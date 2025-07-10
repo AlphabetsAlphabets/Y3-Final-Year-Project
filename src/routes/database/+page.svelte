@@ -12,7 +12,9 @@
         syncWorker = new SyncWorker.default();
         syncWorker.onmessage = onWorkerMessage;
         syncWorker.postMessage({});
-        console.log("MAIN THREAD :Sent message to web worker.");
+        console.log(
+            "MAIN THREAD: Component mounted and sent message to web worker.",
+        );
     };
 
     onMount(loadWorker);

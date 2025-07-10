@@ -9,5 +9,9 @@ export default defineConfig({
       key: fs.readFileSync("localhost-key.pem"),
       cert: fs.readFileSync("localhost.pem"),
     },
+    headers: {
+      "Cross-Origin-Embedder-Policy": "require-corp",
+      "Cross-Origin-Opener-Policy": "same-origin",
+    },
   },
 });
