@@ -54,8 +54,6 @@ const listUsers = async () => {
     rowMode: "array",
   });
 
-  console.log(users);
-
   return users.result;
 };
 

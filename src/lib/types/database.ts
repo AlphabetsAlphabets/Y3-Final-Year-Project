@@ -8,7 +8,7 @@ export type Promiser = {
     messageType: "exec",
     args: ExecArgs & { rowMode: "object" },
   ): Promise<object[]>;
-  (messageType: "exec", args: ExecArgs): Promise<RowModeArray>;
+  (messageType: "exec", args: ExecArgs): Promise<RowModeObject>;
 };
 
 type OpenArgs = {
@@ -37,4 +37,10 @@ export type RowModeArray = {
   dbId: string;
   messageId: string;
   result: { resultRows: object[] };
+};
+
+export type RowModeObject = {
+  dbId: string;
+  messageId: string;
+  result: { sql: string; rowMode: string; resultRows: object[] };
 };
