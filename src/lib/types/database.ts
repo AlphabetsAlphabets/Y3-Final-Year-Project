@@ -44,3 +44,16 @@ export type RowModeObject = {
   messageId: string;
   result: { sql: string; rowMode: string; resultRows: object[] };
 };
+
+export type WorkerCommand = {
+  command: "schema" | "list" | "reset" | string;
+  messageId: string;
+};
+
+export type WorkerResponse = {
+  success: boolean;
+  message: string;
+  messageId: string;
+  data: any;
+  error?: string;
+};
