@@ -1,6 +1,5 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
-    import { page as pageStore } from "$app/stores";
     let { children } = $props();
 
     const pages = [
