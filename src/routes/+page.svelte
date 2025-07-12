@@ -1,15 +1,4 @@
 <script lang="ts">
-    import { db } from "$lib/database/db";
-    import {
-        clearActivities,
-        clearLogs,
-        clearProjects,
-        listAllItems,
-    } from "$lib/database/dev";
-
-    import { addActivity, getActivities } from "$lib/database/schemas/activity";
-    import { addProject, getProjects } from "$lib/database/schemas/project";
-
     import Modal from "$lib/components/Modal.svelte";
     import SelectModal from "$lib/components/derived/SelectModal.svelte";
     import MessageModal from "$lib/components/derived/MessageModal.svelte";
@@ -33,39 +22,6 @@
     let modal: Modal | null = $state(null);
 </script>
 
-<div>
-    <button onclick={async () => await listAllItems(db.activities)}
-        >List activities</button
-    >
-    <button onclick={async () => await listAllItems(db.projects)}
-        >List projects</button
-    >
-    <button onclick={async () => await listAllItems(db.logs)}>List logs</button>
-    <button
-        onclick={async () => {
-            await clearActivities();
-        }}>Clear activities</button
-    >
-    <button
-        onclick={async () => {
-            await clearProjects();
-        }}>Clear projects</button
-    >
-    <button
-        onclick={async () => {
-            await clearLogs();
-        }}>Clear logs</button
-    >
-
-    <button
-        onclick={async () => {
-            modal?.showModal();
-        }}
-    >
-        display message
-    </button>
-</div>
-
 <MessageModal bind:modal></MessageModal>
 
 <div class="container-md py-4">
@@ -77,19 +33,6 @@
 
     <form class="pt-4">
         <div class="mb-3">
-            <SelectModal
-                bind:name={activityName}
-                getter={() => getActivities()}
-                setter={(name: string) => addActivity(name)}
-            ></SelectModal>
-
-            <ProjectModal
-                bind:name={projectName}
-                getter={() => getProjects()}
-                setter={(name: string, color: string) =>
-                    addProject(name, color)}
-            ></ProjectModal>
-
             <div class="goal-container">
                 <span class="goal-label">Goal</span>
                 <input type="text" class="goal-input" />
