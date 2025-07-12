@@ -1,6 +1,6 @@
 import sqlite3Worker1Promiser from "$lib/sqlite/jswasm/sqlite3-worker1-promiser.mjs";
 
-const DB_NAME = "time-trakcer.db";
+const DB_NAME = "time-tracker.db";
 
 import type { Promiser } from "$lib/types/database";
 

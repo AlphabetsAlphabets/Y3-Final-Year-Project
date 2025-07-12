@@ -5,7 +5,9 @@
         let myWorker = await import("$lib/worker?worker");
         let worker = new myWorker.default();
 
-        worker.postMessage({});
+        worker.postMessage({ command: "schema", messageId: 1 });
+        worker.postMessage({ command: "reset", messageId: 2 });
+        worker.postMessage({ command: "list", messageId: 3 });
         console.log("Message sent to worker");
 
         worker.onmessage = (e: MessageEvent) => {
