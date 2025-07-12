@@ -1,8 +1,7 @@
 <script lang="ts">
-    import { goto } from "$app/navigation";
     let { children } = $props();
-
-    const pages = [
+    let currentPage = $state("Home");
+    let pages = [
         {
             name: "Summary",
             href: "/summary",
@@ -17,59 +16,10 @@
         },
     ];
 
-    let currentPageName = $derived(
-        pages.find((p) => p.href === $pageStore.url.pathname)?.name ?? "Home",
-    );
-    let currentPageIndex = $derived(
-        pages.findIndex((p) => p.href === $pageStore.url.pathname),
-    );
-
-    let touchStartX = 0;
-    let touchEndX = 0;
-
-    function handleTouchStart(event: TouchEvent) {
-        touchStartX = event.touches[0].clientX;
-        touchEndX = 0;
-    }
-
-    function handleTouchMove(event: TouchEvent) {
-        touchEndX = event.touches[0].clientX;
-    }
-
-    function handleTouchEnd() {
-        if (
-            touchStartX === 0 ||
-            touchEndX === 0 ||
-            Math.abs(touchStartX - touchEndX) < 50
-        ) {
-            touchStartX = 0;
-            touchEndX = 0;
-            return;
-        }
-
-        if (touchStartX - touchEndX > 50) {
-            const nextIndex = (currentPageIndex + 1) % pages.length;
-            goto(pages[nextIndex].href);
-        }
-
-        if (touchStartX - touchEndX < -50) {
-            const prevIndex =
-                (currentPageIndex - 1 + pages.length) % pages.length;
-            goto(pages[prevIndex].href);
-        }
-
-        touchStartX = 0;
-        touchEndX = 0;
-    }
+    let setDropdownTitle = (name: string) => (currentPage = name);
 </script>
 
-<div
-    ontouchstart={handleTouchStart}
-    ontouchmove={handleTouchMove}
-    ontouchend={handleTouchEnd}
->
-    {@render children()}
-</div>
+{@render children()}
 
 <div
     class="dropdown"
@@ -82,13 +32,18 @@
         aria-expanded="false"
         style="display: flex; justify-content: center; align-items: center; height: 50px;"
     >
-        {currentPageName}
+        {currentPage}
     </button>
     <ul class="dropdown-menu w-100">
         {#each pages as page (page.href)}
-            {#if page.name !== currentPageName}
+            {#if page.name !== currentPage}
                 <li>
-                    <a class="dropdown-item" href={page.href}>{page.name}</a>
+                    <a
+                        class="dropdown-item"
+                        href={page.href}
+                        onclick={() => setDropdownTitle(page.name)}
+                        >{page.name}</a
+                    >
                 </li>
             {/if}
         {/each}
