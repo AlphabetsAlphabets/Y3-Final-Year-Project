@@ -108,6 +108,7 @@ onmessage = async (e) => {
 
     postMessage(result);
   } catch (error: any) {
+    // TODO: FIX THIS
     // Use the same result structure for consistency
     result.error = error.message || "An unknown error occurred";
     console.error("Worker error:", error);
