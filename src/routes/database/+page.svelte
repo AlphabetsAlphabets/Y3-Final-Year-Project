@@ -20,7 +20,8 @@
                 let response = reply.data as RowModeArray;
                 let results = response.result.resultRows;
                 results.forEach((value) => {
-                    names.push({ id: value[0], name: value[1] });
+                    let activity = value as Activity;
+                    names.push({ id: activity[0], name: activity[1] });
                 });
             }
         };

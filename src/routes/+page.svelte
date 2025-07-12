@@ -1,4 +1,9 @@
 <script lang="ts">
+    import { onMount } from "svelte";
+
+    import type { MessageReply } from "$lib/types/message";
+    import type { RowModeArray } from "$lib/types/promiser";
+
     import Modal from "$lib/components/Modal.svelte";
     import SelectModal from "$lib/components/derived/SelectModal.svelte";
     import MessageModal from "$lib/components/derived/MessageModal.svelte";
@@ -20,6 +25,34 @@
     let isPomodoro = $state(false);
 
     let modal: Modal | null = $state(null);
+
+    let names: {
+        id: number;
+        name: string;
+    }[] = $state([]);
+
+    const loadWorker = async () => {
+        const Worker = await import("$lib/workers/database.worker?worker");
+        let worker = new Worker.default();
+
+        worker.onmessage = (e) => {
+            console.log("message received from worker.");
+
+            let reply: MessageReply = e.data;
+            if (reply.messageId === 3 && reply.data) {
+                let response = reply.data as RowModeArray;
+                let results = response.result.resultRows;
+                results.forEach((value) => {
+                    names.push({ id: value[0], name: value[1] });
+                });
+            }
+        };
+
+        worker.postMessage({ command: "schema", messageId: 1 });
+        worker.postMessage({ command: "list", messageId: 3 });
+    };
+
+    onMount(loadWorker);
 </script>
 
 <MessageModal bind:modal></MessageModal>
@@ -30,6 +63,9 @@
             <img src="/gear.svg" alt="gear" />
         </button>
     </div>
+    {#key names}
+        <SelectModal options={names} />
+    {/key}
 
     <form class="pt-4">
         <div class="mb-3">
