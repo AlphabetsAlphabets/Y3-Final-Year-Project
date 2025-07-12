@@ -2,11 +2,14 @@
     import { onMount } from "svelte";
 
     onMount(async () => {
-        let SyncWorker = await import("$lib/worker?worker");
-        let worker = new SyncWorker.default();
+        let myWorker = await import("$lib/worker?worker");
+        let worker = new myWorker.default();
+
         worker.postMessage({});
+        console.log("Message sent to worker");
+
         worker.onmessage = (e: MessageEvent) => {
-            console.log(`Received from worker: ${e.data}`);
+            console.log("Received response from worker:", e.data);
         };
     });
 </script>
