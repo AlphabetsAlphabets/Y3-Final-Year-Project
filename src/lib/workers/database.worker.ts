@@ -15,6 +15,7 @@
 // Web Worker generic tutorial - https://freedium.cfd/https://medium.com/geekculture/sveltekit-web-worker-8cfc0c86abf6
 
 import sqlite3Worker1Promiser from "$lib/sqlite/jswasm/sqlite3-worker1-promiser.mjs";
+import type { Message, MessageReply } from "$lib/types/message";
 
 const DB_NAME = "time-tracker.db";
 
@@ -66,19 +67,15 @@ const listUsers = async () => {
     rowMode: "array",
   });
 
-  return users.result;
+  return users;
 };
 
 // TODO: Will need to fix this
 onmessage = async (e) => {
-  const { command, messageId } = e.data;
+  const { command, messageId }: Message = e.data;
 
-  const result = {
-    success: false,
-    message: "",
-    messageId: messageId,
-    data: undefined,
-    error: undefined,
+  const result: MessageReply = {
+    messageId,
   };
 
   try {
@@ -90,11 +87,8 @@ onmessage = async (e) => {
 
     if (command === "schema") {
       await setupSchema();
-      result.success = true;
     } else if (command == "list") {
-      const users = await listUsers();
-      result.data = users.resultRows;
-      result.success = true;
+      result.data = await listUsers();
     } else if (command === "reset") {
       await promiser("exec", { sql: "DELETE FROM users;" });
       await promiser("exec", {
@@ -108,7 +102,6 @@ onmessage = async (e) => {
       });
 
       console.log("Reset dummy data.");
-      result.success = true;
     } else {
       throw new Error(`Unknown command: ${command}`);
     }
@@ -116,9 +109,7 @@ onmessage = async (e) => {
     postMessage(result);
   } catch (error: any) {
     // Use the same result structure for consistency
-    result.success = false;
-    result.message = error.message || "An unknown error occurred";
-    result.error = error.message;
+    result.error = error.message || "An unknown error occurred";
     console.error("Worker error:", error);
     postMessage(result);
   }
