@@ -1,5 +1,12 @@
 <script lang="ts">
+    import type { MessageReply } from "$lib/types/message";
+    import type { RowModeArray } from "$lib/types/promiser";
     import { onMount } from "svelte";
+
+    let names: {
+        id: number;
+        name: string;
+    }[] = $state([]);
 
     const loadWorker = async () => {
         const Worker = await import("$lib/workers/database.worker?worker");
@@ -7,13 +14,24 @@
 
         worker.onmessage = (e) => {
             console.log("message received from worker.");
-            console.log(e.data);
+
+            let reply: MessageReply = e.data;
+            if (reply.messageId === 3 && reply.data) {
+                let response = reply.data as RowModeArray;
+                let results = response.result.resultRows;
+                results.forEach((value) => {
+                    names.push({ id: value[0], name: value[1] });
+                });
+            }
         };
 
         worker.postMessage({ command: "schema", messageId: 1 });
-        worker.postMessage({ command: "reset", messageId: 2 });
         worker.postMessage({ command: "list", messageId: 3 });
     };
 
     onMount(loadWorker);
 </script>
+
+{#each names as name (name.id)}
+    <p>{name.name}</p>
+{/each}
