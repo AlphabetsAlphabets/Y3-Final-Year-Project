@@ -1,10 +1,18 @@
 import type { Message, MessageReply } from "$lib/types/message";
 
-import { Command, insert, list, setupTables } from "$lib/workers/commands";
+import {
+  Command,
+  initDb,
+  insert,
+  list,
+  setupTables,
+} from "$lib/workers/commands";
 
 // TODO: Will need to fix this
 onmessage = async (e) => {
   const { command, messageId, data }: Message = e.data;
+
+  await initDb();
 
   const result: MessageReply = {
     messageId,

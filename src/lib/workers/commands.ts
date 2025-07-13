@@ -18,7 +18,11 @@ function isPromiserReady(
   }
 }
 
-let initDb = async () => {
+let DB_HAS_INIT = false;
+export const initDb = async () => {
+  if (DB_HAS_INIT) {
+    return;
+  }
   promiser = await sqlite3Worker1Promiser({
     onready: () => {
       console.log("WORKER: SQLite promiser is ready.");
@@ -26,6 +30,8 @@ let initDb = async () => {
   });
 
   isPromiserReady(promiser);
+
+  DB_HAS_INIT = true;
   await promiser("open", {
     filename: "time-tracker.db",
     vfs: "opfs",
@@ -76,6 +82,8 @@ export let list = async (
   let query = `SELECT`;
   if (columns.length > 0) {
     query += ` ${columns}`;
+  } else {
+    query += " *";
   }
 
   query += ` FROM ${table}`;

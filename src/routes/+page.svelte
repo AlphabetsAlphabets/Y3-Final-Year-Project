@@ -55,7 +55,7 @@
         //     data: ["Jack Black"],
         // });
         worker.postMessage({ command: Command.INIT, messageId: 1 });
-        // worker.postMessage({ command: Command.LIST, messageId: 3 });
+        worker.postMessage({ command: Command.LIST, messageId: 3 });
     };
 
     onMount(loadWorker);
