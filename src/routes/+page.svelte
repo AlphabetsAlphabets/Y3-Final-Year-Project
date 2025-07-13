@@ -17,6 +17,7 @@
         stopCountdown,
         TimerState,
     } from "$lib/timer";
+    import { Command } from "$lib/workers/commands";
 
     let activityName: string = $state("Activity");
     let projectName: string = $state("Project");
@@ -48,8 +49,13 @@
             }
         };
 
-        worker.postMessage({ command: "schema", messageId: 1 });
-        worker.postMessage({ command: "list", messageId: 3 });
+        // worker.postMessage({
+        //     command: "new user",
+        //     messageId: 1,
+        //     data: ["Jack Black"],
+        // });
+        worker.postMessage({ command: Command.INIT, messageId: 1 });
+        // worker.postMessage({ command: Command.LIST, messageId: 3 });
     };
 
     onMount(loadWorker);

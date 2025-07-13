@@ -1,8 +1,10 @@
+import type { Command } from "$lib/workers/commands";
 import type { RowModeArray, RowModeObject } from "./promiser";
 
 export type Message = {
-  command: string;
+  command: Command;
   messageId: number;
+  data?: string[];
 };
 
 export type MessageReply = {
