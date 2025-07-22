@@ -32,10 +32,16 @@
         name: string;
     }[] = $state([]);
 
+    let projects: {
+        name: string;
+        color: string;
+    }[] = $state([]);
+
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
 
     // Function to add an activity
     let addActivities = $state();
+    let addProjects = $state();
 
     const loadWorker = async () => {
         const Worker = await import("$lib/workers/database.worker?worker");
@@ -47,12 +53,21 @@
         await dbWorker.setup();
 
         // Load activity data
-        const response = await dbWorker.list("activity");
+        let response = await dbWorker.list("activity");
         console.log("Received activities from worker", response);
 
         if (response && response.result && response.result.resultRows) {
             response.result.resultRows.forEach((value) => {
                 activities.push({ id: value[0], name: value[1] });
+            });
+        }
+
+        response = await dbWorker.list("project");
+        console.log("Received projects from worker", response);
+        if (response && response.result && response.result.resultRows) {
+            response.result.resultRows.forEach((value) => {
+                console.log(value);
+                projects.push({ name: value[0], color: value[1] });
             });
         }
 
@@ -77,6 +92,31 @@
                 }
             }
         };
+
+        addProjects = async (name: string, color: string = "#3498db") => {
+            if (dbWorker) {
+                await dbWorker.insert(
+                    "project",
+                    "name, color",
+                    `'${name}', '${color}'`,
+                );
+
+                // Refresh the list after insertion
+                const newResponse = await dbWorker.list("project");
+                console.log(newResponse);
+
+                projects = [];
+                if (
+                    newResponse &&
+                    newResponse.result &&
+                    newResponse.result.resultRows
+                ) {
+                    newResponse.result.resultRows.forEach((value) => {
+                        projects.push({ name: value[0], color: value[1] });
+                    });
+                }
+            }
+        };
     };
 
     onMount(loadWorker);
@@ -92,6 +132,10 @@
     </div>
     {#key activities || addActivities}
         <SelectModal options={activities} fn={addActivities} />
+    {/key}
+
+    {#key projects || addProjects}
+        <ProjectModal options={projects} fn={addProjects} />
     {/key}
 
     <form class="pt-4">
