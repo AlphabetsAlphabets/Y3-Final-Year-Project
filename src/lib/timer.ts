@@ -1,5 +1,4 @@
 import { get, writable, type Writable } from "svelte/store";
-import { logEntry } from "./database/schemas/log";
 
 export const seconds: Writable<number> = writable(0);
 
@@ -43,7 +42,7 @@ export function stopCountdown(activity: string, projectName: string) {
 
   const finalSeconds = get(seconds);
   end = Date.now();
-  logEntry(activity, projectName, start, end, finalSeconds);
+  // logEntry(activity, projectName, start, end, finalSeconds);
 
   seconds.set(0);
   is_paused = false;
