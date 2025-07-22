@@ -12,7 +12,7 @@ import type { RowModeArray } from "$lib/types/promiser";
 /**
  * Database worker API exposed through Comlink
  */
-const dbWorker = {
+export const dbWorker = {
   /**
    * Initialize the database
    */
@@ -100,8 +100,5 @@ const dbWorker = {
     }
   },
 };
-
-// Expose the API to the main thread using Comlink
-Comlink.expose(dbWorker);
 
 export type DbWorker = typeof dbWorker;

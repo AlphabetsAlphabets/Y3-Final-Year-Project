@@ -1,10 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
 
-    import * as Comlink from "comlink";
-    import type { DbWorker } from "$lib/workers/database.worker";
-    import type { RowModeArray } from "$lib/types/promiser";
-
     import Modal from "$lib/components/Modal.svelte";
     import SelectModal from "$lib/components/derived/SelectModal.svelte";
     import MessageModal from "$lib/components/derived/MessageModal.svelte";
@@ -13,96 +9,33 @@
     import Timer from "$lib/components/Timer.svelte";
     import { seconds } from "$lib/timer";
 
-    let activities: {
-        id: number;
-        name: string;
-    }[] = $state([]);
+    import * as Comlink from "comlink";
 
-    let projects: {
-        name: string;
-        color: string;
-    }[] = $state([]);
+    import {
+        loadActivities,
+        loadProjects,
+        addProjects,
+        addActivity,
+        activites,
+        projects,
+        initWorker,
+    } from "$lib/database/services";
+    import { dbWorker } from "$lib/workers/database.worker";
 
-    let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
+    let activity: string = $state("Activity");
+    let project: string = $state("Project");
 
-    // Function to add an activity
-    let addActivities = $state();
-    let addProjects = $state();
+    let isPomodoro = $state(false);
+
+    let modal: Modal | null = $state(null);
 
     const loadWorker = async () => {
-        const Worker = await import("$lib/workers/database.worker?worker");
-        // Create Comlink wrapper for the worker
-        dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
-
-        console.log("Setting up database");
-        // Initialize and setup the database
-        await dbWorker.setup();
-
-        // Load activity data
-        let response = await dbWorker.list("activity");
-        console.log("Received activities from worker", response);
-
-        if (response && response.result && response.result.resultRows) {
-            response.result.resultRows.forEach((value) => {
-                activities.push({ id: value[0], name: value[1] });
-            });
-        }
-
-        response = await dbWorker.list("project");
-        console.log("Received projects from worker", response);
-        if (response && response.result && response.result.resultRows) {
-            response.result.resultRows.forEach((value) => {
-                console.log(value);
-                projects.push({ name: value[0], color: value[1] });
-            });
-        }
-
-        addActivities = async (name: string) => {
-            console.log("Adding activity:", name);
-            if (dbWorker) {
-                await dbWorker.insert("activity", "name", `'${name}'`);
-
-                // Refresh the list after insertion
-                const newResponse = await dbWorker.list("activity");
-
-                // Clear and update names array
-                activities = [];
-                if (
-                    newResponse &&
-                    newResponse.result &&
-                    newResponse.result.resultRows
-                ) {
-                    newResponse.result.resultRows.forEach((value) => {
-                        activities.push({ id: value[0], name: value[1] });
-                    });
-                }
-            }
-        };
-
-        addProjects = async (name: string, color: string = "#3498db") => {
-            if (dbWorker) {
-                await dbWorker.insert(
-                    "project",
-                    "name, color",
-                    `'${name}', '${color}'`,
-                );
-
-                // Refresh the list after insertion
-                const newResponse = await dbWorker.list("project");
-                console.log(newResponse);
-
-                projects = [];
-                if (
-                    newResponse &&
-                    newResponse.result &&
-                    newResponse.result.resultRows
-                ) {
-                    newResponse.result.resultRows.forEach((value) => {
-                        projects.push({ name: value[0], color: value[1] });
-                    });
-                }
-            }
-        };
+        await initWorker();
+        // This is here instead of database.worker.ts is because
+        // you can't expose without the worker being setup.
+        Comlink.expose(dbWorker);
+        await loadActivities();
+        await loadProjects();
     };
 
     onMount(loadWorker);
@@ -116,12 +49,12 @@
             <img src="/gear.svg" alt="gear" />
         </button>
     </div>
-    {#key activities || addActivities}
-        <SelectModal options={activities} fn={addActivities} />
+    {#key activites || addActivity}
+        <SelectModal selected={activity} options={activites} fn={addActivity} />
     {/key}
 
     {#key projects || addProjects}
-        <ProjectModal options={projects} fn={addProjects} />
+        <ProjectModal selected={project} options={projects} fn={addProjects} />
     {/key}
 
     <form class="pt-4">
@@ -139,6 +72,7 @@
                 >
                     Pomodoro
                 </button>
+                <Timer elapsed={seconds} activity project />
             </div>
         </div>
     </form>
