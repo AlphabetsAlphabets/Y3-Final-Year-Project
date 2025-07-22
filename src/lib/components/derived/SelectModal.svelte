@@ -1,7 +1,7 @@
 <script lang="ts">
     import Modal from "../Modal.svelte";
 
-    let { options, fn } = $props();
+    let { options, fn, selected = $bindable() } = $props();
     let modal: Modal | null = $state(null);
     let userInput = $state("");
 
