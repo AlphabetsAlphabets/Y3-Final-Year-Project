@@ -2,7 +2,7 @@ import type { Promiser } from "$lib/types/promiser";
 import sqlite3Worker1Promiser from "$lib/sqlite/jswasm/sqlite3-worker1-promiser.mjs";
 
 export enum Command {
-  INIT,
+  SETUP,
   INSERT,
   LIST,
   RESET,
@@ -72,7 +72,7 @@ export const setupTables = async () => {
   });
 };
 
-export let list = async (
+export const list = async (
   table: string,
   columns: string = "",
   clause: string = "",
@@ -110,7 +110,9 @@ export const insert = async (
   // So, I need to get the length after it has been flattened. So flat map's length.
   isPromiserReady(promiser);
 
+  let query = `INSERT INTO ${table} (${columns}) VALUES (${values})`;
+  console.log(query);
   await promiser("exec", {
-    sql: `INSERT INTO ${table} (${columns}) VALUES (${values})`,
+    sql: query,
   });
 };

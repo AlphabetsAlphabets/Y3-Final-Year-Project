@@ -19,13 +19,17 @@ onmessage = async (e) => {
   };
 
   try {
-    if (command === Command.INIT) {
+    if (command === Command.SETUP) {
       await setupTables();
     } else if (command === Command.LIST) {
-      result.data = await list("users");
+      result.data = await list("activity");
     } else if (command === Command.INSERT) {
       // Use data here.
-      insert("users", "name", "Steve Rogers");
+      const table = data["table"];
+      const column = data["columns"];
+      const values = data["values"];
+
+      insert(table, column, values);
     } else {
       throw new Error(`Unknown command: ${command}`);
     }

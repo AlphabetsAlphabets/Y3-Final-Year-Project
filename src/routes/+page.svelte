@@ -18,6 +18,7 @@
         TimerState,
     } from "$lib/timer";
     import { Command } from "$lib/workers/commands";
+    import { addActivity } from "$lib/database/schemas/activity";
 
     let activityName: string = $state("Activity");
     let projectName: string = $state("Project");
@@ -32,6 +33,8 @@
         name: string;
     }[] = $state([]);
 
+    let add_activities = $state();
+
     const loadWorker = async () => {
         const Worker = await import("$lib/workers/database.worker?worker");
         let worker = new Worker.default();
@@ -40,6 +43,9 @@
             console.log("message received from worker.");
 
             let reply: MessageReply = e.data;
+            // This does nothing right now because there is no data
+            // in the activities module. Which is why I need to figure out
+            // how to insert data by working on the SelectModal.
             if (reply.messageId === 3 && reply.data) {
                 let response = reply.data as RowModeArray;
                 let results = response.result.resultRows;
@@ -49,12 +55,21 @@
             }
         };
 
-        // worker.postMessage({
-        //     command: "new user",
-        //     messageId: 1,
-        //     data: ["Jack Black"],
-        // });
-        worker.postMessage({ command: Command.INIT, messageId: 1 });
+        add_activities = async (name: string) => {
+            let insertObj = {
+                table: "activity",
+                columns: "name",
+                values: `'${name}'`,
+            };
+
+            worker.postMessage({
+                command: Command.INSERT,
+                messageId: 4,
+                data: insertObj,
+            });
+        };
+
+        worker.postMessage({ command: Command.SETUP, messageId: 1 });
         worker.postMessage({ command: Command.LIST, messageId: 3 });
     };
 
@@ -69,8 +84,8 @@
             <img src="/gear.svg" alt="gear" />
         </button>
     </div>
-    {#key names}
-        <SelectModal options={names} />
+    {#key names || add_activities}
+        <SelectModal options={names} fn={add_activities} />
     {/key}
 
     <form class="pt-4">

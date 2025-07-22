@@ -1,7 +1,7 @@
 <script lang="ts">
     import Modal from "../Modal.svelte";
 
-    let { options } = $props();
+    let { options, fn } = $props();
     let modal: Modal | null = $state(null);
     let userInput = $state("");
 
@@ -55,7 +55,8 @@
         <button
             type="button"
             class="btn btn-outline-success w-100"
-            onclick={async () => {}}>Create "{userInput}"</button
+            onclick={async () => await fn(userInput)}
+            >Create "{userInput}"</button
         >
     {/if}
     <button
