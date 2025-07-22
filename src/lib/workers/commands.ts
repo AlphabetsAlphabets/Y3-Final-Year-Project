@@ -116,3 +116,33 @@ export const insert = async (
     sql: query,
   });
 };
+
+/**
+ * Reset tables by dropping and recreating them
+ * @param table Optional table name. If not provided, all tables will be dropped and recreated
+ */
+export const reset = async (table?: string): Promise<void> => {
+  isPromiserReady(promiser);
+
+  if (table) {
+    // Drop a specific table
+    await promiser("exec", {
+      sql: `DROP TABLE IF EXISTS ${table};`,
+    });
+    console.log(`Table ${table} has been dropped`);
+  } else {
+    // Drop all tables
+    await promiser("exec", {
+      sql: `
+        DROP TABLE IF EXISTS log;
+        DROP TABLE IF EXISTS activity;
+        DROP TABLE IF EXISTS project;
+      `,
+    });
+    console.log("All tables have been dropped");
+  }
+
+  // Recreate tables schema
+  await setupTables();
+  console.log("Tables have been recreated with fresh schema");
+};

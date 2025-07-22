@@ -4,6 +4,7 @@ import {
   initDb,
   insert,
   list,
+  reset,
   setupTables,
 } from "$lib/workers/commands";
 import type { RowModeArray } from "$lib/types/promiser";
@@ -54,6 +55,15 @@ const dbWorker = {
   },
 
   /**
+   * Reset data in tables
+   * @param table Optional table name to reset. If not provided, all tables will be reset
+   */
+  async reset(table?: string): Promise<void> {
+    await initDb();
+    await reset(table);
+  },
+
+  /**
    * Process command by type (legacy support)
    * @param command Command enum value
    * @param data Command data
@@ -79,6 +89,8 @@ const dbWorker = {
         }
 
         return await insert(table, columns, values);
+      } else if (command === Command.RESET) {
+        await reset(data);
       } else {
         throw new Error(`Unknown command: ${command}`);
       }
