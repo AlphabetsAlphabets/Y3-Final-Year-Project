@@ -110,7 +110,7 @@ export const insert = async (
   // So, I need to get the length after it has been flattened. So flat map's length.
   isPromiserReady(promiser);
 
-  let query = `INSERT INTO ${table} (${columns}) VALUES (${values})`;
+  const query = `INSERT INTO ${table} (${columns}) VALUES (${values})`;
   console.log(query);
   await promiser("exec", {
     sql: query,

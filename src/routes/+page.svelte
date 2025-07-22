@@ -1,7 +1,8 @@
 <script lang="ts">
     import { onMount } from "svelte";
 
-    import type { MessageReply } from "$lib/types/message";
+    import * as Comlink from "comlink";
+    import type { DbWorker } from "$lib/workers/database.worker";
     import type { RowModeArray } from "$lib/types/promiser";
 
     import Modal from "$lib/components/Modal.svelte";
@@ -17,8 +18,6 @@
         stopCountdown,
         TimerState,
     } from "$lib/timer";
-    import { Command } from "$lib/workers/commands";
-    import { addActivity } from "$lib/database/schemas/activity";
 
     let activityName: string = $state("Activity");
     let projectName: string = $state("Project");
@@ -28,49 +27,56 @@
 
     let modal: Modal | null = $state(null);
 
-    let names: {
+    let activities: {
         id: number;
         name: string;
     }[] = $state([]);
 
-    let add_activities = $state();
+    let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
+
+    // Function to add an activity
+    let addActivities = $state();
 
     const loadWorker = async () => {
         const Worker = await import("$lib/workers/database.worker?worker");
-        let worker = new Worker.default();
+        // Create Comlink wrapper for the worker
+        dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
 
-        worker.onmessage = (e) => {
-            console.log("message received from worker.");
+        console.log("Setting up database");
+        // Initialize and setup the database
+        await dbWorker.setup();
 
-            let reply: MessageReply = e.data;
-            // This does nothing right now because there is no data
-            // in the activities module. Which is why I need to figure out
-            // how to insert data by working on the SelectModal.
-            if (reply.messageId === 3 && reply.data) {
-                let response = reply.data as RowModeArray;
-                let results = response.result.resultRows;
-                results.forEach((value) => {
-                    names.push({ id: value[0], name: value[1] });
-                });
+        // Load activity data
+        const response = await dbWorker.list("activity");
+        console.log("Received activities from worker", response);
+
+        if (response && response.result && response.result.resultRows) {
+            response.result.resultRows.forEach((value) => {
+                activities.push({ id: value[0], name: value[1] });
+            });
+        }
+
+        addActivities = async (name: string) => {
+            console.log("Adding activity:", name);
+            if (dbWorker) {
+                await dbWorker.insert("activity", "name", `'${name}'`);
+
+                // Refresh the list after insertion
+                const newResponse = await dbWorker.list("activity");
+
+                // Clear and update names array
+                activities = [];
+                if (
+                    newResponse &&
+                    newResponse.result &&
+                    newResponse.result.resultRows
+                ) {
+                    newResponse.result.resultRows.forEach((value) => {
+                        activities.push({ id: value[0], name: value[1] });
+                    });
+                }
             }
         };
-
-        add_activities = async (name: string) => {
-            let insertObj = {
-                table: "activity",
-                columns: "name",
-                values: `'${name}'`,
-            };
-
-            worker.postMessage({
-                command: Command.INSERT,
-                messageId: 4,
-                data: insertObj,
-            });
-        };
-
-        worker.postMessage({ command: Command.SETUP, messageId: 1 });
-        worker.postMessage({ command: Command.LIST, messageId: 3 });
     };
 
     onMount(loadWorker);
@@ -84,8 +90,8 @@
             <img src="/gear.svg" alt="gear" />
         </button>
     </div>
-    {#key names || add_activities}
-        <SelectModal options={names} fn={add_activities} />
+    {#key activities || addActivities}
+        <SelectModal options={activities} fn={addActivities} />
     {/key}
 
     <form class="pt-4">

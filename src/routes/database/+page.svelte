@@ -1,5 +1,6 @@
 <script lang="ts">
-    import type { MessageReply } from "$lib/types/message";
+    import * as Comlink from "comlink";
+    import type { DbWorker } from "$lib/workers/database.worker";
     import type { RowModeArray } from "$lib/types/promiser";
     import { onMount } from "svelte";
 
@@ -10,24 +11,22 @@
 
     const loadWorker = async () => {
         const Worker = await import("$lib/workers/database.worker?worker");
-        let worker = new Worker.default();
+        // Create Comlink wrapper for the worker
+        const dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
 
-        worker.onmessage = (e) => {
-            console.log("message received from worker.");
+        console.log("Setting up database");
+        // Initialize and setup the database
+        await dbWorker.setup();
 
-            let reply: MessageReply = e.data;
-            if (reply.messageId === 3 && reply.data) {
-                let response = reply.data as RowModeArray;
-                let results = response.result.resultRows;
-                results.forEach((value) => {
-                    let activity = value as Activity;
-                    names.push({ id: activity[0], name: activity[1] });
-                });
-            }
-        };
+        // Load activity data
+        const response = await dbWorker.list("activity");
+        console.log("Received activities from worker", response);
 
-        worker.postMessage({ command: "schema", messageId: 1 });
-        worker.postMessage({ command: "list", messageId: 3 });
+        if (response && response.result && response.result.resultRows) {
+            response.result.resultRows.forEach((value) => {
+                names.push({ id: value[0], name: value[1] });
+            });
+        }
     };
 
     onMount(loadWorker);

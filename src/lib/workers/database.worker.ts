@@ -1,5 +1,4 @@
-import type { Message, MessageReply } from "$lib/types/message";
-
+import * as Comlink from "comlink";
 import {
   Command,
   initDb,
@@ -7,41 +6,90 @@ import {
   list,
   setupTables,
 } from "$lib/workers/commands";
+import type { RowModeArray } from "$lib/types/promiser";
 
-// TODO: Will need to fix this
-onmessage = async (e) => {
-  const { command, messageId, data }: Message = e.data;
+/**
+ * Database worker API exposed through Comlink
+ */
+const dbWorker = {
+  /**
+   * Initialize the database
+   */
+  async init(): Promise<void> {
+    await initDb();
+  },
 
-  await initDb();
+  /**
+   * Setup database tables
+   */
+  async setup(): Promise<void> {
+    await initDb();
+    await setupTables();
+  },
 
-  const result: MessageReply = {
-    messageId,
-  };
+  /**
+   * List items from a table
+   * @param table The table name to query
+   * @param columns Optional columns to select
+   * @param clause Optional WHERE clause
+   */
+  async list(
+    table: string,
+    columns?: string,
+    clause?: string,
+  ): Promise<RowModeArray> {
+    await initDb();
+    return await list(table, columns, clause);
+  },
 
-  try {
-    if (command === Command.SETUP) {
-      await setupTables();
-    } else if (command === Command.LIST) {
-      result.data = await list("activity");
-    } else if (command === Command.INSERT) {
-      // Use data here.
-      const table = data["table"];
-      const column = data["columns"];
-      const values = data["values"];
+  /**
+   * Insert data into a table
+   * @param table The table name
+   * @param columns Column names (comma-separated)
+   * @param values Values to insert (formatted as SQL string)
+   */
+  async insert(table: string, columns: string, values: string): Promise<void> {
+    await initDb();
+    await insert(table, columns, values);
+  },
 
-      insert(table, column, values);
-    } else {
-      throw new Error(`Unknown command: ${command}`);
+  /**
+   * Process command by type (legacy support)
+   * @param command Command enum value
+   * @param data Command data
+   */
+  async processCommand(command: Command, data?: any): Promise<any> {
+    await initDb();
+
+    try {
+      if (command === Command.SETUP) {
+        return await setupTables();
+      } else if (command === Command.LIST) {
+        const table = data?.table || "activity";
+        const columns = data?.columns;
+        const clause = data?.clause;
+        return await list(table, columns, clause);
+      } else if (command === Command.INSERT) {
+        const table = data?.table;
+        const columns = data?.columns;
+        const values = data?.values;
+
+        if (!table || !columns || !values) {
+          throw new Error("Missing required data for INSERT command");
+        }
+
+        return await insert(table, columns, values);
+      } else {
+        throw new Error(`Unknown command: ${command}`);
+      }
+    } catch (error: any) {
+      console.error("Worker error:", error);
+      throw error;
     }
-
-    postMessage(result);
-  } catch (error: any) {
-    // TODO: FIX THIS
-    // Use the same result structure for consistency
-    result.error = error.message || "An unknown error occurred";
-    console.error("Worker error:", error);
-    postMessage(result);
-  }
+  },
 };
 
-export {};
+// Expose the API to the main thread using Comlink
+Comlink.expose(dbWorker);
+
+export type DbWorker = typeof dbWorker;
