@@ -36,7 +36,7 @@
     />
     {#if filteredOptions.length > 0 || userInput === ""}
         <ul class="options-list">
-            {#each filteredOptions as option}
+            {#each filteredOptions as option (option.name)}
                 <li class="option-item">
                     <button
                         type="button"
@@ -97,19 +97,6 @@
 
     .new-project-section {
         margin-top: 0.5rem;
-    }
-
-    .project-name-display {
-        display: flex;
-        align-items: center;
-        border: 1px solid #dee2e6;
-        border-radius: 0.375rem;
-        overflow: hidden;
-    }
-
-    .project-name {
-        flex: 1;
-        padding: 0.375rem 0.75rem;
     }
 
     .color-picker-container {
