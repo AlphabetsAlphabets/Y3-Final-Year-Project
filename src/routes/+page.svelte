@@ -20,7 +20,7 @@
         projects,
         initWorker,
     } from "$lib/database/services";
-    import { dbWorker } from "$lib/workers/database.worker";
+    import { worker } from "$lib/workers/database.worker";
 
     let activity: string = $state("Activity");
     let project: string = $state("Project");
@@ -33,7 +33,7 @@
         await initWorker();
         // This is here instead of database.worker.ts is because
         // you can't expose without the worker being setup.
-        Comlink.expose(dbWorker);
+        Comlink.expose(worker);
         await loadActivities();
         await loadProjects();
     };

@@ -1,4 +1,3 @@
-import * as Comlink from "comlink";
 import {
   Command,
   initDb,
@@ -12,7 +11,7 @@ import type { RowModeArray } from "$lib/types/promiser";
 /**
  * Database worker API exposed through Comlink
  */
-export const dbWorker = {
+export const worker = {
   /**
    * Initialize the database
    */
@@ -101,4 +100,4 @@ export const dbWorker = {
   },
 };
 
-export type DbWorker = typeof dbWorker;
+export type DbWorker = typeof worker;
