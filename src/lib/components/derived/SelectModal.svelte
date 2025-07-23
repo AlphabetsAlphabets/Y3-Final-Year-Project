@@ -10,7 +10,7 @@
             return options;
         }
 
-        return options.filter((option: { id: number; name: string }) =>
+        return $options.filter((option: { id: number; name: string }) =>
             option.name.toLowerCase().includes(userInput.toLowerCase()),
         );
     });

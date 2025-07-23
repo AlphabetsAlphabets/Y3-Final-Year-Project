@@ -49,11 +49,11 @@
             <img src="/gear.svg" alt="gear" />
         </button>
     </div>
-    {#key activites || addActivity}
+    {#key $activites || addActivity}
         <SelectModal selected={activity} options={activites} fn={addActivity} />
     {/key}
 
-    {#key projects || addProjects}
+    {#key $projects || addProjects}
         <ProjectModal selected={project} options={projects} fn={addProjects} />
     {/key}
 

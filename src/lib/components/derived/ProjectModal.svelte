@@ -11,7 +11,7 @@
             return options;
         }
 
-        return options.filter((option: { name: string; color: string }) =>
+        return $options.filter((option: { name: string; color: string }) =>
             option.name.toLowerCase().includes(userInput.toLowerCase()),
         );
     });
