@@ -1,49 +1,33 @@
 <script lang="ts">
-    import { db } from "$lib/database/db";
-    import { clearItems, listAllItems } from "$lib/database/dev";
-    import { addActivity, getActivities } from "$lib/database/schemas/activity";
-    import { addProject, getProjects } from "$lib/database/schemas/project";
+    import { onMount } from "svelte";
+    import * as Comlink from "comlink";
 
-    import {
-        pauseCountdown,
-        resumeCountdown,
-        seconds,
-        startCountdown,
-        stopCountdown,
-        TimerState,
-    } from "$lib/timer";
-
+    import Timer from "$lib/components/Timer.svelte";
     import SelectModal from "$lib/components/derived/SelectModal.svelte";
-    import MessageModal from "$lib/components/derived/MessageModal.svelte";
-    import Modal from "$lib/components/Modal.svelte";
 
-    let activityName: string = $state("Activity");
-    let projectName: string = $state("Project");
+    import { seconds } from "$lib/timer";
 
-    let timerState = $state(TimerState.Stopped);
+    // If there is an ep.EventListener error then the cause is this import statement.
+    // comlink requires the worker be exposed via Comlink.expose but importing this file
+    // runs that code and it may be ran BEFORE the worker is ready. Which causes
+    // the EventListener error.
+    import type { DbWorker } from "$lib/workers/database.worker";
+    import ProjectModal from "$lib/components/derived/ProjectModal.svelte";
+
+    let activity = $state("Activity");
+    let project = $state("Project");
+    let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
+
+    const loadWorker = async () => {
+        const Worker = await import("$lib/workers/database.worker?worker");
+        dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
+        await dbWorker.initWorker();
+    };
+
+    onMount(loadWorker);
+
     let isPomodoro = $state(false);
-
-    let modal: Modal | null = $state(null);
 </script>
-
-<button onclick={async () => await listAllItems(db.activities)}
-    >List all items</button
->
-<button
-    onclick={async () => {
-        await clearItems();
-    }}>Clear db</button
->
-
-<button
-    onclick={async () => {
-        modal?.showModal();
-    }}
->
-    display message
-</button>
-
-<MessageModal bind:modal></MessageModal>
 
 <div class="container-md py-4">
     <div class="settings-container">
@@ -52,20 +36,19 @@
         </button>
     </div>
 
+    {#if dbWorker}
+        {#key dbWorker}
+            <SelectModal selected={activity} />
+        {/key}
+        {#key dbWorker}
+            <ProjectModal selected={project} />
+        {/key}
+    {:else}
+        <p>Please wait while the app loads</p>
+    {/if}
+
     <form class="pt-4">
         <div class="mb-3">
-            <SelectModal
-                bind:name={activityName}
-                getter={() => getActivities()}
-                setter={(name: string) => addActivity(name)}
-            ></SelectModal>
-
-            <SelectModal
-                bind:name={projectName}
-                getter={() => getProjects()}
-                setter={(name: string) => addProject(name)}
-            ></SelectModal>
-
             <div class="goal-container">
                 <span class="goal-label">Goal</span>
                 <input type="text" class="goal-input" />
@@ -79,52 +62,8 @@
                 >
                     Pomodoro
                 </button>
+                <Timer elapsed={seconds} activity project />
             </div>
-            {#if timerState === TimerState.Stopped}
-                <button
-                    type="button"
-                    class="btn btn-outline-success w-100 h-100 d-flex justify-content-center align-items-center"
-                    onclick={() => {
-                        startCountdown();
-                        timerState = TimerState.Running;
-                    }}>Start</button
-                >
-            {/if}
-            {#if timerState === TimerState.Running || timerState === TimerState.Paused}
-                <div
-                    style="display: flex; justify-content: space-between; margin-top: 10px;"
-                >
-                    {#if timerState === TimerState.Paused}
-                        <button
-                            type="button"
-                            class="btn btn-outline-primary flex-grow-1"
-                            style="margin-right: 10px;"
-                            onclick={() => {
-                                resumeCountdown();
-                                timerState = TimerState.Running;
-                            }}>Resume</button
-                        >
-                    {:else}
-                        <button
-                            type="button"
-                            class="btn btn-outline-warning flex-grow-1"
-                            style="margin-right: 10px;"
-                            onclick={() => {
-                                pauseCountdown();
-                                timerState = TimerState.Paused;
-                            }}>Pause</button
-                        >
-                    {/if}
-                    <button
-                        type="button"
-                        class="btn btn-outline-danger flex-grow-1"
-                        onclick={() => {
-                            stopCountdown(activityName, projectName);
-                            timerState = TimerState.Stopped;
-                        }}>Stop</button
-                    >
-                </div>
-            {/if}
         </div>
     </form>
     <div class="timer-display-container">

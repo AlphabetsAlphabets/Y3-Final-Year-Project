@@ -1,48 +1,38 @@
 <script lang="ts">
-    import type { Observable } from "dexie";
+    import * as Comlink from "comlink";
+    import { onMount } from "svelte";
+
     import Modal from "../Modal.svelte";
 
-    let { name = $bindable(), getter, setter } = $props();
+    import type { DbWorker } from "$lib/workers/database.worker";
+    import { type Activity } from "$lib/types/schema";
 
-    let options: string[] = $state([]);
-    let observable: Observable<unknown> = getter();
+    let { selected = $bindable() } = $props();
 
-    observable.subscribe({
-        next(entries) {
-            //@ts-expect-error entries is an observable that can contain pretty much anything.
-            entries.map((entry) => {
-                if (!options.includes(entry.name, 0)) {
-                    options.push(entry.name);
-                }
-            });
-        },
-        error(error) {
-            console.log(`Failed to get activities due to :\n${error}`);
-        },
-        complete() {
-            console.log("Done");
-        },
-    });
+    let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
+    let activities: Activity[] = $state([]);
+
+    const loadWorker = async () => {
+        const Worker = await import("$lib/workers/database.worker?worker");
+        dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
+        await dbWorker.initWorker();
+        activities = await dbWorker.listActivities();
+    };
+
+    onMount(loadWorker);
 
     let modal: Modal | null = $state(null);
+    let userInput = $state("");
 
-    let filteredOptions: string[] = $derived.by(() => {
-        if (name.length === 0) {
-            return options;
-        } else {
-            return options.filter((option) =>
-                option.toLowerCase().includes(name.toLowerCase()),
-            );
+    let filteredOptions: { id: number; name: string }[] = $derived.by(() => {
+        if (userInput.length === 0) {
+            return activities;
         }
+
+        return activities.filter((option: { id: number; name: string }) =>
+            option.name.toLowerCase().includes(userInput.toLowerCase()),
+        );
     });
-
-    let selectedOption: string = $state(name);
-
-    function selectOption(option: string) {
-        selectedOption = option;
-        filteredOptions = options;
-        name = option;
-    }
 </script>
 
 <button
@@ -51,45 +41,50 @@
     class="btn btn-outline-primary w-100"
     onclick={() => {
         modal?.showModal();
-        name = "";
     }}
 >
-    {selectedOption}
+    {selected}
 </button>
 <Modal bind:this={modal} title="Select an option">
     <input
         type="text"
         class="form-control mb-3"
         placeholder="Type to search..."
-        bind:value={name}
+        bind:value={userInput}
     />
-    {#if filteredOptions.length > 0 || name.length === 0}
+    {#if filteredOptions.length > 0 || userInput === ""}
         <ul class="options-list">
-            {#each filteredOptions as option (option)}
+            {#each filteredOptions as option (option.id)}
                 <li class="option-item">
                     <button
                         type="button"
                         class="btn btn-outline-primary w-100"
                         onclick={() => {
-                            selectOption(option);
+                            selected = option.name;
                             modal?.closeModal();
-                        }}>{option}</button
+                        }}
                     >
+                        {option.name}
+                    </button>
                 </li>
             {/each}
         </ul>
     {:else}
-        <div>
-            <p>No options found for "{name}"</p>
-            <button
-                type="button"
-                class="btn btn-outline-success w-100"
-                onclick={async () => {
-                    await setter(name);
-                    selectOption(name);
-                }}>Create "{name}"</button
-            >
-        </div>
+        <p>No options found for "{userInput}"</p>
+        <button
+            type="button"
+            class="btn btn-outline-success w-100"
+            onclick={async () => {
+                if (!dbWorker) {
+                    console.error("dbWorker not ready yet.");
+                    return;
+                }
+
+                activities = await dbWorker.addActivity(userInput);
+                selected = userInput;
+                modal?.closeModal();
+            }}>Create "{userInput}"</button
+        >
     {/if}
     <button
         type="button"
