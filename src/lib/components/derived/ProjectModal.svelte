@@ -1,17 +1,36 @@
 <script lang="ts">
+    import * as Comlink from "comlink";
+    import { onMount } from "svelte";
+
     import Modal from "../Modal.svelte";
 
-    let { options, fn, selected = $bindable() } = $props();
+    import type { DbWorker } from "$lib/workers/database.worker";
+    import { type Project } from "$lib/types/schema";
+
+    let { selected = $bindable() } = $props();
+
+    let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
+    let projects: Project[] = $state([]);
+
+    const loadWorker = async () => {
+        const Worker = await import("$lib/workers/database.worker?worker");
+        dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
+        await dbWorker.initWorker();
+        projects = await dbWorker.listProjects();
+    };
+
+    onMount(loadWorker);
+
     let modal: Modal | null = $state(null);
     let userInput = $state("");
     let selectedColor = $state("#3498db"); // Default color
 
-    let filteredOptions: { name: string; color: string }[] = $derived.by(() => {
+    let filteredOptions: Project[] = $derived.by(() => {
         if (userInput.length === 0) {
-            return options;
+            return projects;
         }
 
-        return $options.filter((option: { name: string; color: string }) =>
+        return projects.filter((option: { name: string; color: string }) =>
             option.name.toLowerCase().includes(userInput.toLowerCase()),
         );
     });
@@ -72,7 +91,16 @@
                 type="button"
                 class="btn btn-outline-success w-100 mt-2"
                 onclick={async () => {
-                    await fn(userInput, selectedColor);
+                    if (!dbWorker) {
+                        console.error("dbWorker not ready yet.");
+                        return;
+                    }
+
+                    projects = await dbWorker.addProject(
+                        userInput,
+                        selectedColor,
+                    );
+
                     modal?.closeModal();
                 }}>Create "{userInput}"</button
             >

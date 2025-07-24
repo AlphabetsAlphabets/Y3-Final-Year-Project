@@ -1,16 +1,35 @@
 <script lang="ts">
+    import * as Comlink from "comlink";
+    import { onMount } from "svelte";
+
     import Modal from "../Modal.svelte";
 
-    let { options, fn, selected = $bindable() } = $props();
+    import type { DbWorker } from "$lib/workers/database.worker";
+    import { type Activity } from "$lib/types/schema";
+
+    let { selected = $bindable() } = $props();
+
+    let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
+    let activities: Activity[] = $state([]);
+
+    const loadWorker = async () => {
+        const Worker = await import("$lib/workers/database.worker?worker");
+        dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
+        await dbWorker.initWorker();
+        activities = await dbWorker.listActivities();
+    };
+
+    onMount(loadWorker);
+
     let modal: Modal | null = $state(null);
     let userInput = $state("");
 
     let filteredOptions: { id: number; name: string }[] = $derived.by(() => {
         if (userInput.length === 0) {
-            return options;
+            return activities;
         }
 
-        return $options.filter((option: { id: number; name: string }) =>
+        return activities.filter((option: { id: number; name: string }) =>
             option.name.toLowerCase().includes(userInput.toLowerCase()),
         );
     });
@@ -24,7 +43,7 @@
         modal?.showModal();
     }}
 >
-    {userInput || "Activity"}
+    {selected}
 </button>
 <Modal bind:this={modal} title="Select an option">
     <input
@@ -41,7 +60,7 @@
                         type="button"
                         class="btn btn-outline-primary w-100"
                         onclick={() => {
-                            userInput = option.name;
+                            selected = option.name;
                             modal?.closeModal();
                         }}
                     >
@@ -55,8 +74,16 @@
         <button
             type="button"
             class="btn btn-outline-success w-100"
-            onclick={async () => await fn(userInput)}
-            >Create "{userInput}"</button
+            onclick={async () => {
+                if (!dbWorker) {
+                    console.error("dbWorker not ready yet.");
+                    return;
+                }
+
+                activities = await dbWorker.addActivity(userInput);
+                selected = userInput;
+                modal?.closeModal();
+            }}>Create "{userInput}"</button
         >
     {/if}
     <button

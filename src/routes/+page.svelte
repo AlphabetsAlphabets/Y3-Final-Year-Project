@@ -1,47 +1,33 @@
 <script lang="ts">
     import { onMount } from "svelte";
-
-    import Modal from "$lib/components/Modal.svelte";
-    import SelectModal from "$lib/components/derived/SelectModal.svelte";
-    import MessageModal from "$lib/components/derived/MessageModal.svelte";
-    import ProjectModal from "$lib/components/derived/ProjectModal.svelte";
-
-    import Timer from "$lib/components/Timer.svelte";
-    import { seconds } from "$lib/timer";
-
     import * as Comlink from "comlink";
 
-    import {
-        loadActivities,
-        loadProjects,
-        addProjects,
-        addActivity,
-        activites,
-        projects,
-        initWorker,
-    } from "$lib/database/services";
-    import { worker } from "$lib/workers/database.worker";
+    import Timer from "$lib/components/Timer.svelte";
+    import SelectModal from "$lib/components/derived/SelectModal.svelte";
 
-    let activity: string = $state("Activity");
-    let project: string = $state("Project");
+    import { seconds } from "$lib/timer";
 
-    let isPomodoro = $state(false);
+    // If there is an ep.EventListener error then the cause is this import statement.
+    // comlink requires the worker be exposed via Comlink.expose but importing this file
+    // runs that code and it may be ran BEFORE the worker is ready. Which causes
+    // the EventListener error.
+    import type { DbWorker } from "$lib/workers/database.worker";
+    import ProjectModal from "$lib/components/derived/ProjectModal.svelte";
 
-    let modal: Modal | null = $state(null);
+    let activity = $state("Activity");
+    let project = $state("Project");
+    let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
 
     const loadWorker = async () => {
-        await initWorker();
-        // This is here instead of database.worker.ts is because
-        // you can't expose without the worker being setup.
-        Comlink.expose(worker);
-        await loadActivities();
-        await loadProjects();
+        const Worker = await import("$lib/workers/database.worker?worker");
+        dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
+        await dbWorker.initWorker();
     };
 
     onMount(loadWorker);
-</script>
 
-<MessageModal bind:modal></MessageModal>
+    let isPomodoro = $state(false);
+</script>
 
 <div class="container-md py-4">
     <div class="settings-container">
@@ -49,13 +35,17 @@
             <img src="/gear.svg" alt="gear" />
         </button>
     </div>
-    {#key $activites || addActivity}
-        <SelectModal selected={activity} options={activites} fn={addActivity} />
-    {/key}
 
-    {#key $projects || addProjects}
-        <ProjectModal selected={project} options={projects} fn={addProjects} />
-    {/key}
+    {#if dbWorker}
+        {#key dbWorker}
+            <SelectModal selected={activity} />
+        {/key}
+        {#key dbWorker}
+            <ProjectModal selected={project} />
+        {/key}
+    {:else}
+        <p>Please wait while the app loads</p>
+    {/if}
 
     <form class="pt-4">
         <div class="mb-3">
