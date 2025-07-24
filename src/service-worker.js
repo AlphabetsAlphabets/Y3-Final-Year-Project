@@ -1,16 +1,23 @@
 /// <reference types="@sveltejs/kit" />
+/// <reference no-default-lib="true"/>
+/// <reference lib="esnext" />
+/// <reference lib="webworker" />
+// The stuff above is for type checking.
+// From https://svelte.dev/docs/kit/service-workers#Type-safety
+
 import { build, files, version, prerendered } from "$service-worker";
 
-// Create a unique cache name for this deployment
+// Creates a unique cache name every time there is an update
 const CACHE = `cache-${version}`;
 console.log(`Current version: ${CACHE}`);
 
 const ASSETS = [
   ...build, // the app itself
   ...files, // everything in `static`
-  ...prerendered,
+  ...prerendered, // all the prerendered stuff.
 ];
 
+// Installing the PWA onto the user's device
 self.addEventListener("install", (event) => {
   event.waitUntil(async () => {
     console.log("Cashing assets.");
@@ -21,6 +28,8 @@ self.addEventListener("install", (event) => {
 
 // TODO: This is from gemini, will need to vet through it.
 // https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Tutorials/CycleTracker/Service_workers
+// The code triggers when a new service worker is replacing an old one.
+// https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Tutorials/CycleTracker/Service_workers#updating_the_pwa_and_deleting_old_caches
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then(async (keys) => {
@@ -32,6 +41,9 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+// The "server" part. Helps with redirection, etc.
+// Took this directly from SvelteKit website.
+// site: https://svelte.dev/docs/kit/service-workers#Inside-the-service-worker
 self.addEventListener("fetch", (event) => {
   async function respond() {
     const url = new URL(event.request.url);
