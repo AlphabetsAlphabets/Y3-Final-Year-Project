@@ -17,20 +17,26 @@ const ASSETS = [
   ...prerendered, // all the prerendered stuff.
 ];
 
+// This fixes typing issues
+const sw = /** @type {ServiceWorkerGlobalScope} */ (
+  /** @type {unknown} */ (self)
+);
+
 // Installing the PWA onto the user's device
-self.addEventListener("install", (event) => {
-  event.waitUntil(async () => {
-    console.log("Cashing assets.");
-    const cache = await caches.open(CACHE);
-    await cache.addAll(ASSETS);
-  });
+sw.addEventListener("install", (event) => {
+  console.log("Assets: \n", ASSETS);
+
+  event.waitUntil(
+    (async () => {
+      console.log("Cashing assets.");
+      const cache = await caches.open(CACHE);
+      await cache.addAll(ASSETS);
+    })(),
+  );
 });
 
-// TODO: This is from gemini, will need to vet through it.
-// https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Tutorials/CycleTracker/Service_workers
-// The code triggers when a new service worker is replacing an old one.
-// https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Tutorials/CycleTracker/Service_workers#updating_the_pwa_and_deleting_old_caches
-self.addEventListener("activate", (event) => {
+// Delete old caches and all that is unsued.
+sw.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then(async (keys) => {
       // delete old caches
@@ -44,7 +50,9 @@ self.addEventListener("activate", (event) => {
 // The "server" part. Helps with redirection, etc.
 // Took this directly from SvelteKit website.
 // site: https://svelte.dev/docs/kit/service-workers#Inside-the-service-worker
-self.addEventListener("fetch", (event) => {
+sw.addEventListener("fetch", (event) => {
+  if (event.request.method !== "GET") return;
+
   async function respond() {
     const url = new URL(event.request.url);
     const cache = await caches.open(CACHE);
