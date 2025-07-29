@@ -6,8 +6,8 @@ export default defineConfig({
   plugins: [sveltekit()],
   server: {
     https: {
-      key: fs.readFileSync("localhost-key.pem"),
-      cert: fs.readFileSync("localhost.pem"),
+      key: fs.readFileSync("192.168.100.181+3-key.pem"),
+      cert: fs.readFileSync("192.168.100.181+3.pem"),
     },
     headers: {
       "Cross-Origin-Embedder-Policy": "require-corp",
