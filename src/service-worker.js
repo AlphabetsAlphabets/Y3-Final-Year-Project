@@ -1,4 +1,11 @@
 /// <reference types="@sveltejs/kit" />
+/// <reference no-default-lib="true"/>
+/// <reference lib="esnext" />
+/// <reference lib="webworker" />
+
+const sw = /** @type {ServiceWorkerGlobalScope} */ (
+  /** @type {unknown} */ (self)
+);
 import { build, files, version, prerendered } from "$service-worker";
 
 // Create a unique cache name for this deployment
@@ -11,7 +18,7 @@ const ASSETS = [
   ...prerendered,
 ];
 
-self.addEventListener("install", (event) => {
+sw.addEventListener("install", (event) => {
   event.waitUntil(async () => {
     console.log("Cashing assets.");
     const cache = await caches.open(CACHE);
@@ -21,7 +28,7 @@ self.addEventListener("install", (event) => {
 
 // TODO: This is from gemini, will need to vet through it.
 // https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Tutorials/CycleTracker/Service_workers
-self.addEventListener("activate", (event) => {
+sw.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then(async (keys) => {
       // delete old caches
@@ -32,7 +39,7 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-self.addEventListener("fetch", (event) => {
+sw.addEventListener("fetch", (event) => {
   async function respond() {
     const url = new URL(event.request.url);
     const cache = await caches.open(CACHE);
