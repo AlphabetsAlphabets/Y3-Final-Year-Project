@@ -39,8 +39,6 @@
     {#if dbWorker}
         {#key dbWorker}
             <SelectModal selected={activity} />
-        {/key}
-        {#key dbWorker}
             <ProjectModal selected={project} />
         {/key}
     {:else}
@@ -62,7 +60,14 @@
                 >
                     Pomodoro
                 </button>
-                <Timer elapsed={seconds} activity project />
+
+                {#if dbWorker}
+                    {#key dbWorker}
+                        <Timer elapsed={seconds} activity project />
+                    {/key}
+                {:else}
+                    <p>Please wait while the app loads</p>
+                {/if}
             </div>
         </div>
     </form>

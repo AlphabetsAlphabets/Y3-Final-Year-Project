@@ -1,4 +1,7 @@
 <script lang="ts">
+    import * as Comlink from "comlink";
+    import { onMount } from "svelte";
+
     import {
         pauseCountdown,
         resumeCountdown,
@@ -7,9 +10,20 @@
         TimerState,
     } from "$lib/timer";
 
+    import type { DbWorker } from "$lib/workers/database.worker";
+
     let { activity, project, elapsed = $bindable() } = $props();
 
     let timerState = $state(TimerState.Stopped);
+
+    let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
+    const loadWorker = async () => {
+        const Worker = await import("$lib/workers/database.worker?worker");
+        dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
+        await dbWorker.initWorker();
+    };
+
+    onMount(loadWorker);
 </script>
 
 {#if timerState === TimerState.Stopped}
@@ -51,7 +65,14 @@
             type="button"
             class="btn btn-outline-danger flex-grow-1"
             onclick={() => {
-                stopCountdown(activity, project);
+                if (activity.length === 0 || activity === "Activity") {
+                    console.error("No activity selected.");
+                    return;
+                }
+
+                let [start, end, finalSeconds] = stopCountdown();
+                // logEntry(activity, projectName, start, end, finalSeconds);
+
                 timerState = TimerState.Stopped;
             }}>Stop</button
         >

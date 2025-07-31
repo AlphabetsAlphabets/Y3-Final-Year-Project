@@ -29,12 +29,7 @@ export function startCountdown() {
   start = Date.now();
 }
 
-export function stopCountdown(activity: string, projectName: string) {
-  if (activity.length === 0 || activity === "Activity") {
-    console.error("No activity selected.");
-    return;
-  }
-
+export function stopCountdown(): [number, number, number] {
   if (id !== null) {
     clearInterval(id);
     id = null;
@@ -42,10 +37,11 @@ export function stopCountdown(activity: string, projectName: string) {
 
   const finalSeconds = get(seconds);
   end = Date.now();
-  // logEntry(activity, projectName, start, end, finalSeconds);
 
   seconds.set(0);
   is_paused = false;
+
+  return [start, end, finalSeconds];
 }
 
 export function pauseCountdown() {
