@@ -18,6 +18,10 @@ const config = {
       strict: true,
     }),
   },
+
+  paths: {
+    base: process.argv.includes("dev") ? "" : "/Y3-Final-Year-Project",
+  },
 };
 
 export default config;
