@@ -3,14 +3,6 @@
     let currentPage = $state("Home");
     let pages = [
         {
-            name: "Summary",
-            href: "/summary",
-        },
-        {
-            name: "Calendar",
-            href: "/calendar",
-        },
-        {
             name: "Home",
             href: "/",
         },
