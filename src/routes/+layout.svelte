@@ -1,7 +1,12 @@
 <script lang="ts">
+    import { page } from "$app/stores";
+
     let { children } = $props();
-    let currentPage = $state("Home");
     let pages = [
+        {
+            name: "Home",
+            href: "/",
+        },
         {
             name: "Summary",
             href: "/summary",
@@ -10,42 +15,40 @@
             name: "Calendar",
             href: "/calendar",
         },
-        {
-            name: "Home",
-            href: "/",
-        },
     ];
 
-    let setDropdownTitle = (name: string) => (currentPage = name);
+    /**
+     * Determines if a navigation link should be considered active.
+     * The "Home" link ("/") requires an exact match, while other links
+     * match if the current path starts with their href.
+     * @param href The link's destination
+     */
+    function isActive(href: string): boolean {
+        if (href === "/") {
+            return $page.url.pathname === "/";
+        }
+        return $page.url.pathname.startsWith(href);
+    }
 </script>
 
 {@render children()}
 
-<div
-    class="dropdown"
-    style="width: calc(100% - 40px); text-align: center; margin: 20px auto;"
->
-    <button
-        class="btn btn-secondary dropdown-toggle w-100"
-        type="button"
-        data-bs-toggle="dropdown"
-        aria-expanded="false"
-        style="display: flex; justify-content: center; align-items: center; height: 50px;"
-    >
-        {currentPage}
-    </button>
-    <ul class="dropdown-menu w-100">
-        {#each pages as page (page.href)}
-            {#if page.name !== currentPage}
-                <li>
-                    <a
-                        class="dropdown-item"
-                        href={page.href}
-                        onclick={() => setDropdownTitle(page.name)}
-                        >{page.name}</a
-                    >
-                </li>
-            {/if}
-        {/each}
-    </ul>
+<div class="container mt-4 fixed-bottom mb-3">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <ul class="nav nav-pills nav-fill justify-content-center">
+                {#each pages as p (p.href)}
+                    <li class="nav-item">
+                        <a
+                            class="nav-link {isActive(p.href) ? 'active' : ''}"
+                            aria-current={isActive(p.href) ? "page" : undefined}
+                            href={p.href}
+                        >
+                            {p.name}
+                        </a>
+                    </li>
+                {/each}
+            </ul>
+        </div>
+    </div>
 </div>
