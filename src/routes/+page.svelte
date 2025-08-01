@@ -66,7 +66,7 @@
                 </button>
 
                 {#if dbWorker}
-                    {#key dbWorker || projectColor}
+                    {#key dbWorker}
                         <Timer {activityName} {projectName} {projectColor} />
                     {/key}
                 {:else}

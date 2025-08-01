@@ -104,6 +104,9 @@
                         selectedColor,
                     );
 
+                    selected = userInput;
+                    color = selectedColor;
+
                     modal?.closeModal();
                 }}>Create "{userInput}"</button
             >
