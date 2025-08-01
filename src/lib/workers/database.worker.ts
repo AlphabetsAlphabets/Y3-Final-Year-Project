@@ -8,7 +8,7 @@ import {
   setupTables,
 } from "$lib/workers/commands";
 
-import type { Activity, Project } from "$lib/types/schema";
+import type { Activity as Log, Project } from "$lib/types/schema";
 
 const dbWorker = {
   async initWorker() {
@@ -20,10 +20,10 @@ const dbWorker = {
   insert,
   reset,
 
-  async listActivities(): Promise<Activity[]> {
+  async listActivities(): Promise<Log[]> {
     const response = await this.list("activity");
     console.log("Received activities from worker", response);
-    const list: Activity[] = [];
+    const list: Log[] = [];
     if (response && response.result && response.result.resultRows) {
       response.result.resultRows.forEach((value) => {
         // @ts-expect-error This will always be Activity
@@ -34,7 +34,7 @@ const dbWorker = {
     return list;
   },
 
-  async addActivity(name: string): Promise<Activity[]> {
+  async addActivity(name: string): Promise<Log[]> {
     await this.insert("activity", "name", `'${name}'`);
     return await this.listActivities();
   },
@@ -46,7 +46,7 @@ const dbWorker = {
     if (response && response.result && response.result.resultRows) {
       response.result.resultRows.forEach((value) => {
         // @ts-expect-error This will always be Project
-        list.push({ name: value[0], color: value[1] });
+        list.push({});
       });
     }
 
@@ -58,6 +58,20 @@ const dbWorker = {
     return await this.listProjects();
   },
 
+  async listLog() {
+    const response = await this.list("log");
+    console.log("Received logs from worker", response);
+    const list: Log[] = [];
+    if (response && response.result && response.result.resultRows) {
+      response.result.resultRows.forEach((value) => {
+        // @ts-expect-error This will always be Log
+        list.push({ id: value[0], name: value[1] });
+      });
+    }
+
+    return list;
+  },
+
   async addLog(
     name: string,
     projectName: string,
@@ -65,13 +79,14 @@ const dbWorker = {
     elapsed: number,
     start: number,
     end: number,
-  ): Promise<Project[]> {
+  ): Promise<Log[]> {
     await this.insert(
       "log",
       "activity, project_name, project_color, elapsed, start, end",
       `'${name}', '${projectName}', '${projectColor}', ${elapsed}, ${start}, ${end}`,
     );
-    return await this.listProjects();
+
+    return await this.listLog();
   },
 };
 
