@@ -46,7 +46,7 @@ const dbWorker = {
     if (response && response.result && response.result.resultRows) {
       response.result.resultRows.forEach((value) => {
         // @ts-expect-error This will always be Project
-        list.push({});
+        list.push({ name: value[0], color: value[1] });
       });
     }
 
