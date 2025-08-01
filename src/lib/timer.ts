@@ -8,8 +8,8 @@ export const TimerState = {
   Stopped: "Stopped",
 };
 
-let start = Date.now();
-let end = Date.now();
+let startDate = Date.now();
+let endDate = Date.now();
 
 let id: ReturnType<typeof setInterval> | null = null;
 let is_paused = false;
@@ -26,7 +26,7 @@ export function startCountdown() {
     }
   }, 1000);
 
-  start = Date.now();
+  startDate = Date.now();
 }
 
 export function stopCountdown(): [number, number, number] {
@@ -35,13 +35,13 @@ export function stopCountdown(): [number, number, number] {
     id = null;
   }
 
-  const finalSeconds = get(seconds);
-  end = Date.now();
+  const elapsed = get(seconds);
+  endDate = Date.now();
 
   seconds.set(0);
   is_paused = false;
 
-  return [start, end, finalSeconds];
+  return [startDate, endDate, elapsed];
 }
 
 export function pauseCountdown() {

@@ -11,7 +11,7 @@ export type Project = {
 export type Log = {
   id: number;
   activity: number;
-  project: string;
-  startTime: Date;
-  endTime: Date;
+  project: Project;
+  start: number;
+  end: number;
 };

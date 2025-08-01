@@ -57,6 +57,22 @@ const dbWorker = {
     await this.insert("project", "name, color", `'${name}', '${color}'`);
     return await this.listProjects();
   },
+
+  async addLog(
+    name: string,
+    projectName: string,
+    projectColor: string,
+    elapsed: number,
+    start: number,
+    end: number,
+  ): Promise<Project[]> {
+    await this.insert(
+      "log",
+      "activity, project_name, project_color, elapsed, start, end",
+      `'${name}', '${projectName}', '${projectColor}', ${elapsed}, ${start}, ${end}`,
+    );
+    return await this.listProjects();
+  },
 };
 
 export type DbWorker = typeof dbWorker;

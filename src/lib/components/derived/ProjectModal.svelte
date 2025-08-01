@@ -7,7 +7,7 @@
     import type { DbWorker } from "$lib/workers/database.worker";
     import { type Project } from "$lib/types/schema";
 
-    let { selected = $bindable() } = $props();
+    let { selected = $bindable(), color = $bindable() } = $props();
 
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
     let projects: Project[] = $state([]);
@@ -62,7 +62,10 @@
                         class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-between"
                         onclick={() => {
                             userInput = option.name;
+                            selected = userInput;
+
                             selectedColor = option.color;
+                            color = selectedColor;
                             modal?.closeModal();
                         }}
                     >

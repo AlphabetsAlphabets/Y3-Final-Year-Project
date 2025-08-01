@@ -14,8 +14,9 @@
     import type { DbWorker } from "$lib/workers/database.worker";
     import ProjectModal from "$lib/components/derived/ProjectModal.svelte";
 
-    let activity = $state("Activity");
-    let project = $state("Project");
+    let activityName: string = $state("Activity");
+    let projectName: string = $state("Project");
+    let projectColor: string = $state("");
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
 
     const loadWorker = async () => {
@@ -38,8 +39,11 @@
 
     {#if dbWorker}
         {#key dbWorker}
-            <SelectModal selected={activity} />
-            <ProjectModal selected={project} />
+            <SelectModal bind:selected={activityName} />
+            <ProjectModal
+                bind:selected={projectName}
+                bind:color={projectColor}
+            />
         {/key}
     {:else}
         <p>Please wait while the app loads</p>
@@ -62,8 +66,8 @@
                 </button>
 
                 {#if dbWorker}
-                    {#key dbWorker}
-                        <Timer elapsed={seconds} activity project />
+                    {#key dbWorker || projectColor}
+                        <Timer {activityName} {projectName} {projectColor} />
                     {/key}
                 {:else}
                     <p>Please wait while the app loads</p>

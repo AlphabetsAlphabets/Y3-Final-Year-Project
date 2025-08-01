@@ -12,7 +12,7 @@
 
     import type { DbWorker } from "$lib/workers/database.worker";
 
-    let { activity, project, elapsed = $bindable() } = $props();
+    let { activityName, projectName, projectColor } = $props();
 
     let timerState = $state(TimerState.Stopped);
 
@@ -64,14 +64,27 @@
         <button
             type="button"
             class="btn btn-outline-danger flex-grow-1"
-            onclick={() => {
-                if (activity.length === 0 || activity === "Activity") {
+            onclick={async () => {
+                if (activityName.length === 0 || activityName === "Activity") {
+                    console.log(activityName);
                     console.error("No activity selected.");
                     return;
                 }
 
-                let [start, end, finalSeconds] = stopCountdown();
-                // logEntry(activity, projectName, start, end, finalSeconds);
+                let [startDate, endDate, elapsed] = stopCountdown();
+                if (!dbWorker) {
+                    console.error("No database worker available.");
+                    return;
+                }
+
+                await dbWorker.addLog(
+                    activityName,
+                    projectName,
+                    projectColor,
+                    startDate,
+                    endDate,
+                    elapsed,
+                );
 
                 timerState = TimerState.Stopped;
             }}>Stop</button
