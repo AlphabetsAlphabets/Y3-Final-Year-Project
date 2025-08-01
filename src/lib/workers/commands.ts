@@ -63,10 +63,10 @@ export const setupTables = async () => {
         activity TEXT NOT NULL,
         project_name TEXT,
         project_color TEXT,
-        elasped INTEGER NOT NULL,
+        elapsed INTEGER NOT NULL,
         start INTEGER NOT NULL,
         end INTEGER NOT NULL,
-        FOREIGN KEY (project_name, project_color) REFERENCES project(name, color) ON UPDATE CASCADE
+        FOREIGN KEY (project_name) REFERENCES project(name) ON UPDATE CASCADE
       );
     `,
   });
