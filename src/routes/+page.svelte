@@ -30,110 +30,80 @@
     let isPomodoro = $state(false);
 </script>
 
-<div class="container-md py-4">
-    <div class="settings-container">
-        <button id="settings">
-            <img src="/gear.svg" alt="gear" />
-        </button>
-    </div>
-
-    {#if dbWorker}
-        {#key dbWorker}
-            <SelectModal bind:selected={activityName} />
-            <ProjectModal
-                bind:selected={projectName}
-                bind:color={projectColor}
-            />
-        {/key}
-    {:else}
-        <p>Please wait while the app loads</p>
-    {/if}
-
-    <form class="pt-4">
-        <div class="mb-3">
-            <div class="goal-container">
-                <span class="goal-label">Goal</span>
-                <input type="text" class="goal-input" />
-            </div>
-            <div class="mb-3">
-                <button
-                    type="button"
-                    class="btn pomodoro-btn w-100"
-                    class:active={isPomodoro}
-                    onclick={() => (isPomodoro = !isPomodoro)}
-                >
-                    Pomodoro
-                </button>
-
-                {#if dbWorker}
-                    {#key dbWorker}
-                        <Timer {activityName} {projectName} {projectColor} />
-                    {/key}
-                {:else}
-                    <p>Please wait while the app loads</p>
-                {/if}
-            </div>
-        </div>
-    </form>
-    <div class="timer-display-container">
-        <div class="timer-display">
-            <p>{$seconds}s</p>
-        </div>
-    </div>
+<div class="settings-container">
+    <button id="settings" class="btn btn-light rounded-circle p-2 lh-1">
+        <img src="/gear.svg" alt="gear" />
+    </button>
 </div>
+
+<main class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 text-center">
+            {#if dbWorker}
+                <form onsubmit={(e) => e.preventDefault()}>
+                    <div class="d-flex gap-2 mb-3">
+                        <div class="flex-grow-1">
+                            <SelectModal bind:selected={activityName} />
+                        </div>
+                        <div class="flex-grow-1">
+                            <ProjectModal
+                                bind:selected={projectName}
+                                bind:color={projectColor}
+                            />
+                        </div>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Goal</span>
+                        <input
+                            type="text"
+                            class="form-control"
+                            placeholder="What are you working on?"
+                        />
+                    </div>
+
+                    <div class="d-grid gap-2 mb-4">
+                        <button
+                            type="button"
+                            class="btn"
+                            class:btn-success={isPomodoro}
+                            class:btn-outline-success={!isPomodoro}
+                            onclick={() => (isPomodoro = !isPomodoro)}
+                        >
+                            Pomodoro
+                        </button>
+                    </div>
+
+                    <div class="display-1 fw-bold my-3">
+                        {$seconds}<span class="fs-4 align-text-top">s</span>
+                    </div>
+
+                    <Timer {activityName} {projectName} {projectColor} />
+                </form>
+            {:else}
+                <div class="d-flex flex-column align-items-center p-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3 mb-0">Please wait while the app loads</p>
+                </div>
+            {/if}
+        </div>
+    </div>
+</main>
 
 <style>
     .settings-container {
         position: fixed;
         top: 0;
         right: 0;
-        margin: 10px;
+        margin: 1rem;
+        z-index: 1050; /* Ensure it's above other content */
     }
 
-    .goal-container {
-        display: flex;
-        align-items: center;
-        margin: 10px 0;
-    }
-
-    .goal-label {
-        margin-right: 10px;
-    }
-
-    .goal-input {
-        flex-grow: 1;
-        border-radius: 15px;
-        background-color: white;
-        border: 2px solid lightblue;
-        padding: 5px;
-    }
-
-    .timer-display-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-top: 20px;
-    }
-
-    .timer-display {
-        width: 300px;
-        height: 100px;
-        border-radius: 15px;
-        background-color: #f0f0f0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .pomodoro-btn {
-        background-color: white;
-        border: 2px solid var(--bs-success);
-        color: var(--bs-success);
-    }
-
-    .pomodoro-btn.active,
-    .pomodoro-btn:hover {
-        background-color: var(--bs-success);
-        color: white;
+    /* Make the settings button icon a bit cleaner */
+    #settings img {
+        width: 1.5rem;
+        height: 1.5rem;
     }
 </style>
