@@ -10,8 +10,10 @@ export type Project = {
 
 export type Log = {
   id: number;
-  activity: number;
-  project: Project;
+  activity: string;
+  project_name: string;
+  project_color: string;
+  elapsed: number;
   start: number;
   end: number;
 };

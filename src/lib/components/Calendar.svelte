@@ -2,7 +2,7 @@
     import type { CalendarEvent } from "$lib/calendar";
     import { Calendar, Interaction, TimeGrid } from "@event-calendar/core";
 
-    let events: CalendarEvent[] = $state([]);
+    let { events }: { events: CalendarEvent[] } = $props();
 
     // What an event should look like for CalendarEvent
     // const event = {
@@ -18,5 +18,4 @@
     });
 </script>
 
-<p>Calendar</p>
 <Calendar plugins={[TimeGrid, Interaction]} {options} />

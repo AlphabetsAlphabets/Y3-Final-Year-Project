@@ -94,7 +94,7 @@ export const list = async (
 
   return await promiser("exec", {
     sql: query,
-    rowMode: "array",
+    rowMode: "object",
   });
 };
 

@@ -8,7 +8,7 @@ import {
   setupTables,
 } from "$lib/workers/commands";
 
-import type { Activity as Log, Project } from "$lib/types/schema";
+import type { Activity, Log, Project } from "$lib/types/schema";
 
 const dbWorker = {
   async initWorker() {
@@ -20,21 +20,13 @@ const dbWorker = {
   insert,
   reset,
 
-  async listActivities(): Promise<Log[]> {
+  async listActivities(): Promise<Activity[]> {
     const response = await this.list("activity");
-    console.log("Received activities from worker", response);
-    const list: Log[] = [];
-    if (response && response.result && response.result.resultRows) {
-      response.result.resultRows.forEach((value) => {
-        // @ts-expect-error This will always be Activity
-        list.push({ id: value[0], name: value[1] });
-      });
-    }
-
-    return list;
+    console.log("Received activities from worker.", response);
+    return (response?.result?.resultRows as Activity[]) || [];
   },
 
-  async addActivity(name: string): Promise<Log[]> {
+  async addActivity(name: string): Promise<Activity[]> {
     await this.insert("activity", "name", `'${name}'`);
     return await this.listActivities();
   },
@@ -42,15 +34,7 @@ const dbWorker = {
   async listProjects(): Promise<Project[]> {
     const response = await this.list("project");
     console.log("Received projects from worker", response);
-    const list: Project[] = [];
-    if (response && response.result && response.result.resultRows) {
-      response.result.resultRows.forEach((value) => {
-        // @ts-expect-error This will always be Project
-        list.push({ name: value[0], color: value[1] });
-      });
-    }
-
-    return list;
+    return (response?.result?.resultRows as Project[]) || [];
   },
 
   async addProject(name: string, color: string): Promise<Project[]> {
@@ -58,18 +42,13 @@ const dbWorker = {
     return await this.listProjects();
   },
 
-  async listLog() {
+  async listLog(): Promise<Log[]> {
     const response = await this.list("log");
     console.log("Received logs from worker", response);
-    const list: Log[] = [];
-    if (response && response.result && response.result.resultRows) {
-      response.result.resultRows.forEach((value) => {
-        // @ts-expect-error This will always be Log
-        list.push({ id: value[0], name: value[1] });
-      });
-    }
-
-    return list;
+    // Note: The `log` table stores `activity` as TEXT, but the `Log` type expects a number.
+    // This is an existing issue in the codebase. A direct cast here might lead to
+    // runtime errors if the rest of the application expects `activity` to be a number.
+    return (response?.result?.resultRows as Log[]) || [];
   },
 
   async addLog(
