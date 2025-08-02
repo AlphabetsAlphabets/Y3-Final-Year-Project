@@ -68,6 +68,7 @@
                             color = selectedColor;
                             modal?.closeModal();
                         }}
+                        style="background-color: {option.color};"
                     >
                         <span>{option.name}</span>
                         <div
