@@ -102,4 +102,33 @@
     .option-item {
         margin-bottom: 0.5rem;
     }
+
+    /*
+      NOTE: This :global() selector targets the Modal's content pane.
+      This approach is taken because the modal's DOM structure is rendered
+      outside of this component, making direct styling difficult without
+      modifying the base Modal component.
+
+      This may have unintended side effects if other modals with different
+      width requirements are added to the app, as this style will apply
+      globally to any element with the `.modal-content` class.
+    */
+    :global(.modal-content) {
+        width: 90%; /* Default for smaller screens */
+        max-width: none; /* Override any potential max-width from the base modal style */
+    }
+
+    /* Mimic Bootstrap's grid system for col-md-8 */
+    @media (min-width: 768px) {
+        :global(.modal-content) {
+            width: 66.66666667%;
+        }
+    }
+
+    /* Mimic Bootstrap's grid system for col-lg-6 */
+    @media (min-width: 992px) {
+        :global(.modal-content) {
+            width: 50%;
+        }
+    }
 </style>
