@@ -4,16 +4,19 @@
     let { children } = $props();
     let pages = [
         {
-            name: "Home",
-            href: "/",
-        },
-        {
             name: "Summary",
             href: "/summary",
+            icon: "bi-bar-chart-line",
+        },
+        {
+            name: "Home",
+            href: "/",
+            icon: "bi-house",
         },
         {
             name: "Calendar",
             href: "/calendar",
+            icon: "bi-calendar",
         },
     ];
 
@@ -31,6 +34,13 @@
     }
 </script>
 
+<svelte:head>
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+</svelte:head>
+
 {@render children()}
 
 <div class="container mt-4 fixed-bottom mb-3">
@@ -43,8 +53,14 @@
                             class="nav-link {isActive(p.href) ? 'active' : ''}"
                             aria-current={isActive(p.href) ? "page" : undefined}
                             href={p.href}
+                            title={p.name}
                         >
-                            {p.name}
+                            <i
+                                class="bi {p.icon}"
+                                style="font-size: 1.5rem;"
+                                aria-hidden="true"
+                            ></i>
+                            <span class="visually-hidden">{p.name}</span>
                         </a>
                     </li>
                 {/each}
