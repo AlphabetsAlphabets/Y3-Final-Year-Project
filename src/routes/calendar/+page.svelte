@@ -7,23 +7,34 @@
     import type { CalendarEvent } from "$lib/calendar";
 
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
-    let calendarEvents: Log[] = $state([]);
+    let calendarEvents: CalendarEvent[] = $state([]);
 
     const loadWorker = async () => {
         const Worker = await import("$lib/workers/database.worker?worker");
         dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
         await dbWorker.initWorker();
 
-        calendarEvents = await dbWorker.listLog();
-        console.log(calendarEvents);
+        let events: CalendarEvent[] = [];
+        (await dbWorker.listLog()).forEach((log) => {
+            events.push({
+                id: log.id,
+                title: log.activity,
+                start: new Date(log.start).toISOString(),
+                end: new Date(log.end).toISOString(),
+                backgroundColor: log.project_color,
+            });
+        });
+
+        calendarEvents = events;
     };
 
     onMount(loadWorker);
 </script>
 
 {#if dbWorker}
-    <p>Done</p>
-    <!-- <Calendar events={calendarEvents} /> -->
+    {#key calendarEvents}
+        <Calendar events={calendarEvents} />
+    {/key}
 {:else}
     <p>Please wait while the calendar loads</p>
 {/if}

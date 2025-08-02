@@ -4,15 +4,7 @@
 
     let { events }: { events: CalendarEvent[] } = $props();
 
-    // What an event should look like for CalendarEvent
-    // const event = {
-    //     id: log.id,
-    //     title: log.activity,
-    //     start: new Date(log.start).toISOString(),
-    //     end: new Date(log.end).toISOString(),
-    //     backgroundColor: log.project.color,
-    // };
-    let options = $derived({
+    let options = $state({
         view: "timeGridWeek",
         events: events,
     });
