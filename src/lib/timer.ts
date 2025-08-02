@@ -14,8 +14,6 @@ let endDate = Date.now();
 let id: ReturnType<typeof setInterval> | null = null;
 let is_paused = false;
 
-seconds.subscribe((value) => console.log(value));
-
 export function startCountdown() {
   is_paused = false;
   seconds.set(0);
