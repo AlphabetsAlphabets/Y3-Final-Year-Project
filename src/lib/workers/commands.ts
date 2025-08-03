@@ -62,7 +62,6 @@ export const setupTables = async () => {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         activity TEXT NOT NULL,
         project_name TEXT,
-        project_color TEXT,
         elapsed INTEGER NOT NULL,
         start INTEGER NOT NULL,
         end INTEGER NOT NULL,
@@ -113,6 +112,20 @@ export const insert = async (
   const query = `INSERT INTO ${table} (${columns}) VALUES (${values})`;
   console.log(query);
   await promiser("exec", {
+    sql: query,
+  });
+};
+
+export const update = async (
+  table: string,
+  setClause: string,
+  whereClause: string,
+) => {
+  isPromiserReady(promiser);
+
+  const query = `UPDATE ${table} SET ${setClause} WHERE ${whereClause}`;
+  console.log(query);
+  return await promiser("exec", {
     sql: query,
   });
 };

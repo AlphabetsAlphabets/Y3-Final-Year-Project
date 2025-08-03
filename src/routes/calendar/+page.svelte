@@ -48,7 +48,6 @@
         const newLogs = await dbWorker.addLog(
             activityName,
             projectName,
-            projectColor,
             elapsed,
             start,
             end,

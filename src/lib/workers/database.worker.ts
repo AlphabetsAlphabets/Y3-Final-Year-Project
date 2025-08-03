@@ -6,6 +6,7 @@ import {
   list,
   reset,
   setupTables,
+  update,
 } from "$lib/workers/commands";
 
 import type { Activity, Log, Project } from "$lib/types/schema";
@@ -45,27 +46,47 @@ const dbWorker = {
   async listLog(): Promise<Log[]> {
     const response = await this.list("log");
     console.log("Received logs from worker", response);
-    // Note: The `log` table stores `activity` as TEXT, but the `Log` type expects a number.
-    // This is an existing issue in the codebase. A direct cast here might lead to
-    // runtime errors if the rest of the application expects `activity` to be a number.
-    return (response?.result?.resultRows as Log[]) || [];
+    if (!(response && response.result && response.result.resultRows)) {
+      console.error("Something went wrong.");
+    }
+
+    const results = response.result.resultRows as Log[];
+    const logs = Promise.all(
+      results.map(async (log: Log) => {
+        // get the project name and query the project table
+        const color = await this.list(
+          "project",
+          "color",
+          `name = '${log.project_name}'`,
+        );
+
+        log.project_color = (color.result.resultRows[0] as Project).color;
+        return log;
+      }),
+    );
+
+    return logs || [];
   },
 
   async addLog(
     name: string,
     projectName: string,
-    projectColor: string,
     elapsed: number,
     start: number,
     end: number,
   ): Promise<Log[]> {
     await this.insert(
       "log",
-      "activity, project_name, project_color, elapsed, start, end",
-      `'${name}', '${projectName}', '${projectColor}', ${elapsed}, ${start}, ${end}`,
+      "activity, project_name, elapsed, start, end",
+      `'${name}', '${projectName}', ${elapsed}, ${start}, ${end}`,
     );
 
     return await this.listLog();
+  },
+
+  async updateProject(name: string, color: string) {
+    let res = await update("project", `color = '${color}'`, `name = '${name}'`);
+    console.log(res);
   },
 };
 
