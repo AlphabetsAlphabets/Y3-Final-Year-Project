@@ -1,0 +1,1 @@
+{"type":"data","nodes":[null,{"type":"data","data":[{"summaries":1},[2,5],{"name":3,"stats":4},"Studying",105,{"name":6,"stats":7},"Exercise",360],"uses":{}},null,{"type":"data","data":[{"activity":1},{"name":2,"stats":3},"Studying",105],"uses":{"params":["name"]}}]}
