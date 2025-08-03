@@ -7,7 +7,7 @@ export type Promiser = {
   (
     messageType: "exec",
     args: ExecArgs & { rowMode: "object" },
-  ): Promise<object[]>;
+  ): Promise<RowModeObject>;
   (messageType: "exec", args: ExecArgs): Promise<RowModeObject>;
 };
 

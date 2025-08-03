@@ -8,13 +8,11 @@ export const TimerState = {
   Stopped: "Stopped",
 };
 
-let start = Date.now();
-let end = Date.now();
+let startDate = Date.now();
+let endDate = Date.now();
 
 let id: ReturnType<typeof setInterval> | null = null;
 let is_paused = false;
-
-seconds.subscribe((value) => console.log(value));
 
 export function startCountdown() {
   is_paused = false;
@@ -26,26 +24,22 @@ export function startCountdown() {
     }
   }, 1000);
 
-  start = Date.now();
+  startDate = Date.now();
 }
 
-export function stopCountdown(activity: string, projectName: string) {
-  if (activity.length === 0 || activity === "Activity") {
-    console.error("No activity selected.");
-    return;
-  }
-
+export function stopCountdown(): [number, number, number] {
   if (id !== null) {
     clearInterval(id);
     id = null;
   }
 
-  const finalSeconds = get(seconds);
-  end = Date.now();
-  // logEntry(activity, projectName, start, end, finalSeconds);
+  const elapsed = get(seconds);
+  endDate = Date.now();
 
   seconds.set(0);
   is_paused = false;
+
+  return [startDate, endDate, elapsed];
 }
 
 export function pauseCountdown() {

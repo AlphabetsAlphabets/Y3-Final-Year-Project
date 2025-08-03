@@ -6,9 +6,10 @@ import {
   list,
   reset,
   setupTables,
+  update,
 } from "$lib/workers/commands";
 
-import type { Activity, Project } from "$lib/types/schema";
+import type { Activity, Log, Project } from "$lib/types/schema";
 
 const dbWorker = {
   async initWorker() {
@@ -22,16 +23,8 @@ const dbWorker = {
 
   async listActivities(): Promise<Activity[]> {
     const response = await this.list("activity");
-    console.log("Received activities from worker", response);
-    const list: Activity[] = [];
-    if (response && response.result && response.result.resultRows) {
-      response.result.resultRows.forEach((value) => {
-        // @ts-expect-error This will always be Activity
-        list.push({ id: value[0], name: value[1] });
-      });
-    }
-
-    return list;
+    console.log("Received activities from worker.", response);
+    return (response?.result?.resultRows as Activity[]) || [];
   },
 
   async addActivity(name: string): Promise<Activity[]> {
@@ -42,20 +35,58 @@ const dbWorker = {
   async listProjects(): Promise<Project[]> {
     const response = await this.list("project");
     console.log("Received projects from worker", response);
-    const list: Project[] = [];
-    if (response && response.result && response.result.resultRows) {
-      response.result.resultRows.forEach((value) => {
-        // @ts-expect-error This will always be Project
-        list.push({ name: value[0], color: value[1] });
-      });
-    }
-
-    return list;
+    return (response?.result?.resultRows as Project[]) || [];
   },
 
   async addProject(name: string, color: string): Promise<Project[]> {
     await this.insert("project", "name, color", `'${name}', '${color}'`);
     return await this.listProjects();
+  },
+
+  async listLog(): Promise<Log[]> {
+    const response = await this.list("log");
+    console.log("Received logs from worker", response);
+    if (!(response && response.result && response.result.resultRows)) {
+      console.error("Something went wrong.");
+    }
+
+    const results = response.result.resultRows as Log[];
+    const logs = Promise.all(
+      results.map(async (log: Log) => {
+        // get the project name and query the project table
+        const color = await this.list(
+          "project",
+          "color",
+          `name = '${log.project_name}'`,
+        );
+
+        log.project_color = (color.result.resultRows[0] as Project).color;
+        return log;
+      }),
+    );
+
+    return logs || [];
+  },
+
+  async addLog(
+    name: string,
+    projectName: string,
+    elapsed: number,
+    start: number,
+    end: number,
+  ): Promise<Log[]> {
+    await this.insert(
+      "log",
+      "activity, project_name, elapsed, start, end",
+      `'${name}', '${projectName}', ${elapsed}, ${start}, ${end}`,
+    );
+
+    return await this.listLog();
+  },
+
+  async updateProject(name: string, color: string) {
+    let res = await update("project", `color = '${color}'`, `name = '${name}'`);
+    console.log(res);
   },
 };
 

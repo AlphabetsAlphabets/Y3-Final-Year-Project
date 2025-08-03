@@ -7,7 +7,7 @@
     import type { DbWorker } from "$lib/workers/database.worker";
     import { type Project } from "$lib/types/schema";
 
-    let { selected = $bindable() } = $props();
+    let { selected = $bindable(), color = $bindable() } = $props();
 
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
     let projects: Project[] = $state([]);
@@ -57,22 +57,40 @@
         <ul class="options-list">
             {#each filteredOptions as option (option.name)}
                 <li class="option-item">
-                    <button
-                        type="button"
-                        class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-between"
-                        onclick={() => {
-                            userInput = option.name;
-                            selectedColor = option.color;
-                            modal?.closeModal();
-                        }}
-                    >
-                        <span>{option.name}</span>
-                        <div
-                            class="color-preview"
-                            style="background-color: {option.color ||
-                                '#CCCCCC'}"
-                        ></div>
-                    </button>
+                    <div class="d-flex">
+                        <button
+                            type="button"
+                            class="btn btn-outline-primary w-100 d-flex p-0"
+                            onclick={() => {
+                                userInput = option.name;
+                                selected = userInput;
+
+                                selectedColor = option.color;
+                                color = selectedColor;
+                                modal?.closeModal();
+                            }}
+                        >
+                            <span class="project-name">{option.name}</span>
+                        </button>
+                        <input
+                            type="color"
+                            class="form-control form-control-color"
+                            bind:value={option.color}
+                            onchange={async () => {
+                                if (!dbWorker) {
+                                    console.error("Worker not ready.");
+                                    return;
+                                }
+
+                                await dbWorker?.updateProject(
+                                    option.name,
+                                    option.color,
+                                );
+                                projects = await dbWorker.listProjects();
+                            }}
+                            title="Choose project color"
+                        />
+                    </div>
                 </li>
             {/each}
         </ul>
@@ -101,6 +119,9 @@
                         selectedColor,
                     );
 
+                    selected = userInput;
+                    color = selectedColor;
+
                     modal?.closeModal();
                 }}>Create "{userInput}"</button
             >
@@ -121,6 +142,31 @@
 
     .option-item {
         margin-bottom: 0.5rem;
+    }
+
+    .option-item .btn {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    .option-item .form-control-color {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        width: 50px; /* Adjust width as needed */
+    }
+
+    .project-name {
+        width: 75%;
+        padding: 0.375rem 0.75rem;
+        text-align: left;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .color-preview {
+        width: 25%;
+        min-height: 100%;
     }
 
     .new-project-section {
