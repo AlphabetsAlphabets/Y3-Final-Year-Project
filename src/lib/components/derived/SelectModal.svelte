@@ -45,11 +45,11 @@
 >
     {selected}
 </button>
-<Modal bind:this={modal} title="Select an option">
+<Modal bind:this={modal} title="Select an activity">
     <input
         type="text"
         class="form-control mb-3"
-        placeholder="Type to search..."
+        placeholder="Name of an activity. Reading, writing, etc."
         bind:value={userInput}
     />
     {#if filteredOptions.length > 0 || userInput === ""}
