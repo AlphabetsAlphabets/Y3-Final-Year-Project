@@ -8,24 +8,19 @@
     let { events }: { events: CalendarEvent[] } = $props();
 
     let modal: Modal | null = $state(null);
-    let message = $state("");
+    let event: CalendarEvent | undefined = $state();
 
     let options = $state({
         view: "timeGridWeek",
         events: events,
         eventDidMount: function (arg) {
             arg.el.addEventListener("click", () => {
-                message = "Goodbye";
+                event = arg.event;
                 modal?.showModal();
             });
         },
     });
 </script>
 
-<ContextMenuModal
-    bind:modal
-    title="Edit event"
-    {message}
-    type="message-modal-ok"
-/>
+<ContextMenuModal bind:modal {event} />
 <Calendar plugins={[TimeGrid, Interaction]} {options} />
