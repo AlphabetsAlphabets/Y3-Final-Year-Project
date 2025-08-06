@@ -22,5 +22,5 @@
     });
 </script>
 
-<ContextMenuModal bind:modal {event} />
+<ContextMenuModal bind:modal bind:event />
 <Calendar plugins={[TimeGrid, Interaction]} {options} />

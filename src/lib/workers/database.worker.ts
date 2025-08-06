@@ -85,7 +85,16 @@ const dbWorker = {
   },
 
   async updateProject(name: string, color: string) {
-    let res = await update("project", `color = '${color}'`, `name = '${name}'`);
+    const res = await update(
+      "project",
+      `color = '${color}'`,
+      `name = '${name}'`,
+    );
+    console.log(res);
+  },
+
+  async updateLog(toUpdate: string, clause: string) {
+    const res = await update("log", toUpdate, clause);
     console.log(res);
   },
 };
