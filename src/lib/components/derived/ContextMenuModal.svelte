@@ -17,11 +17,6 @@
 
     onMount(loadWorker);
 
-    let newTitle = $state("");
-    let newColor = $state("");
-    let newStartTime = $state(new Date());
-    let newEndTime = $state(new Date());
-
     function formatDateForInput(date: Date): string {
         const year = date.getFullYear();
         const month = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -31,34 +26,35 @@
         return `${year}-${month}-${day}T${hours}:${minutes}`;
     }
 
+    let newTitle = $state("");
+    let newColor = $state("");
+    let newStartTime: Date | null = $state(null);
+    let newEndTime: Date | null = $state(null);
+
     let clause: string[] = [];
     let toUpdate: string[] = [];
 
-    async function handleTitleAndColorChange() {
-        // Only update if title or color isn't empty string.
+    async function updateEventTitle() {
         let titleChanged = newTitle.length != 0;
-        let colorChanged = newColor.length != 0;
-
-        if (titleChanged || colorChanged) {
-            // Update only if it is different
-            if (newTitle != event.title || newColor != event.color) {
-                // This is wrong. I am updating the event name. Which is the activity name.
-                // I need a separate update project section.
-                // await dbWorker?.updateProject(newTitle, newColor);
-            }
-
-            // If title changed, we need to find the log with the newly updated title.
-            // Nothing for color because color info isn't tracked in the log table.
-            if (titleChanged) {
-                clause.push(`title = '${newTitle}'`);
-            }
+        if (titleChanged && newTitle !== event.title) {
+            clause.push(`title = '${newTitle}'`);
+            toUpdate.push(`title = '${event.title}'`);
         }
     }
 
-    async function handleTimeChange() {
-        let startTimeChanged = newStartTime !== event.startTime;
-        let endTimeChanged = newEndTime !== event.endTime;
+    async function updateEventColor() {
+        let colorChanged = newColor.length != 0;
+
+        if (colorChanged && newColor != event.color) {
+            // This is wrong. I am updating the event name. Which is the activity name.
+        }
+    }
+
+    async function updateEventTime() {
         let newElapsed = 0;
+
+        let startTimeChanged = newStartTime && newStartTime !== event.startTime;
+        let endTimeChanged = newEndTime && newEndTime !== event.endTime;
 
         if (startTimeChanged && endTimeChanged) {
             newElapsed = newEndTime.getTime() - newStartTime.getTime();
@@ -69,12 +65,12 @@
         }
 
         if (startTimeChanged) {
-            clause.push(`start = ${event.start.getTime()}`); // original value
+            clause.push(`id = ${event.id}`); // original value
             toUpdate.push(`start = ${newStartTime.getTime()}`); // new value
         }
 
         if (endTimeChanged) {
-            clause.push(`end = ${event.end.getTime()}`);
+            clause.push(`id = ${event.id}`); // original value
             toUpdate.push(`end = ${newEndTime.getTime()}`);
         }
 
@@ -83,34 +79,39 @@
         }
     }
 
-    async function handleConfirm() {
+    async function handleActivityUpdate() {
         if (!dbWorker) {
             console.error("Worker in context menu not ready.");
             return;
         }
 
-        console.log("Start: ", event.start.toISOString());
-        console.log("End: ", event.end.toISOString());
-
-        // await handleTitleAndColorChange();
-        await handleTimeChange();
+        // await updateEventTitle();
+        // await updateEventColor();
+        await updateEventTime();
 
         let finalClause = clause.join(" AND ");
         let finalToUpdate = toUpdate.join(", ");
 
         console.log("Final clause: ", finalClause);
         console.log("Final update: ", finalToUpdate);
-        // await dbWorker.updateLog(finalToUpdate, finalClause);
+        await dbWorker.updateLog(finalToUpdate, finalClause);
 
         modal.closeModal();
     }
 </script>
 
 <Modal bind:this={modal} title="Edit Event">
-    <form onsubmit={handleConfirm}>
+    <form onsubmit={handleActivityUpdate}>
         <div class="form-grid">
             <label for="title">Title</label>
-            <input id="title" type="text" bind:value={event.title} />
+            <input
+                id="title"
+                type="text"
+                value={event.title}
+                oninput={(e) => {
+                    newTitle = e.currentTarget.value;
+                }}
+            />
 
             <label for="start">Start time</label>
             <input
