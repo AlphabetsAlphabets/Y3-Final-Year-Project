@@ -19,10 +19,17 @@
 
     let newTitle = $state("");
     let newColor = $state("");
-    // TODO: These should be numbers
-    // TEST THIS TOO
     let newStartTime = $state(new Date());
     let newEndTime = $state(new Date());
+
+    function formatDateForInput(date: Date): string {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, "0");
+        const day = date.getDate().toString().padStart(2, "0");
+        const hours = date.getHours().toString().padStart(2, "0");
+        const minutes = date.getMinutes().toString().padStart(2, "0");
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
 
     let clause: string[] = [];
     let toUpdate: string[] = [];
@@ -35,8 +42,9 @@
         if (titleChanged || colorChanged) {
             // Update only if it is different
             if (newTitle != event.title || newColor != event.color) {
-                await dbWorker?.updateProject(newTitle, newColor);
-                return;
+                // This is wrong. I am updating the event name. Which is the activity name.
+                // I need a separate update project section.
+                // await dbWorker?.updateProject(newTitle, newColor);
             }
 
             // If title changed, we need to find the log with the newly updated title.
@@ -53,21 +61,21 @@
         let newElapsed = 0;
 
         if (startTimeChanged && endTimeChanged) {
-            newElapsed = newEndTime - newStartTime;
+            newElapsed = newEndTime.getTime() - newStartTime.getTime();
         } else if (startTimeChanged) {
-            newElapsed = event.endTime - newStartTime;
+            newElapsed = event.end - newStartTime.getTime();
         } else if (endTimeChanged) {
-            newElapsed = newEndTime - event.startTime;
+            newElapsed = newEndTime.getTime() - event.start;
         }
 
         if (startTimeChanged) {
-            toUpdate.push(`start = ${newStartTime}`); // new value
-            clause.push(`start = ${event.startTime}`); // original value
+            clause.push(`start = ${event.start.getTime()}`); // original value
+            toUpdate.push(`start = ${newStartTime.getTime()}`); // new value
         }
 
         if (endTimeChanged) {
-            toUpdate.push(`end = ${newEndTime}`);
-            clause.push(`end = ${event.endTime}`);
+            clause.push(`end = ${event.end.getTime()}`);
+            toUpdate.push(`end = ${newEndTime.getTime()}`);
         }
 
         if (newElapsed !== 0) {
@@ -81,12 +89,18 @@
             return;
         }
 
-        await handleTitleAndColorChange();
+        console.log("Start: ", event.start.toISOString());
+        console.log("End: ", event.end.toISOString());
+
+        // await handleTitleAndColorChange();
         await handleTimeChange();
 
         let finalClause = clause.join(" AND ");
         let finalToUpdate = toUpdate.join(", ");
-        await dbWorker.updateLog(finalToUpdate, finalClause);
+
+        console.log("Final clause: ", finalClause);
+        console.log("Final update: ", finalToUpdate);
+        // await dbWorker.updateLog(finalToUpdate, finalClause);
 
         modal.closeModal();
     }
@@ -102,8 +116,9 @@
             <input
                 id="start"
                 type="datetime-local"
+                value={formatDateForInput(event.start)}
                 oninput={(e) => {
-                    if (event) newStartTime = new Date(e.currentTarget.value);
+                    newStartTime = new Date(e.currentTarget.value);
                 }}
             />
 
@@ -111,8 +126,9 @@
             <input
                 id="end"
                 type="datetime-local"
+                value={formatDateForInput(event.end)}
                 oninput={(e) => {
-                    if (event) newEndTime = new Date(e.currentTarget.value);
+                    newEndTime = new Date(e.currentTarget.value);
                 }}
             />
 
