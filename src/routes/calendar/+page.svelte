@@ -33,32 +33,87 @@
     const addTestLog = async () => {
         if (!dbWorker) return;
 
-        const activityName = "TEST";
-        const projectName = "TEST";
-        const projectColor = "hotpink";
+        const projects = {
+            Relaxing: "green",
+            Work: "blue",
+        };
 
-        await dbWorker.addActivity(activityName);
-        await dbWorker.addProject(projectName, projectColor);
+        const activities = [
+            { name: "Reading", project: "Relaxing" },
+            { name: "Gaming", project: "Relaxing" },
+            { name: "FYP", project: "Work" },
+        ];
 
-        const start = Date.now();
-        const twoHoursInMillis = 2 * 60 * 60 * 1000;
-        const end = start + twoHoursInMillis;
-        const elapsed = twoHoursInMillis;
-
-        const newLogs = await dbWorker.addLog(
-            activityName,
-            projectName,
-            elapsed,
-            start,
-            end,
+        const existingProjects = await dbWorker.listProjects();
+        const existingProjectNames = new Set(
+            existingProjects.map((p) => p.name),
         );
 
-        calendarEvents = mapLogsToEvents(newLogs);
+        for (const [projectName, projectColor] of Object.entries(projects)) {
+            if (!existingProjectNames.has(projectName)) {
+                await dbWorker.addProject(projectName, projectColor);
+            }
+        }
+
+        const existingActivities = await dbWorker.listActivities();
+        const existingActivityNames = new Set(
+            existingActivities.map((a) => a.name),
+        );
+
+        for (const activity of activities) {
+            if (!existingActivityNames.has(activity.name)) {
+                await dbWorker.addActivity(activity.name);
+            }
+        }
+
+        const now = Date.now();
+        const twoHoursInMillis = 2 * 60 * 60 * 1000;
+
+        const logsToAdd = [
+            {
+                activityName: "Reading",
+                projectName: "Relaxing",
+                start: now,
+                end: now + twoHoursInMillis,
+            },
+            {
+                activityName: "FYP",
+                projectName: "Work",
+                start: now + twoHoursInMillis,
+                end: now + 2 * twoHoursInMillis,
+            },
+            {
+                activityName: "Gaming",
+                projectName: "Relaxing",
+                start: now - 3 * 60 * 60 * 1000,
+                end: now - 3 * 60 * 60 * 1000 + twoHoursInMillis,
+            },
+        ];
+
+        for (const log of logsToAdd) {
+            await dbWorker.addLog(
+                log.activityName,
+                log.projectName,
+                log.end - log.start,
+                log.start,
+                log.end,
+            );
+        }
+
+        calendarEvents = mapLogsToEvents(await dbWorker.listLog());
+    };
+
+    const listReadingLogs = async () => {
+        if (!dbWorker) return;
+
+        const readingLogs = await dbWorker.listLogsByActivity("Reading");
+        console.log("Reading logs:", readingLogs);
     };
 </script>
 
 {#if dbWorker}
     <button onclick={addTestLog}> Add test log </button>
+    <button onclick={listReadingLogs}> List Reading Logs </button>
     {#key calendarEvents}
         <Calendar events={calendarEvents} />
     {/key}

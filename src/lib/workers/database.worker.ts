@@ -68,6 +68,39 @@ const dbWorker = {
     return logs || [];
   },
 
+  async listLogsByActivity(activityName: string): Promise<Log[]> {
+    const response = await this.list(
+      "log",
+      "*",
+      `activity = '${activityName}'`,
+    );
+    console.log(
+      `Received logs for activity ${activityName} from worker`,
+      response,
+    );
+    if (!(response && response.result && response.result.resultRows)) {
+      console.error("Something went wrong.");
+      return [];
+    }
+
+    const results = response.result.resultRows as Log[];
+    const logs = Promise.all(
+      results.map(async (log: Log) => {
+        // get the project name and query the project table
+        const color = await this.list(
+          "project",
+          "color",
+          `name = '${log.project_name}'`,
+        );
+
+        log.project_color = (color.result.resultRows[0] as Project).color;
+        return log;
+      }),
+    );
+
+    return logs || [];
+  },
+
   async addLog(
     name: string,
     projectName: string,
