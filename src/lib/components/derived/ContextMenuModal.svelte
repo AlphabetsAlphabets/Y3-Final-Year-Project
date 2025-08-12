@@ -1,6 +1,6 @@
 <script lang="ts">
     import * as Comlink from "comlink";
-    import { onMount } from "svelte";
+    import { createEventDispatcher, onMount } from "svelte";
 
     import type { DbWorker } from "$lib/workers/database.worker";
 
@@ -8,6 +8,8 @@
 
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
     let { modal = $bindable(), event = $bindable() } = $props();
+
+    const dispatch = createEventDispatcher();
 
     const loadWorker = async () => {
         const Worker = await import("$lib/workers/database.worker?worker");
@@ -51,32 +53,37 @@
     }
 
     async function updateEventTime() {
-        let newElapsed = 0;
+        const startTimeChanged =
+            newStartTime && newStartTime.getTime() !== event.start.getTime();
+        const endTimeChanged =
+            newEndTime && newEndTime.getTime() !== event.end.getTime();
 
-        let startTimeChanged = newStartTime && newStartTime !== event.startTime;
-        let endTimeChanged = newEndTime && newEndTime !== event.endTime;
-
-        if (startTimeChanged && endTimeChanged) {
-            newElapsed = newEndTime.getTime() - newStartTime.getTime();
-        } else if (startTimeChanged) {
-            newElapsed = event.end - newStartTime.getTime();
-        } else if (endTimeChanged) {
-            newElapsed = newEndTime.getTime() - event.start;
+        if (!startTimeChanged && !endTimeChanged) {
+            return;
         }
 
+        const finalStartTime = startTimeChanged ? newStartTime : event.start;
+        const finalEndTime = endTimeChanged ? newEndTime : event.end;
+
+        if (finalStartTime.getTime() >= finalEndTime.getTime()) {
+            console.error("Start time must be before end time.");
+            // NOTE: You might want to show this error to the user in the UI
+            return;
+        }
+
+        const newElapsed = finalEndTime.getTime() - finalStartTime.getTime();
+
+        clause.push(`id = ${event.id}`);
+
         if (startTimeChanged) {
-            clause.push(`id = ${event.id}`); // original value
-            toUpdate.push(`start = ${newStartTime.getTime()}`); // new value
+            toUpdate.push(`start = ${finalStartTime.getTime()}`);
         }
 
         if (endTimeChanged) {
-            clause.push(`id = ${event.id}`); // original value
-            toUpdate.push(`end = ${newEndTime.getTime()}`);
+            toUpdate.push(`end = ${finalEndTime.getTime()}`);
         }
 
-        if (newElapsed !== 0) {
-            toUpdate.push(`elapsed = ${newElapsed}`);
-        }
+        toUpdate.push(`elapsed = ${newElapsed}`);
     }
 
     async function handleActivityUpdate() {
@@ -85,9 +92,18 @@
             return;
         }
 
+        // Reset arrays
+        clause = [];
+        toUpdate = [];
+
         // await updateEventTitle();
         // await updateEventColor();
         await updateEventTime();
+
+        if (toUpdate.length === 0) {
+            modal.closeModal();
+            return;
+        }
 
         let finalClause = clause.join(" AND ");
         let finalToUpdate = toUpdate.join(", ");
@@ -96,6 +112,7 @@
         console.log("Final update: ", finalToUpdate);
         await dbWorker.updateLog(finalToUpdate, finalClause);
 
+        dispatch("eventupdated");
         modal.closeModal();
     }
 </script>

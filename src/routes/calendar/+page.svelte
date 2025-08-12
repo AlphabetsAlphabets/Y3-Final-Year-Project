@@ -20,12 +20,17 @@
         }));
     };
 
+    async function refreshCalendar() {
+        if (!dbWorker) return;
+        calendarEvents = mapLogsToEvents(await dbWorker.listLog());
+    }
+
     const loadWorker = async () => {
         const Worker = await import("$lib/workers/database.worker?worker");
         dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
         await dbWorker.initWorker();
 
-        calendarEvents = mapLogsToEvents(await dbWorker.listLog());
+        await refreshCalendar();
     };
 
     onMount(loadWorker);
@@ -100,7 +105,7 @@
             );
         }
 
-        calendarEvents = mapLogsToEvents(await dbWorker.listLog());
+        await refreshCalendar();
     };
 
     const listReadingLogs = async () => {
@@ -115,7 +120,7 @@
     <button onclick={addTestLog}> Add test log </button>
     <button onclick={listReadingLogs}> List Reading Logs </button>
     {#key calendarEvents}
-        <Calendar events={calendarEvents} />
+        <Calendar events={calendarEvents} on:eventupdated={refreshCalendar} />
     {/key}
 {:else}
     <p>Please wait while the calendar loads</p>

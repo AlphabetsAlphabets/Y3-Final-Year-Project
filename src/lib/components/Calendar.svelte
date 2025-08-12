@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { CalendarEvent } from "$lib/calendar";
     import { Calendar, Interaction, TimeGrid } from "@event-calendar/core";
+    import { createEventDispatcher } from "svelte";
 
     import Modal from "./Modal.svelte";
     import ContextMenuModal from "./derived/ContextMenuModal.svelte";
@@ -9,6 +10,7 @@
 
     let modal: Modal | null = $state(null);
     let event: CalendarEvent | undefined = $state();
+    const dispatch = createEventDispatcher();
 
     let options = $state({
         view: "timeGridWeek",
@@ -22,5 +24,9 @@
     });
 </script>
 
-<ContextMenuModal bind:modal bind:event />
+<ContextMenuModal
+    bind:modal
+    bind:event
+    on:eventupdated={() => dispatch("eventupdated")}
+/>
 <Calendar plugins={[TimeGrid, Interaction]} {options} />
