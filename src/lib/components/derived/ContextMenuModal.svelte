@@ -5,6 +5,12 @@
     import type { DbWorker } from "$lib/workers/database.worker";
 
     import Modal from "../Modal.svelte";
+    import {
+        formatDateForInput,
+        updateEventColor,
+        updateEventTime,
+        updateEventTitle,
+    } from "$lib/calendar";
 
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
     let { modal = $bindable(), event = $bindable() } = $props();
@@ -19,82 +25,10 @@
 
     onMount(loadWorker);
 
-    function formatDateForInput(date: Date): string {
-        const year = date.getFullYear();
-        const month = (date.getMonth() + 1).toString().padStart(2, "0");
-        const day = date.getDate().toString().padStart(2, "0");
-        const hours = date.getHours().toString().padStart(2, "0");
-        const minutes = date.getMinutes().toString().padStart(2, "0");
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
-    }
-
     let newTitle = $state("");
     let newColor = $state("");
     let newStartTime: Date | null = $state(null);
     let newEndTime: Date | null = $state(null);
-
-    let clause: string[] = [];
-    let toUpdate: string[] = [];
-
-    async function updateEventTitle() {
-        const titleChanged = newTitle.length > 0 && newTitle !== event.title;
-        if (titleChanged) {
-            toUpdate.push(`activity = '${newTitle}'`);
-        }
-    }
-
-    async function updateEventColor() {
-        const colorChanged =
-            newColor.length !== 0 && newColor !== event.backgroundColor;
-        // nothing to do
-        if (!colorChanged) return;
-
-        if (colorChanged && dbWorker) {
-            console.log("New color:", newColor);
-            console.log("old color:", event.backgroundColor);
-            await dbWorker.update(
-                "project",
-                `color = '${newColor}'`,
-                `color = '${event.backgroundColor}'`,
-            );
-        }
-    }
-
-    async function updateEventTime() {
-        const startTimeChanged =
-            newStartTime &&
-            newStartTime.getTime() !== new Date(event.start).getTime();
-        const endTimeChanged =
-            newEndTime &&
-            newEndTime.getTime() !== new Date(event.end).getTime();
-
-        if (!startTimeChanged && !endTimeChanged) {
-            return;
-        }
-
-        const finalStartTime = startTimeChanged
-            ? newStartTime
-            : new Date(event.start);
-        const finalEndTime = endTimeChanged ? newEndTime : new Date(event.end);
-
-        if (finalStartTime.getTime() >= finalEndTime.getTime()) {
-            console.error("Start time must be before end time.");
-            // NOTE: You might want to show this error to the user in the UI
-            return;
-        }
-
-        const newElapsed = finalEndTime.getTime() - finalStartTime.getTime();
-
-        if (startTimeChanged) {
-            toUpdate.push(`start = ${finalStartTime.getTime()}`);
-        }
-
-        if (endTimeChanged) {
-            toUpdate.push(`end = ${finalEndTime.getTime()}`);
-        }
-
-        toUpdate.push(`elapsed = ${newElapsed}`);
-    }
 
     async function handleActivityUpdate() {
         if (!dbWorker) {
@@ -102,13 +36,22 @@
             return;
         }
 
-        // Reset arrays
-        clause = [];
-        toUpdate = [];
+        let toUpdate: string[] = [];
 
-        await updateEventTitle();
-        await updateEventTime();
-        await updateEventColor();
+        let updateTitle = await updateEventTitle(newTitle, event);
+        toUpdate.push(...updateTitle);
+
+        let updateTimeQuery = await updateEventTime(
+            newStartTime,
+            newEndTime,
+            event,
+        );
+        toUpdate.push(...updateTimeQuery);
+
+        let query = await updateEventColor(newColor, event);
+        if (query.length !== 0) {
+            dbWorker.update("project", query[0], query[1]);
+        }
 
         if (toUpdate.length === 0) {
             modal.closeModal();
@@ -116,14 +59,7 @@
             return;
         }
 
-        clause.push(`id = ${event.id}`);
-
-        let finalClause = clause.join(" AND ");
-        let finalToUpdate = toUpdate.join(", ");
-
-        console.log("Final clause: ", finalClause);
-        console.log("Final update: ", finalToUpdate);
-        await dbWorker.updateLog(finalToUpdate, finalClause);
+        await dbWorker.updateLog(toUpdate.join(", "), `id = ${event.id}`);
 
         dispatch("eventupdated");
         modal.closeModal();
