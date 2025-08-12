@@ -37,33 +37,45 @@
     let toUpdate: string[] = [];
 
     async function updateEventTitle() {
-        let titleChanged = newTitle.length != 0;
-        if (titleChanged && newTitle !== event.title) {
-            clause.push(`title = '${newTitle}'`);
-            toUpdate.push(`title = '${event.title}'`);
+        const titleChanged = newTitle.length > 0 && newTitle !== event.title;
+        if (titleChanged) {
+            toUpdate.push(`activity = '${newTitle}'`);
         }
     }
 
     async function updateEventColor() {
-        let colorChanged = newColor.length != 0;
+        const colorChanged =
+            newColor.length !== 0 && newColor !== event.backgroundColor;
+        // nothing to do
+        if (!colorChanged) return;
 
-        if (colorChanged && newColor != event.color) {
-            // This is wrong. I am updating the event name. Which is the activity name.
+        if (colorChanged && dbWorker) {
+            console.log("New color:", newColor);
+            console.log("old color:", event.backgroundColor);
+            await dbWorker.update(
+                "project",
+                `color = '${newColor}'`,
+                `color = '${event.backgroundColor}'`,
+            );
         }
     }
 
     async function updateEventTime() {
         const startTimeChanged =
-            newStartTime && newStartTime.getTime() !== event.start.getTime();
+            newStartTime &&
+            newStartTime.getTime() !== new Date(event.start).getTime();
         const endTimeChanged =
-            newEndTime && newEndTime.getTime() !== event.end.getTime();
+            newEndTime &&
+            newEndTime.getTime() !== new Date(event.end).getTime();
 
         if (!startTimeChanged && !endTimeChanged) {
             return;
         }
 
-        const finalStartTime = startTimeChanged ? newStartTime : event.start;
-        const finalEndTime = endTimeChanged ? newEndTime : event.end;
+        const finalStartTime = startTimeChanged
+            ? newStartTime
+            : new Date(event.start);
+        const finalEndTime = endTimeChanged ? newEndTime : new Date(event.end);
 
         if (finalStartTime.getTime() >= finalEndTime.getTime()) {
             console.error("Start time must be before end time.");
@@ -72,8 +84,6 @@
         }
 
         const newElapsed = finalEndTime.getTime() - finalStartTime.getTime();
-
-        clause.push(`id = ${event.id}`);
 
         if (startTimeChanged) {
             toUpdate.push(`start = ${finalStartTime.getTime()}`);
@@ -96,14 +106,17 @@
         clause = [];
         toUpdate = [];
 
-        // await updateEventTitle();
-        // await updateEventColor();
+        await updateEventTitle();
         await updateEventTime();
+        await updateEventColor();
 
         if (toUpdate.length === 0) {
             modal.closeModal();
+            dispatch("eventupdated"); // Still dispatch in case color was changed
             return;
         }
+
+        clause.push(`id = ${event.id}`);
 
         let finalClause = clause.join(" AND ");
         let finalToUpdate = toUpdate.join(", ");
@@ -134,7 +147,7 @@
             <input
                 id="start"
                 type="datetime-local"
-                value={formatDateForInput(event.start)}
+                value={formatDateForInput(new Date(event.start))}
                 oninput={(e) => {
                     newStartTime = new Date(e.currentTarget.value);
                 }}
@@ -144,14 +157,19 @@
             <input
                 id="end"
                 type="datetime-local"
-                value={formatDateForInput(event.end)}
+                value={formatDateForInput(new Date(event.end))}
                 oninput={(e) => {
                     newEndTime = new Date(e.currentTarget.value);
                 }}
             />
 
             <label for="color">Color</label>
-            <input id="color" type="color" bind:value={event.color} />
+            <input
+                id="color"
+                type="color"
+                value={event.backgroundColor}
+                oninput={(e) => (newColor = e.currentTarget.value)}
+            />
         </div>
 
         <div class="form-actions">

@@ -20,6 +20,7 @@ const dbWorker = {
   list,
   insert,
   reset,
+  update,
 
   async listActivities(): Promise<Activity[]> {
     const response = await this.list("activity");
