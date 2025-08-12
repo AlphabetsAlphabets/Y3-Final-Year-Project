@@ -16,6 +16,8 @@
             title: log.activity,
             start: new Date(log.start).toISOString(),
             end: new Date(log.end).toISOString(),
+            // The wrong project color is due to the fact that this field
+            // doesn't exist. Will need to pull from the database.
             backgroundColor: log.project_color,
         }));
     };
