@@ -44,6 +44,8 @@ const dbWorker = {
     return await this.listProjects();
   },
 
+  // Puts data in the log table into a Log object.
+  // Color is also obtained based on the project name.
   async listLog(): Promise<Log[]> {
     const response = await this.list("log");
     console.log("Received logs from worker", response);
