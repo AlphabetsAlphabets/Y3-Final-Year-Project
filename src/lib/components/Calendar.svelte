@@ -21,6 +21,7 @@
                 modal?.showModal();
             });
         },
+        editable: true,
     });
 </script>
 
