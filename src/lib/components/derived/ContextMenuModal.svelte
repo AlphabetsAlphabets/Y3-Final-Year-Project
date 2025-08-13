@@ -7,6 +7,7 @@
     import Modal from "../Modal.svelte";
     import {
         formatDateForInput,
+        hasEventTimeUpdated,
         updateEventColor,
         updateEventTime,
         updateEventTitle,
@@ -40,12 +41,18 @@
         let updateTitle = await updateEventTitle(newTitle, event);
         toUpdate.push(...updateTitle);
 
-        let updateTimeQuery = await updateEventTime(
-            newStartTime,
-            newEndTime,
-            event,
-        );
-        toUpdate.push(...updateTimeQuery);
+        if (!newStartTime || !newEndTime) {
+            return;
+        }
+
+        if (await hasEventTimeUpdated(newStartTime, newEndTime, event)) {
+            let updateTimeQuery = await updateEventTime(
+                newStartTime,
+                newEndTime,
+            );
+
+            toUpdate.push(...updateTimeQuery);
+        }
 
         let query = await updateEventColor(newColor, event);
         if (query.length !== 0) {

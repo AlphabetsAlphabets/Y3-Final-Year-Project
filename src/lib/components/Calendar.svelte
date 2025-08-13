@@ -3,7 +3,7 @@
     import { Calendar, Interaction, TimeGrid } from "@event-calendar/core";
     import * as Comlink from "comlink";
 
-    import type { CalendarEvent } from "$lib/calendar";
+    import { updateEventTime, type CalendarEvent } from "$lib/calendar";
     import type { DbWorker } from "$lib/workers/database.worker";
 
     import Modal from "./Modal.svelte";
@@ -15,7 +15,6 @@
     }: { events: CalendarEvent[]; refresh: () => Promise<void> } = $props();
 
     let modal: Modal | null = $state(null);
-    let updated = $state(1);
     let targetEvent: CalendarEvent | undefined = $state();
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
 
@@ -33,15 +32,13 @@
             return;
         }
 
-        const { id, start, end } = arg.event;
-        const elapsed = new Date(end).getTime() - new Date(start).getTime();
+        let newStart = new Date(arg.event.start);
+        let newEnd = new Date(arg.event.end);
 
-        const toUpdate = `start = ${new Date(
-            start,
-        ).getTime()}, end = ${new Date(end).getTime()}, elapsed = ${elapsed}`;
-        const clause = `id = ${id}`;
+        let toUpdate = await updateEventTime(newStart, newEnd, arg.event);
+        console.log("Resize toUpdate: ", toUpdate);
 
-        await dbWorker.updateLog(toUpdate, clause);
+        await dbWorker.updateLog(toUpdate.join(", "), `id = ${arg.event.id}`);
     }
 
     let options = $state({
@@ -67,6 +64,4 @@
     }}
 />
 
-{#key updated}
-    <Calendar plugins={[TimeGrid, Interaction]} {options} />
-{/key}
+<Calendar plugins={[TimeGrid, Interaction]} {options} />

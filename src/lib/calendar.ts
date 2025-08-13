@@ -42,43 +42,35 @@ export async function updateEventColor(
   return [];
 }
 
-export async function updateEventTime(
-  newStartTime: Date | null,
-  newEndTime: Date | null,
+export async function hasEventTimeUpdated(
+  newStartTime: Date,
+  newEndTime: Date,
   event: CalendarEvent,
-): Promise<string[]> {
-  const toUpdate: string[] = [];
-
+): Promise<boolean> {
   const startTimeChanged =
     newStartTime && newStartTime.getTime() !== new Date(event.start).getTime();
   const endTimeChanged =
     newEndTime && newEndTime.getTime() !== new Date(event.end).getTime();
 
-  if (!startTimeChanged && !endTimeChanged) {
-    return toUpdate;
-  }
+  return startTimeChanged || endTimeChanged;
+}
 
-  const finalStartTime = startTimeChanged
-    ? newStartTime
-    : new Date(event.start);
-  const finalEndTime = endTimeChanged ? newEndTime : new Date(event.end);
+export async function updateEventTime(
+  newStartTime: Date,
+  newEndTime: Date,
+): Promise<string[]> {
+  const toUpdate: string[] = [];
 
-  if (finalStartTime.getTime() >= finalEndTime.getTime()) {
+  const newElapsed = newStartTime.getTime() - newEndTime.getTime();
+  if (newStartTime.getTime() >= newEndTime.getTime()) {
     console.error("Start time must be before end time.");
     // TODO: You might want to show this error to the user in the UI
     return toUpdate;
   }
 
-  const newElapsed = finalEndTime.getTime() - finalStartTime.getTime();
-
-  if (startTimeChanged) {
-    toUpdate.push(`start = ${finalStartTime.getTime()}`);
-  }
-
-  if (endTimeChanged) {
-    toUpdate.push(`end = ${finalEndTime.getTime()}`);
-  }
-
+  toUpdate.push(`start = ${newStartTime.getTime()}`);
+  toUpdate.push(`end = ${newEndTime.getTime()}`);
   toUpdate.push(`elapsed = ${newElapsed}`);
+
   return toUpdate;
 }
