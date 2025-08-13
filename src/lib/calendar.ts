@@ -65,7 +65,7 @@ export async function updateEventTime(
 
   if (finalStartTime.getTime() >= finalEndTime.getTime()) {
     console.error("Start time must be before end time.");
-    // NOTE: You might want to show this error to the user in the UI
+    // TODO: You might want to show this error to the user in the UI
     return toUpdate;
   }
 
