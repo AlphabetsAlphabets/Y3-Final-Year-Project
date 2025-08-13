@@ -1,6 +1,6 @@
 <script lang="ts">
     import * as Comlink from "comlink";
-    import { createEventDispatcher, onMount } from "svelte";
+    import { onMount } from "svelte";
 
     import type { DbWorker } from "$lib/workers/database.worker";
 
@@ -13,9 +13,8 @@
     } from "$lib/calendar";
 
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
-    let { modal = $bindable(), event = $bindable() } = $props();
-
-    const dispatch = createEventDispatcher();
+    // updateEvent will call a method defined in the parent component to change the parent's state.
+    let { modal = $bindable(), event = $bindable(), updateEvent } = $props();
 
     const loadWorker = async () => {
         const Worker = await import("$lib/workers/database.worker?worker");
@@ -55,13 +54,15 @@
 
         if (toUpdate.length === 0) {
             modal.closeModal();
-            dispatch("eventupdated"); // Still dispatch in case color was changed
+            if (query.length !== 0) {
+                updateEvent();
+            }
             return;
         }
 
         await dbWorker.updateLog(toUpdate.join(", "), `id = ${event.id}`);
 
-        dispatch("eventupdated");
+        updateEvent();
         modal.closeModal();
     }
 </script>

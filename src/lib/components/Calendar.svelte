@@ -1,18 +1,22 @@
 <script lang="ts">
-    import type { CalendarEvent } from "$lib/calendar";
+    import { onMount } from "svelte";
     import { Calendar, Interaction, TimeGrid } from "@event-calendar/core";
-    import { createEventDispatcher, onMount } from "svelte";
     import * as Comlink from "comlink";
+
+    import type { CalendarEvent } from "$lib/calendar";
     import type { DbWorker } from "$lib/workers/database.worker";
 
     import Modal from "./Modal.svelte";
     import ContextMenuModal from "./derived/ContextMenuModal.svelte";
 
-    let { events }: { events: CalendarEvent[] } = $props();
+    let {
+        events,
+        refresh, // calls a method defined in the parent component to change the parent's state.
+    }: { events: CalendarEvent[]; refresh: () => Promise<void> } = $props();
 
     let modal: Modal | null = $state(null);
+    let updated = $state(1);
     let targetEvent: CalendarEvent | undefined = $state();
-    const dispatch = createEventDispatcher();
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
 
     const loadWorker = async () => {
@@ -38,13 +42,12 @@
         const clause = `id = ${id}`;
 
         await dbWorker.updateLog(toUpdate, clause);
-        dispatch("eventupdated");
     }
 
     let options = $state({
         view: "timeGridWeek",
         events: events,
-        eventDidMount: function (arg: unknown) {
+        eventDidMount: function (arg: { event: CalendarEvent }) {
             arg.el.addEventListener("click", () => {
                 targetEvent = arg.event;
                 modal?.showModal();
@@ -59,6 +62,11 @@
 <ContextMenuModal
     bind:modal
     bind:event={targetEvent}
-    on:eventupdated={() => dispatch("eventupdated")}
+    updateEvent={async () => {
+        await refresh();
+    }}
 />
-<Calendar plugins={[TimeGrid, Interaction]} {options} />
+
+{#key updated}
+    <Calendar plugins={[TimeGrid, Interaction]} {options} />
+{/key}

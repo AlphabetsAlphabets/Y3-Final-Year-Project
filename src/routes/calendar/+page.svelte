@@ -3,8 +3,9 @@
     import * as Comlink from "comlink";
 
     import Calendar from "$lib/components/Calendar.svelte";
-    import type { DbWorker } from "$lib/workers/database.worker";
     import type { CalendarEvent } from "$lib/calendar";
+
+    import type { DbWorker } from "$lib/workers/database.worker";
     import type { Log } from "$lib/types/schema";
 
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
@@ -120,7 +121,7 @@
     <button onclick={addTestLog}> Add test log </button>
     <button onclick={listReadingLogs}> List Reading Logs </button>
     {#key calendarEvents}
-        <Calendar events={calendarEvents} on:eventupdated={refreshCalendar} />
+        <Calendar events={calendarEvents} refresh={refreshCalendar} />
     {/key}
 {:else}
     <p>Please wait while the calendar loads</p>
