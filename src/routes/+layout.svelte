@@ -18,6 +18,11 @@
             href: "/calendar",
             icon: "bi-calendar",
         },
+        {
+            name: "Task",
+            href: "/tasks",
+            icon: "bi bi-list-check",
+        },
     ];
 
     /**
