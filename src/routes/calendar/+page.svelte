@@ -3,9 +3,11 @@
     import * as Comlink from "comlink";
 
     import Calendar from "$lib/components/Calendar.svelte";
-    import type { DbWorker } from "$lib/workers/database.worker";
     import type { CalendarEvent } from "$lib/calendar";
+
+    import type { DbWorker } from "$lib/workers/database.worker";
     import type { Log } from "$lib/types/schema";
+    import { addTestLog } from "$lib/utils/calendar";
 
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
     let calendarEvents: CalendarEvent[] = $state([]);
@@ -14,53 +16,37 @@
         return logs.map((log) => ({
             id: log.id,
             title: log.activity,
-            start: new Date(log.start).toISOString(),
-            end: new Date(log.end).toISOString(),
+            start: new Date(log.start),
+            end: new Date(log.end),
             backgroundColor: log.project_color,
         }));
     };
+
+    async function refreshCalendar() {
+        if (!dbWorker) return;
+        calendarEvents = mapLogsToEvents(await dbWorker.listLog());
+    }
 
     const loadWorker = async () => {
         const Worker = await import("$lib/workers/database.worker?worker");
         dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
         await dbWorker.initWorker();
 
-        calendarEvents = mapLogsToEvents(await dbWorker.listLog());
+        await refreshCalendar();
+    };
+
+    const createDummyLogs = async () => {
+        addTestLog(dbWorker);
+        await refreshCalendar();
     };
 
     onMount(loadWorker);
-
-    const addTestLog = async () => {
-        if (!dbWorker) return;
-
-        const activityName = "TEST";
-        const projectName = "TEST";
-        const projectColor = "hotpink";
-
-        await dbWorker.addActivity(activityName);
-        await dbWorker.addProject(projectName, projectColor);
-
-        const start = Date.now();
-        const twoHoursInMillis = 2 * 60 * 60 * 1000;
-        const end = start + twoHoursInMillis;
-        const elapsed = twoHoursInMillis;
-
-        const newLogs = await dbWorker.addLog(
-            activityName,
-            projectName,
-            elapsed,
-            start,
-            end,
-        );
-
-        calendarEvents = mapLogsToEvents(newLogs);
-    };
 </script>
 
 {#if dbWorker}
-    <button onclick={addTestLog}> Add test log </button>
+    <button onclick={createDummyLogs}> Add test log </button>
     {#key calendarEvents}
-        <Calendar events={calendarEvents} />
+        <Calendar events={calendarEvents} refresh={refreshCalendar} />
     {/key}
 {:else}
     <p>Please wait while the calendar loads</p>

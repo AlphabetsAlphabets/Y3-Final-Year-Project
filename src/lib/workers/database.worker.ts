@@ -20,6 +20,7 @@ const dbWorker = {
   list,
   insert,
   reset,
+  update,
 
   async listActivities(): Promise<Activity[]> {
     const response = await this.list("activity");
@@ -43,11 +44,46 @@ const dbWorker = {
     return await this.listProjects();
   },
 
+  // Puts data in the log table into a Log object.
+  // Color is also obtained based on the project name.
   async listLog(): Promise<Log[]> {
     const response = await this.list("log");
     console.log("Received logs from worker", response);
     if (!(response && response.result && response.result.resultRows)) {
       console.error("Something went wrong.");
+    }
+
+    const results = response.result.resultRows as Log[];
+    const logs = Promise.all(
+      results.map(async (log: Log) => {
+        // get the project name and query the project table
+        const color = await this.list(
+          "project",
+          "color",
+          `name = '${log.project_name}'`,
+        );
+
+        log.project_color = (color.result.resultRows[0] as Project).color;
+        return log;
+      }),
+    );
+
+    return logs || [];
+  },
+
+  async listLogsByActivity(activityName: string): Promise<Log[]> {
+    const response = await this.list(
+      "log",
+      "*",
+      `activity = '${activityName}'`,
+    );
+    console.log(
+      `Received logs for activity ${activityName} from worker`,
+      response,
+    );
+    if (!(response && response.result && response.result.resultRows)) {
+      console.error("Something went wrong.");
+      return [];
     }
 
     const results = response.result.resultRows as Log[];
@@ -85,7 +121,16 @@ const dbWorker = {
   },
 
   async updateProject(name: string, color: string) {
-    let res = await update("project", `color = '${color}'`, `name = '${name}'`);
+    const res = await update(
+      "project",
+      `color = '${color}'`,
+      `name = '${name}'`,
+    );
+    console.log(res);
+  },
+
+  async updateLog(toUpdate: string, clause: string) {
+    const res = await update("log", toUpdate, clause);
     console.log(res);
   },
 };

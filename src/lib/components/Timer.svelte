@@ -80,7 +80,6 @@
                 await dbWorker.addLog(
                     activityName,
                     projectName,
-                    projectColor,
                     startDate,
                     endDate,
                     elapsed,

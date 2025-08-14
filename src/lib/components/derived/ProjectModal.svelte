@@ -46,11 +46,11 @@
 >
     {userInput || "Project"}
 </button>
-<Modal bind:this={modal} title="Select an option">
+<Modal bind:this={modal} title="Select a project">
     <input
         type="text"
         class="form-control mb-3"
-        placeholder="Type to search..."
+        placeholder="Type name of project. Relaxing, work, etc."
         bind:value={userInput}
     />
     {#if filteredOptions.length > 0 || userInput === ""}
