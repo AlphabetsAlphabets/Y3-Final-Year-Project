@@ -16,8 +16,8 @@
         return logs.map((log) => ({
             id: log.id,
             title: log.activity,
-            start: new Date(log.start).toISOString(),
-            end: new Date(log.end).toISOString(),
+            start: new Date(log.start),
+            end: new Date(log.end),
             backgroundColor: log.project_color,
         }));
     };

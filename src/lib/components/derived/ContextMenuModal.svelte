@@ -7,7 +7,6 @@
     import Modal from "../Modal.svelte";
     import {
         formatDateForInput,
-        hasEventTimeUpdated,
         updateEventColor,
         updateEventTime,
         updateEventTitle,
@@ -41,17 +40,17 @@
         let updateTitle = await updateEventTitle(newTitle, event);
         toUpdate.push(...updateTitle);
 
-        if (!newStartTime || !newEndTime) {
-            return;
-        }
-
-        if (await hasEventTimeUpdated(newStartTime, newEndTime, event)) {
-            let updateTimeQuery = await updateEventTime(
-                newStartTime,
-                newEndTime,
-            );
-
-            toUpdate.push(...updateTimeQuery);
+        if (newStartTime && newEndTime) {
+            let update = await updateEventTime(newStartTime, newEndTime);
+            toUpdate.push(...update);
+        } else if (newStartTime) {
+            let updateStart = await updateEventTime(newStartTime, event.end);
+            toUpdate.push(...updateStart);
+        } else if (newEndTime) {
+            let updateEnd = await updateEventTime(event.start, newEndTime);
+            toUpdate.push(...updateEnd);
+        } else {
+            console.error("Something went wrong.");
         }
 
         let query = await updateEventColor(newColor, event);
@@ -91,7 +90,7 @@
             <input
                 id="start"
                 type="datetime-local"
-                value={formatDateForInput(new Date(event.start))}
+                value={formatDateForInput(event.start)}
                 oninput={(e) => {
                     newStartTime = new Date(e.currentTarget.value);
                 }}
@@ -101,7 +100,7 @@
             <input
                 id="end"
                 type="datetime-local"
-                value={formatDateForInput(new Date(event.end))}
+                value={formatDateForInput(event.end)}
                 oninput={(e) => {
                     newEndTime = new Date(e.currentTarget.value);
                 }}

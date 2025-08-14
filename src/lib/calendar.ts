@@ -1,8 +1,8 @@
 export interface CalendarEvent {
   id: number;
   title: string;
-  start: string;
-  end: string;
+  start: Date;
+  end: Date;
   backgroundColor: string;
 }
 
@@ -40,19 +40,6 @@ export async function updateEventColor(
   }
 
   return [];
-}
-
-export async function hasEventTimeUpdated(
-  newStartTime: Date,
-  newEndTime: Date,
-  event: CalendarEvent,
-): Promise<boolean> {
-  const startTimeChanged =
-    newStartTime && newStartTime.getTime() !== new Date(event.start).getTime();
-  const endTimeChanged =
-    newEndTime && newEndTime.getTime() !== new Date(event.end).getTime();
-
-  return startTimeChanged || endTimeChanged;
 }
 
 export async function updateEventTime(
