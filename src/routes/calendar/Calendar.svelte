@@ -3,11 +3,12 @@
     import { Calendar, Interaction, TimeGrid } from "@event-calendar/core";
     import * as Comlink from "comlink";
 
-    import { updateEventTime, type CalendarEvent } from "$lib/calendar";
-    import type { DbWorker } from "$lib/workers/database.worker";
+    import type { DbWorker } from "$lib/database.worker";
 
-    import Modal from "./Modal.svelte";
-    import ContextMenuModal from "./derived/ContextMenuModal.svelte";
+    import Modal from "$lib/components/Modal.svelte";
+    import EditLogModal from "./EditLogModal.svelte";
+
+    import { updateEventTime, type CalendarEvent } from "./calendar";
 
     let {
         events,
@@ -19,7 +20,7 @@
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
 
     const loadWorker = async () => {
-        const Worker = await import("$lib/workers/database.worker?worker");
+        const Worker = await import("$lib/database.worker?worker");
         dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
         await dbWorker.initWorker();
     };
@@ -35,7 +36,7 @@
         let newStart = new Date(arg.event.start);
         let newEnd = new Date(arg.event.end);
 
-        let toUpdate = await updateEventTime(newStart, newEnd, arg.event);
+        let toUpdate = await updateEventTime(newStart, newEnd);
         console.log("Resize toUpdate: ", toUpdate);
 
         await dbWorker.updateLog(toUpdate.join(", "), `id = ${arg.event.id}`);
@@ -56,7 +57,7 @@
     });
 </script>
 
-<ContextMenuModal
+<EditLogModal
     bind:modal
     bind:event={targetEvent}
     updateEvent={async () => {

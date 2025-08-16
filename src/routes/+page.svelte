@@ -2,17 +2,18 @@
     import { onMount } from "svelte";
     import * as Comlink from "comlink";
 
-    import Timer from "$lib/components/Timer.svelte";
-    import SelectModal from "$lib/components/derived/SelectModal.svelte";
+    import Timer from "./Timer.svelte";
 
-    import { seconds } from "$lib/timer";
+    import { seconds } from "./timer";
 
     // If there is an ep.EventListener error then the cause is this import statement.
     // comlink requires the worker be exposed via Comlink.expose but importing this file
     // runs that code and it may be ran BEFORE the worker is ready. Which causes
     // the EventListener error.
-    import type { DbWorker } from "$lib/workers/database.worker";
-    import ProjectModal from "$lib/components/derived/ProjectModal.svelte";
+    import type { DbWorker } from "$lib/database.worker";
+
+    import ProjectModal from "./ProjectModal.svelte";
+    import SelectModal from "./SelectModal.svelte";
 
     let activityName: string = $state("Activity");
     let projectName: string = $state("Project");
@@ -20,7 +21,7 @@
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
 
     const loadWorker = async () => {
-        const Worker = await import("$lib/workers/database.worker?worker");
+        const Worker = await import("$lib/database.worker?worker");
         dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
         await dbWorker.initWorker();
     };
@@ -58,7 +59,7 @@
                     {#if activityName === "Activity"}
                         <p>Please select or create an activity to track.</p>
                     {:else}
-                        <Timer {activityName} {projectName} {projectColor} />
+                        <Timer {activityName} {projectName} />
                     {/if}
                 </form>
             {:else}

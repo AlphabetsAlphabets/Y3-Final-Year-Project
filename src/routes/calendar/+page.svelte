@@ -2,12 +2,13 @@
     import { onMount } from "svelte";
     import * as Comlink from "comlink";
 
-    import Calendar from "$lib/components/Calendar.svelte";
-    import type { CalendarEvent } from "$lib/calendar";
+    import Calendar from "./Calendar.svelte";
+    import type { CalendarEvent } from "./calendar";
 
-    import type { DbWorker } from "$lib/workers/database.worker";
+    import type { DbWorker } from "$lib/database.worker";
     import type { Log } from "$lib/types/schema";
     import { addTestLog } from "$lib/utils/calendar";
+    import { listLog } from "./log";
 
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
     let calendarEvents: CalendarEvent[] = $state([]);
@@ -24,11 +25,12 @@
 
     async function refreshCalendar() {
         if (!dbWorker) return;
-        calendarEvents = mapLogsToEvents(await dbWorker.listLog());
+
+        calendarEvents = mapLogsToEvents(await listLog(dbWorker));
     }
 
     const loadWorker = async () => {
-        const Worker = await import("$lib/workers/database.worker?worker");
+        const Worker = await import("$lib/database.worker?worker");
         dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
         await dbWorker.initWorker();
 
@@ -36,6 +38,11 @@
     };
 
     const createDummyLogs = async () => {
+        if (!dbWorker) {
+            console.error("Worker not ready yet.");
+            return;
+        }
+
         addTestLog(dbWorker);
         await refreshCalendar();
     };

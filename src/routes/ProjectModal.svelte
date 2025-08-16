@@ -2,39 +2,22 @@
     import * as Comlink from "comlink";
     import { onMount } from "svelte";
 
-    import Modal from "../Modal.svelte";
+    import Modal from "$lib/components/Modal.svelte";
 
-    import type { DbWorker } from "$lib/workers/database.worker";
+    import type { DbWorker } from "$lib/database.worker";
     import { type Project } from "$lib/types/schema";
+    import { addProject, listProjects } from "$lib/utils/projects";
 
     let { selected = $bindable(), color = $bindable() } = $props();
 
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
     let projects: Project[] = $state([]);
 
-    let listProjects = async (): Promise<Project[]> => {
-        const response = await dbWorker?.list("project");
-        console.log("Received projects from worker", response);
-        return (response?.result?.resultRows as Project[]) || [];
-    };
-
-    let addProject = async (
-        name: string,
-        color: string,
-    ): Promise<Project[]> => {
-        await dbWorker?.insert(
-            "project",
-            "name, color",
-            `'${name}', '${color}'`,
-        );
-        return await listProjects();
-    };
-
     const loadWorker = async () => {
-        const Worker = await import("$lib/workers/database.worker?worker");
+        const Worker = await import("$lib//database.worker?worker");
         dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
         await dbWorker.initWorker();
-        projects = await listProjects();
+        projects = await listProjects(dbWorker);
     };
 
     onMount(loadWorker);
@@ -101,6 +84,7 @@
                                 }
 
                                 projects = await addProject(
+                                    dbWorker,
                                     option.name,
                                     option.color,
                                 );
@@ -131,7 +115,8 @@
                         return;
                     }
 
-                    projects = await dbWorker.addProject(
+                    projects = await addProject(
+                        dbWorker,
                         userInput,
                         selectedColor,
                     );

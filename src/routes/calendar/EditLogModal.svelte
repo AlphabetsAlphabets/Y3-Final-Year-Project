@@ -2,22 +2,23 @@
     import * as Comlink from "comlink";
     import { onMount } from "svelte";
 
-    import type { DbWorker } from "$lib/workers/database.worker";
+    import type { DbWorker } from "$lib/database.worker";
 
-    import Modal from "../Modal.svelte";
+    import Modal from "$lib/components/Modal.svelte";
+
     import {
         formatDateForInput,
         updateEventColor,
         updateEventTime,
         updateEventTitle,
-    } from "$lib/calendar";
+    } from "./calendar";
 
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
     // updateEvent will call a method defined in the parent component to change the parent's state.
     let { modal = $bindable(), event = $bindable(), updateEvent } = $props();
 
     const loadWorker = async () => {
-        const Worker = await import("$lib/workers/database.worker?worker");
+        const Worker = await import("$lib/database.worker?worker");
         dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
         await dbWorker.initWorker();
     };

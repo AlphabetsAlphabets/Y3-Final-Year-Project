@@ -2,33 +2,23 @@
     import * as Comlink from "comlink";
     import { onMount } from "svelte";
 
-    import Modal from "../Modal.svelte";
+    import Modal from "$lib/components/Modal.svelte";
 
-    import type { DbWorker } from "$lib/workers/database.worker";
+    import type { DbWorker } from "$lib/database.worker";
     import { type Activity } from "$lib/types/schema";
+    import { addActivity, listActivities } from "$lib/utils/activity";
 
     let { selected = $bindable() } = $props();
 
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
     let activities: Activity[] = $state([]);
 
-    let listActivities = async (): Promise<Activity[]> => {
-        const response = await dbWorker?.list("activity");
-        console.log("Received activities from worker.", response);
-        return (response?.result?.resultRows as Activity[]) || [];
-    };
-
-    let addActivity = async (name: string): Promise<Activity[]> => {
-        await dbWorker?.insert("activity", "name", `'${name}'`);
-        return await listActivities();
-    };
-
     const loadWorker = async () => {
-        const Worker = await import("$lib/workers/database.worker?worker");
+        const Worker = await import("$lib/database.worker?worker");
         dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
         await dbWorker.initWorker();
 
-        activities = await listActivities();
+        activities = await listActivities(dbWorker);
     };
 
     onMount(loadWorker);
@@ -92,7 +82,7 @@
                     return;
                 }
 
-                activities = await addActivity(userInput);
+                activities = await addActivity(dbWorker, userInput);
                 selected = userInput;
                 modal?.closeModal();
             }}>Create "{userInput}"</button

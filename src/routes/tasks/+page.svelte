@@ -1,5 +1,5 @@
 <script lang="ts">
-    import TaskList from "$lib/components/TaskList.svelte";
+    import TaskList from "./TaskList.svelte";
 </script>
 
 <TaskList />
