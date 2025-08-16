@@ -1,5 +1,15 @@
-<script>
+<script lang="ts">
     let newTaskName = "";
+    let newTaskDescription = "";
+    let isDoneListCollapsed = false;
+
+    let addTask = () => {
+        console.log("Task: ", newTaskName);
+    };
+
+    let finishTask = () => {
+        console.log("Task finished");
+    };
 </script>
 
 <div class="container">
@@ -9,12 +19,20 @@
     </header>
 
     <div class="add-task-wrapper">
-        <input
-            type="text"
-            bind:value={newTaskName}
-            placeholder="e.g., Finish project report"
-        />
-        <button aria-label="Add new task">
+        <div class="task-inputs">
+            <input
+                type="text"
+                bind:value={newTaskName}
+                placeholder="e.g., Finish project report"
+            />
+            <input
+                type="text"
+                class="description-input"
+                bind:value={newTaskDescription}
+                placeholder="description"
+            />
+        </div>
+        <button aria-label="Add new task" onclick={addTask}>
             <i class="bi bi-plus-lg"></i>
             <span>Add Task</span>
         </button>
@@ -24,7 +42,7 @@
         <h2 class="section-title">Todo</h2>
         <ul class="task-list">
             <li class="task-item">
-                <button class="checkbox">
+                <button class="checkbox" onclick={finishTask}>
                     <i class="bi bi-check"></i>
                 </button>
                 <span class="task-name">Going home</span>
@@ -36,18 +54,29 @@
     </div>
 
     <div class="tasks-section">
-        <h2 class="section-title">Done</h2>
-        <ul class="task-list">
-            <li class="task-item">
-                <button class="checkbox">
-                    <i class="bi bi-check"></i>
-                </button>
-                <span class="task-name">Going home</span>
-                <button class="delete-btn" aria-label="Delete task">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </li>
-        </ul>
+        <button
+            class="section-title-button"
+            onclick={() => (isDoneListCollapsed = !isDoneListCollapsed)}
+        >
+            <h2 class="section-title">Done</h2>
+            <i class="bi bi-chevron-down" class:rotated={isDoneListCollapsed}
+            ></i>
+        </button>
+        {#if !isDoneListCollapsed}
+            <ul class="task-list">
+                <li class="task-item">
+                    <button class="checkbox">
+                        <i class="bi bi-check"></i>
+                    </button>
+                    <span class="task-name"
+                        >Going home finished on 16/08/2025 15:36</span
+                    >
+                    <button class="delete-btn" aria-label="Delete task">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </li>
+            </ul>
+        {/if}
     </div>
 </div>
 
@@ -81,8 +110,15 @@
         margin-bottom: 2rem;
     }
 
-    .add-task-wrapper input {
+    .task-inputs {
         flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .add-task-wrapper input {
+        width: 100%;
         padding: 0.75rem 1rem;
         border: 1px solid #dee2e6;
         border-radius: 8px;
@@ -90,6 +126,12 @@
         transition:
             border-color 0.15s ease-in-out,
             box-shadow 0.15s ease-in-out;
+        box-sizing: border-box;
+    }
+
+    .description-input {
+        font-size: 0.8rem !important;
+        padding: 0.4rem 0.8rem !important;
     }
 
     .add-task-wrapper input:focus {
@@ -132,11 +174,44 @@
         margin-bottom: 1rem;
         padding-bottom: 0.5rem;
         border-bottom: 1px solid #e9ecef;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    .section-title-button {
+        background: none;
+        border: none;
+        padding: 0;
+        margin: 0;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+
+    .section-title-button .section-title {
+        margin-bottom: 0;
+        border-bottom: none;
+    }
+
+    .section-title-button .bi-chevron-down {
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .section-title-button .bi-chevron-down.rotated {
+        transform: rotate(-90deg);
     }
 
     .task-list {
         list-style: none;
         padding: 0;
+        max-height: 300px;
+        overflow-y: auto;
+        padding-right: 0.5rem; /* For scrollbar spacing */
     }
 
     .task-item {
