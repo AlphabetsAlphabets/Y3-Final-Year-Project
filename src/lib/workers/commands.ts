@@ -1,5 +1,6 @@
 import type { Promiser } from "$lib/types/promiser";
 import sqlite3Worker1Promiser from "$lib/sqlite/jswasm/sqlite3-worker1-promiser.mjs";
+import { createSql } from "$lib/types/schema";
 
 export enum Command {
   SETUP,
@@ -44,30 +45,11 @@ export const initDb = async () => {
 
 export const setupTables = async () => {
   isPromiserReady(promiser);
+  const createTablesSql = createSql.join("\n");
 
   // Enable foreign key constraints
   await promiser("exec", {
-    sql: `
-      CREATE TABLE IF NOT EXISTS activity (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL
-      );
-
-      CREATE TABLE IF NOT EXISTS project (
-        name TEXT PRIMARY KEY,
-        color TEXT NOT NULL
-      );
-
-      CREATE TABLE IF NOT EXISTS log (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        activity TEXT NOT NULL,
-        project_name TEXT,
-        elapsed INTEGER NOT NULL,
-        start INTEGER NOT NULL,
-        end INTEGER NOT NULL,
-        FOREIGN KEY (project_name) REFERENCES project(name) ON UPDATE CASCADE
-      );
-    `,
+    sql: createTablesSql,
   });
 };
 
