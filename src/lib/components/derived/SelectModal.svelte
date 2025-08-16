@@ -12,11 +12,23 @@
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
     let activities: Activity[] = $state([]);
 
+    let listActivities = async (): Promise<Activity[]> => {
+        const response = await dbWorker?.list("activity");
+        console.log("Received activities from worker.", response);
+        return (response?.result?.resultRows as Activity[]) || [];
+    };
+
+    let addActivity = async (name: string): Promise<Activity[]> => {
+        await dbWorker?.insert("activity", "name", `'${name}'`);
+        return await listActivities();
+    };
+
     const loadWorker = async () => {
         const Worker = await import("$lib/workers/database.worker?worker");
         dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
         await dbWorker.initWorker();
-        activities = await dbWorker.listActivities();
+
+        activities = await listActivities();
     };
 
     onMount(loadWorker);
@@ -80,7 +92,7 @@
                     return;
                 }
 
-                activities = await dbWorker.addActivity(userInput);
+                activities = await addActivity(userInput);
                 selected = userInput;
                 modal?.closeModal();
             }}>Create "{userInput}"</button

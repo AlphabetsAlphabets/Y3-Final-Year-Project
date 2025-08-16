@@ -1,3 +1,5 @@
+// This file contains primitives for interacting with the database. Any specific functionality
+// should be implemented elsewhere.
 import * as Comlink from "comlink";
 
 import {
@@ -9,39 +11,17 @@ import {
   update,
 } from "$lib/workers/commands";
 
-import type { Activity, Log, Project } from "$lib/types/schema";
+import type { Log, Project } from "$lib/types/schema";
 
 const dbWorker = {
-  async initWorker() {
-    await initDb();
-    await setupTables();
-  },
-
   list,
   insert,
   reset,
   update,
 
-  async listActivities(): Promise<Activity[]> {
-    const response = await this.list("activity");
-    console.log("Received activities from worker.", response);
-    return (response?.result?.resultRows as Activity[]) || [];
-  },
-
-  async addActivity(name: string): Promise<Activity[]> {
-    await this.insert("activity", "name", `'${name}'`);
-    return await this.listActivities();
-  },
-
-  async listProjects(): Promise<Project[]> {
-    const response = await this.list("project");
-    console.log("Received projects from worker", response);
-    return (response?.result?.resultRows as Project[]) || [];
-  },
-
-  async addProject(name: string, color: string): Promise<Project[]> {
-    await this.insert("project", "name, color", `'${name}', '${color}'`);
-    return await this.listProjects();
+  async initWorker() {
+    await initDb();
+    await setupTables();
   },
 
   // Puts data in the log table into a Log object.
@@ -118,15 +98,6 @@ const dbWorker = {
     );
 
     return await this.listLog();
-  },
-
-  async updateProject(name: string, color: string) {
-    const res = await update(
-      "project",
-      `color = '${color}'`,
-      `name = '${name}'`,
-    );
-    console.log(res);
   },
 
   async updateLog(toUpdate: string, clause: string) {

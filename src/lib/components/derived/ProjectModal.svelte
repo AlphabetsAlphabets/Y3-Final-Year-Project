@@ -12,11 +12,29 @@
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
     let projects: Project[] = $state([]);
 
+    let listProjects = async (): Promise<Project[]> => {
+        const response = await dbWorker?.list("project");
+        console.log("Received projects from worker", response);
+        return (response?.result?.resultRows as Project[]) || [];
+    };
+
+    let addProject = async (
+        name: string,
+        color: string,
+    ): Promise<Project[]> => {
+        await dbWorker?.insert(
+            "project",
+            "name, color",
+            `'${name}', '${color}'`,
+        );
+        return await listProjects();
+    };
+
     const loadWorker = async () => {
         const Worker = await import("$lib/workers/database.worker?worker");
         dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
         await dbWorker.initWorker();
-        projects = await dbWorker.listProjects();
+        projects = await listProjects();
     };
 
     onMount(loadWorker);
@@ -82,11 +100,10 @@
                                     return;
                                 }
 
-                                await dbWorker?.updateProject(
+                                projects = await addProject(
                                     option.name,
                                     option.color,
                                 );
-                                projects = await dbWorker.listProjects();
                             }}
                             title="Choose project color"
                         />
