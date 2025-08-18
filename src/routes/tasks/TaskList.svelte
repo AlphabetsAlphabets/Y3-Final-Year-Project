@@ -3,7 +3,13 @@
     import * as Comlink from "comlink";
     import { onMount } from "svelte";
 
-    import { addTask, deleteTask, listTasks, markTaskComplete } from "./task";
+    import {
+        addTask,
+        deleteCompletedTasks,
+        deleteTask,
+        listTasks,
+        markTaskComplete,
+    } from "./task";
 
     import type { Task } from "$lib/types/schema";
     import Todo from "./Todo.svelte";
@@ -33,6 +39,14 @@
     let addNewTask = async () => {
         if (dbWorker) {
             tasks = await addTask(dbWorker, newTaskName, newTaskDescription);
+        } else {
+            console.error("Worker is not ready. Please try again.");
+        }
+    };
+
+    let deleteCompleted = async () => {
+        if (dbWorker) {
+            tasks = await deleteCompletedTasks(dbWorker);
         } else {
             console.error("Worker is not ready. Please try again.");
         }
@@ -68,14 +82,25 @@
     </div>
 
     <div class="tasks-section">
-        <button
-            class="section-title-button"
-            onclick={() => (isDoneListCollapsed = !isDoneListCollapsed)}
-        >
-            <h2 class="section-title">Done</h2>
-            <i class="bi bi-chevron-down" class:rotated={isDoneListCollapsed}
-            ></i>
-        </button>
+        <div class="section-header">
+            <button
+                class="section-title-button"
+                onclick={() => (isDoneListCollapsed = !isDoneListCollapsed)}
+            >
+                <h2 class="section-title">Done</h2>
+                <i
+                    class="bi bi-chevron-down"
+                    class:rotated={isDoneListCollapsed}
+                ></i>
+            </button>
+            <button
+                class="delete-all-btn"
+                aria-label="Delete all completed tasks"
+                onclick={deleteCompleted}
+            >
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
         {#if !isDoneListCollapsed}
             <ul class="task-list">
                 {#each tasks as task (task.id)}
@@ -224,6 +249,13 @@
         width: 100%;
     }
 
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
     .section-title-button {
         background: none;
         border: none;
@@ -233,13 +265,31 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        width: 100%;
-        margin-bottom: 1rem;
+        flex-grow: 1;
     }
 
     .section-title-button .section-title {
         margin-bottom: 0;
         border-bottom: none;
+    }
+
+    .delete-all-btn {
+        background: none;
+        border: none;
+        color: #6c757d;
+        font-size: 1.2rem;
+        cursor: pointer;
+        padding: 0.5rem;
+        line-height: 1;
+        border-radius: 8px;
+        transition:
+            color 0.15s ease-in-out,
+            background-color 0.15s ease-in-out;
+    }
+
+    .delete-all-btn:hover {
+        color: #dc3545;
+        background-color: #f8d7da;
     }
 
     .section-title-button .bi-chevron-down {

@@ -31,6 +31,13 @@ export const deleteTask = async (
   return await listTasks(dbWorker);
 };
 
+export const deleteCompletedTasks = async (
+  dbWorker: DbWorker,
+): Promise<Task[]> => {
+  await dbWorker.remove("tasks", "completed = 1");
+  return await listTasks(dbWorker);
+};
+
 export const markTaskComplete = async (
   dbWorker: DbWorker,
   taskId: number,
