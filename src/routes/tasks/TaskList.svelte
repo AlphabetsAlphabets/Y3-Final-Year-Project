@@ -13,6 +13,8 @@
 
     import type { Task } from "$lib/types/schema";
     import Todo from "./Todo.svelte";
+    import Modal from "$lib/components/Modal.svelte";
+    import MessageModal from "$lib/components/derived/MessageModal.svelte";
 
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
 
@@ -51,6 +53,8 @@
             console.error("Worker is not ready. Please try again.");
         }
     };
+
+    let showTooltip = $state(false);
 
     onMount(loadWorker);
 </script>
@@ -97,8 +101,14 @@
                 class="delete-all-btn"
                 aria-label="Delete all completed tasks"
                 onclick={deleteCompleted}
+                onmouseenter={() => (showTooltip = true)}
+                onmouseleave={() => (showTooltip = false)}
             >
                 <i class="bi bi-trash"></i>
+                {#if showTooltip}
+                    <span class="tooltip">Delete all COMPLETED tasks</span>
+                {/if}
+                <MessageModal />
             </button>
         </div>
         {#if !isDoneListCollapsed}
@@ -365,7 +375,23 @@
         opacity: 1;
     }
 
-    .delete-btn:hover {
+    .delete-all-btn:hover {
         color: #dc3545;
+    }
+
+    .tooltip {
+        position: absolute;
+        background-color: #000;
+        color: #fff;
+        padding: 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        opacity: 0;
+        transition: opacity 1s ease-in-out;
+    }
+
+    .delete-all-btn:hover .tooltip {
+        opacity: 1;
     }
 </style>

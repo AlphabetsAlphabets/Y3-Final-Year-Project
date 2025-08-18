@@ -1,12 +1,12 @@
 <script lang="ts">
     import Modal from "../Modal.svelte";
 
-    let { modal = $bindable() } = $props();
+    let modal: Modal | null = $state(null);
 </script>
 
 <div class="message-modal-wrapper">
     <Modal bind:this={modal} title="Warning">
-        <p>You have failed your FYP.</p>
+        <p>This will DELETE all COMPLETED tasks. Are you sure?</p>
     </Modal>
 </div>
 
