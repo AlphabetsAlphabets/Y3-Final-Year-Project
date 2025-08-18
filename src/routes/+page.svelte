@@ -14,17 +14,22 @@
 
     import ProjectModal from "./ProjectModal.svelte";
     import SelectModal from "./SelectModal.svelte";
-    import TaskList from "./tasks/TaskList.svelte";
+    import Todo from "./tasks/Todo.svelte";
+    import { listTasks } from "./tasks/task";
+    import type { Task } from "$lib/types/schema";
 
     let activityName: string = $state("Activity");
     let projectName: string = $state("Project");
     let projectColor: string = $state("");
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
 
+    let tasks: Task[] = $state([]);
     const loadWorker = async () => {
         const Worker = await import("$lib/database.worker?worker");
         dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
         await dbWorker.initWorker();
+
+        tasks = await listTasks(dbWorker);
     };
 
     onMount(loadWorker);
@@ -36,10 +41,14 @@
     </button>
 </div>
 
-<TaskList />
-
 <main class="container mt-5">
     <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <Todo {dbWorker} {tasks} />
+        </div>
+
+        <br />
+
         <div class="col-md-8 col-lg-6 text-center">
             {#if dbWorker}
                 <form onsubmit={(e) => e.preventDefault()}>
