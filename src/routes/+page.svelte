@@ -14,6 +14,7 @@
 
     import ProjectModal from "./ProjectModal.svelte";
     import SelectModal from "./SelectModal.svelte";
+    import TaskList from "./tasks/TaskList.svelte";
 
     let activityName: string = $state("Activity");
     let projectName: string = $state("Project");
@@ -34,6 +35,8 @@
         <img src="/gear.svg" alt="gear" />
     </button>
 </div>
+
+<TaskList />
 
 <main class="container mt-5">
     <div class="row justify-content-center">
