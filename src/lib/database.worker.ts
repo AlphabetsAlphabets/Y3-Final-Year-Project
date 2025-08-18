@@ -2,15 +2,22 @@
 // should be implemented elsewhere.
 import * as Comlink from "comlink";
 
-import { initDb, insert, list, reset, setupTables, update } from "$lib/sqlite";
-
-import type { Log, Project } from "$lib/types/schema";
+import {
+  initDb,
+  insert,
+  list,
+  remove,
+  reset,
+  setupTables,
+  update,
+} from "$lib/sqlite";
 
 const dbWorker = {
   list,
   insert,
   reset,
   update,
+  remove,
 
   async initWorker() {
     await initDb();

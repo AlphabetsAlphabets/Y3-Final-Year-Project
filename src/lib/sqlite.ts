@@ -53,14 +53,8 @@ export const setupTables = async () => {
   });
 };
 
-export const list = async (
-  table: string,
-  columns: string = "",
-  clause: string = "",
-) => {
-  isPromiserReady(promiser);
-
-  let query = `SELECT`;
+const concatColums = (columns: string, table: string): string => {
+  let query = "";
   if (columns.length > 0) {
     query += ` ${columns}`;
   } else {
@@ -69,9 +63,40 @@ export const list = async (
 
   query += ` FROM ${table}`;
 
+  return query;
+};
+
+const concatClause = (clause: string): string => {
+  let query = "";
   if (clause.length > 0) {
     query += ` WHERE ${clause}`;
   }
+
+  return query;
+};
+
+export const remove = async (table: string, clause: string) => {
+  isPromiserReady(promiser);
+
+  let query = `DELETE FROM ${table}`;
+  query += concatClause(clause);
+
+  return await promiser("exec", {
+    sql: query,
+    rowMode: "object",
+  });
+};
+
+export const list = async (
+  table: string,
+  columns: string = "",
+  clause: string = "",
+) => {
+  isPromiserReady(promiser);
+
+  let query = `SELECT`;
+  query += concatColums(columns, table);
+  query += concatClause(clause);
 
   return await promiser("exec", {
     sql: query,
@@ -132,6 +157,7 @@ export const reset = async (table?: string): Promise<void> => {
         DROP TABLE IF EXISTS log;
         DROP TABLE IF EXISTS activity;
         DROP TABLE IF EXISTS project;
+        DROP TABLE IF EXISTS tasks;
       `,
     });
     console.log("All tables have been dropped");
