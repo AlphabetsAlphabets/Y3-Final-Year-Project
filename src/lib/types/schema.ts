@@ -23,9 +23,10 @@ export type Log = {
 export type Task = {
   id: number;
   name: string;
-  completed: boolean;
-  created_at: string;
-  completed_at: string | null;
+  description: string;
+  completed: number;
+  created_at: number;
+  completed_at: number | null;
 };
 
 const createActivity = `
@@ -59,7 +60,7 @@ CREATE TABLE IF NOT EXISTS tasks (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
   description TEXT,
-  completed BOOLEAN NOT NULL DEFAULT 0,
+  completed INTEGER DEFAULT 0,
   created_at INTEGER NOT NULL,
   completed_at INTEGER
 );
