@@ -343,25 +343,10 @@
         transition: all 0.2s ease;
     }
 
-    .task-item.completed .checkbox {
-        background-color: #0d6efd;
-        border-color: #0d6efd;
-    }
-
-    .task-item.completed .checkbox .bi-check {
-        opacity: 1;
-        transform: scale(1);
-    }
-
     .task-name {
         flex-grow: 1;
         color: #495057;
         transition: color 0.2s ease;
-    }
-
-    .task-item.completed .task-name {
-        text-decoration: line-through;
-        color: #adb5bd;
     }
 
     .delete-btn {
@@ -382,11 +367,5 @@
 
     .delete-btn:hover {
         color: #dc3545;
-    }
-
-    .empty-state {
-        text-align: center;
-        color: #6c757d;
-        padding: 2rem 0;
     }
 </style>
