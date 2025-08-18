@@ -9,6 +9,7 @@
     import EditLogModal from "./EditLogModal.svelte";
 
     import { updateEventTime, type CalendarEvent } from "./calendar";
+    import { updateLog } from "./log";
 
     let {
         events,
@@ -39,7 +40,7 @@
         let toUpdate = await updateEventTime(newStart, newEnd);
         console.log("Resize toUpdate: ", toUpdate);
 
-        await dbWorker.updateLog(toUpdate.join(", "), `id = ${arg.event.id}`);
+        await updateLog(dbWorker, toUpdate.join(", "), `id = ${arg.event.id}`);
     }
 
     let options = $state({

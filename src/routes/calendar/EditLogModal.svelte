@@ -12,6 +12,7 @@
         updateEventTime,
         updateEventTitle,
     } from "./calendar";
+    import { updateLog } from "./log";
 
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
     // updateEvent will call a method defined in the parent component to change the parent's state.
@@ -67,7 +68,7 @@
             return;
         }
 
-        await dbWorker.updateLog(toUpdate.join(", "), `id = ${event.id}`);
+        await updateLog(dbWorker, toUpdate.join(", "), `id = ${event.id}`);
 
         updateEvent();
         modal.closeModal();

@@ -6,6 +6,7 @@
  */
 
 import type { DbWorker } from "$lib/database.worker";
+import { addLog } from "../../routes/calendar/log";
 import { addActivity, listActivities } from "./activity";
 import { addProject, listProjects } from "./projects";
 
@@ -93,7 +94,8 @@ export const addTestLog = async (dbWorker: DbWorker) => {
   // Iterate over the sample logs and add them to the database.
   // Add the sample logs to the database.
   for (const log of logsToAdd) {
-    await dbWorker.addLog(
+    await addLog(
+      dbWorker,
       log.activityName,
       log.projectName,
       log.end - log.start,
