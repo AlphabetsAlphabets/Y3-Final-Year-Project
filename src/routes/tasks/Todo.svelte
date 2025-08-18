@@ -1,26 +1,7 @@
 <script lang="ts">
-    import type { DbWorker } from "$lib/database.worker";
-    import * as Comlink from "comlink";
-    import { onMount } from "svelte";
+    import { deleteTask, markTaskComplete } from "./task";
 
-    import { addTask, deleteTask, listTasks, markTaskComplete } from "./task";
-
-    import type { Task } from "$lib/types/schema";
-    import Todo from "./Todo.svelte";
-
-    let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
-
-    let tasks: Task[] = $state([]);
-    const loadWorker = async () => {
-        const Worker = await import("$lib/database.worker?worker");
-        dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
-        await dbWorker.initWorker();
-        tasks = await listTasks(dbWorker);
-    };
-
-    let newTaskName = $state("");
-    let newTaskDescription = $state("");
-    let isDoneListCollapsed = $state(true);
+    let { dbWorker, tasks } = $props();
 
     let finishTask = async (taskId: number) => {
         if (dbWorker) {
@@ -29,99 +10,40 @@
             console.error("Worker is not ready. Please try again.");
         }
     };
-
-    let addNewTask = async () => {
-        if (dbWorker) {
-            tasks = await addTask(dbWorker, newTaskName, newTaskDescription);
-        } else {
-            console.error("Worker is not ready. Please try again.");
-        }
-    };
-
-    onMount(loadWorker);
 </script>
 
-<div class="container">
-    <header>
-        <h1>Tasks</h1>
-        <p>Stay organized and get things done.</p>
-    </header>
-
-    <div class="add-task-wrapper">
-        <div class="task-inputs">
-            <input
-                type="text"
-                bind:value={newTaskName}
-                placeholder="e.g., Finish project report"
-            />
-            <input
-                type="text"
-                class="description-input"
-                bind:value={newTaskDescription}
-                placeholder="description"
-            />
-        </div>
-        <button aria-label="Add new task" onclick={addNewTask}>
-            <i class="bi bi-plus-lg"></i>
-            <span>Add Task</span>
-        </button>
-    </div>
-
-    <div class="tasks-section">
-        <button
-            class="section-title-button"
-            onclick={() => (isDoneListCollapsed = !isDoneListCollapsed)}
-        >
-            <h2 class="section-title">Done</h2>
-            <i class="bi bi-chevron-down" class:rotated={isDoneListCollapsed}
-            ></i>
-        </button>
-        {#if !isDoneListCollapsed}
-            <ul class="task-list">
-                {#each tasks as task (task.id)}
-                    {#if task.completed}
-                        <li class="task-item">
-                            <button
-                                aria-label="Finish task"
-                                class="checkbox"
-                                onclick={async () => finishTask(task.id)}
-                            >
-                                <i class="bi bi-check"></i>
-                            </button>
-                            <span class="task-name">{task.name}</span>
-                            <small>{task.description}</small>
-                            <button
-                                class="delete-btn"
-                                aria-label="Delete task"
-                                onclick={async () => {
-                                    if (dbWorker) {
-                                        tasks = await deleteTask(
-                                            dbWorker,
-                                            task.id,
-                                        );
-                                    } else {
-                                        console.error(
-                                            "Worker not ready. Please wait.",
-                                        );
-                                    }
-                                }}
-                            >
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </li>
-                    {/if}
-                {/each}
-            </ul>
-        {/if}
-    </div>
-
-    {#key dbWorker}
-        {#if dbWorker}
-            <Todo {dbWorker} {tasks} />
-        {:else}
-            <p>Please wait while the app loads.</p>
-        {/if}
-    {/key}
+<div class="tasks-section">
+    <h2 class="section-title">Todo</h2>
+    <ul class="task-list">
+        {#each tasks as task (task.id)}
+            {#if !task.completed}
+                <li class="task-item">
+                    <button
+                        aria-label="Finish task"
+                        class="checkbox"
+                        onclick={async () => finishTask(task.id)}
+                    >
+                        <i class="bi bi-check"></i>
+                    </button>
+                    <span class="task-name">{task.name}</span>
+                    <small>{task.description}</small>
+                    <button
+                        class="delete-btn"
+                        aria-label="Delete task"
+                        onclick={async () => {
+                            if (dbWorker) {
+                                tasks = await deleteTask(dbWorker, task.id);
+                            } else {
+                                console.error("Worker not ready. Please wait.");
+                            }
+                        }}
+                    >
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </li>
+            {/if}
+        {/each}
+    </ul>
 </div>
 
 <style>
