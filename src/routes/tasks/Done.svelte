@@ -137,7 +137,6 @@
     .task-list .task-item:last-child {
         border-bottom: none;
     }
-    @import "./shared/task-common.css";
 
     .section-header {
         display: flex;

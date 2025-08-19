@@ -1,5 +1,5 @@
 <script lang="ts">
-    import TaskList from "./TaskList.svelte";
+    import TaskManager from "./TaskManager.svelte";
 </script>
 
-<TaskList />
+<TaskManager />

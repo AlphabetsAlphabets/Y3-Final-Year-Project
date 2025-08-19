@@ -1,23 +1,6 @@
 <script lang="ts">
-    import type { DbWorker } from "$lib/database.worker";
-    import * as Comlink from "comlink";
-    import { onMount } from "svelte";
-
-    import { addTask, listTasks } from "./task";
-
-    import type { Task } from "$lib/types/schema";
-    import Todo from "./Todo.svelte";
-    import Done from "./Done.svelte";
-
-    let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
-
-    let tasks: Task[] = $state([]);
-    const loadWorker = async () => {
-        const Worker = await import("$lib/database.worker?worker");
-        dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
-        await dbWorker.initWorker();
-        tasks = await listTasks(dbWorker);
-    };
+    let { dbWorker, tasks = $bindable() } = $props();
+    import { addTask } from "./task";
 
     let newTaskName = $state("");
     let newTaskDescription = $state("");
@@ -29,56 +12,34 @@
             console.error("Worker is not ready. Please try again.");
         }
     };
-
-    onMount(loadWorker);
 </script>
 
-<div class="container">
-    <header>
-        <h1>Tasks</h1>
-        <p>Stay organized and get things done.</p>
-    </header>
+<header>
+    <h1>Tasks</h1>
+    <p>Stay organized and get things done.</p>
+</header>
 
-    <div class="add-task-wrapper">
-        <div class="task-inputs">
-            <input
-                type="text"
-                bind:value={newTaskName}
-                placeholder="e.g., Finish project report"
-            />
-            <input
-                type="text"
-                class="description-input"
-                bind:value={newTaskDescription}
-                placeholder="description"
-            />
-        </div>
-        <button aria-label="Add new task" onclick={addNewTask}>
-            <i class="bi bi-plus-lg"></i>
-            <span>Add Task</span>
-        </button>
+<div class="add-task-wrapper">
+    <div class="task-inputs">
+        <input
+            type="text"
+            bind:value={newTaskName}
+            placeholder="e.g., Finish project report"
+        />
+        <input
+            type="text"
+            class="description-input"
+            bind:value={newTaskDescription}
+            placeholder="description"
+        />
     </div>
-
-    {#key dbWorker}
-        {#if dbWorker}
-            <Done {dbWorker} bind:tasks />
-            <Todo {dbWorker} bind:tasks />
-        {:else}
-            <p>Please wait while the app loads.</p>
-        {/if}
-    {/key}
+    <button aria-label="Add new task" onclick={addNewTask}>
+        <i class="bi bi-plus-lg"></i>
+        <span>Add Task</span>
+    </button>
 </div>
 
 <style>
-    .container {
-        max-width: 700px;
-        margin: 2rem auto;
-        padding: 1rem;
-        font-family:
-            -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-            Arial, sans-serif;
-    }
-
     header {
         margin-bottom: 2rem;
     }
