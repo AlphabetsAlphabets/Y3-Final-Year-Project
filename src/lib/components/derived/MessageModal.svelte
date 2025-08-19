@@ -2,11 +2,12 @@
     import Modal from "../Modal.svelte";
 
     let modal: Modal | null = $state(null);
+    let { children, title } = $props();
 </script>
 
 <div class="message-modal-wrapper">
-    <Modal bind:this={modal} title="Warning">
-        <p>This will DELETE all COMPLETED tasks. Are you sure?</p>
+    <Modal bind:this={modal} {title}>
+        {@render children()}
     </Modal>
 </div>
 
