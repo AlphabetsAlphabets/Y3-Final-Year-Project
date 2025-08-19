@@ -1,7 +1,7 @@
 <script lang="ts">
     import { deleteTask, markTaskComplete } from "./task";
 
-    let { dbWorker, tasks } = $props();
+    let { dbWorker, tasks = $bindable() } = $props();
 
     let finishTask = async (taskId: number) => {
         if (dbWorker) {
