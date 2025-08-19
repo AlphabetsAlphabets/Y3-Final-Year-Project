@@ -1,27 +1,13 @@
 <script lang="ts">
-    import * as Comlink from "comlink";
-    import { onMount } from "svelte";
-
     import Modal from "$lib/components/Modal.svelte";
 
-    import type { DbWorker } from "$lib/database.worker";
-    import { type Activity } from "$lib/types/schema";
-    import { addActivity, listActivities } from "$lib/utils/activity";
+    import { addActivity } from "$lib/utils/activity";
 
-    let { selected = $bindable() } = $props();
-
-    let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
-    let activities: Activity[] = $state([]);
-
-    const loadWorker = async () => {
-        const Worker = await import("$lib/database.worker?worker");
-        dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
-        await dbWorker.initWorker();
-
-        activities = await listActivities(dbWorker);
-    };
-
-    onMount(loadWorker);
+    let {
+        dbWorker,
+        selected = $bindable(),
+        activities = $bindable(),
+    } = $props();
 
     let modal: Modal | null = $state(null);
     let userInput = $state("");

@@ -53,7 +53,11 @@
 {#if dbWorker}
     <button onclick={createDummyLogs}> Add test log </button>
     {#key calendarEvents}
-        <Calendar events={calendarEvents} refresh={refreshCalendar} />
+        <Calendar
+            {dbWorker}
+            events={calendarEvents}
+            refresh={refreshCalendar}
+        />
     {/key}
 {:else}
     <p>Please wait while the calendar loads</p>

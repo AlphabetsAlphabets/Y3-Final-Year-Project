@@ -1,82 +1,39 @@
 <script lang="ts">
-    import * as Comlink from "comlink";
-    import { onMount } from "svelte";
-
-    import type { DbWorker } from "$lib/database.worker";
-
     import Modal from "$lib/components/Modal.svelte";
 
-    import {
-        formatDateForInput,
-        updateEventColor,
-        updateEventTime,
-        updateEventTitle,
-    } from "./calendar";
-    import { updateLog } from "./log";
+    import { formatDateForInput } from "./calendar";
 
-    let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
+    import { handleActivityUpdate } from "./log";
+
     // updateEvent will call a method defined in the parent component to change the parent's state.
-    let { modal = $bindable(), event = $bindable(), updateEvent } = $props();
-
-    const loadWorker = async () => {
-        const Worker = await import("$lib/database.worker?worker");
-        dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
-        await dbWorker.initWorker();
-    };
-
-    onMount(loadWorker);
+    let {
+        dbWorker,
+        modal = $bindable(),
+        event = $bindable(),
+        updateEvent,
+    } = $props();
 
     let newTitle = $state("");
     let newColor = $state("");
     let newStartTime: Date | null = $state(null);
     let newEndTime: Date | null = $state(null);
-
-    async function handleActivityUpdate() {
-        if (!dbWorker) {
-            console.error("Worker in context menu not ready.");
-            return;
-        }
-
-        let toUpdate: string[] = [];
-
-        let updateTitle = await updateEventTitle(newTitle, event);
-        toUpdate.push(...updateTitle);
-
-        if (newStartTime && newEndTime) {
-            let update = await updateEventTime(newStartTime, newEndTime);
-            toUpdate.push(...update);
-        } else if (newStartTime) {
-            let updateStart = await updateEventTime(newStartTime, event.end);
-            toUpdate.push(...updateStart);
-        } else if (newEndTime) {
-            let updateEnd = await updateEventTime(event.start, newEndTime);
-            toUpdate.push(...updateEnd);
-        } else {
-            console.error("Something went wrong.");
-        }
-
-        let query = await updateEventColor(newColor, event);
-        if (query.length !== 0) {
-            dbWorker.update("project", query[0], query[1]);
-        }
-
-        if (toUpdate.length === 0) {
-            modal.closeModal();
-            if (query.length !== 0) {
-                updateEvent();
-            }
-            return;
-        }
-
-        await updateLog(dbWorker, toUpdate.join(", "), `id = ${event.id}`);
-
-        updateEvent();
-        modal.closeModal();
-    }
 </script>
 
 <Modal bind:this={modal} title="Edit Event">
-    <form onsubmit={handleActivityUpdate}>
+    <form
+        onsubmit={async () => {
+            await handleActivityUpdate(
+                modal,
+                dbWorker,
+                newTitle,
+                newColor,
+                event,
+                newStartTime,
+                newEndTime,
+                updateEvent,
+            );
+        }}
+    >
         <div class="form-grid">
             <label for="title">Title</label>
             <input

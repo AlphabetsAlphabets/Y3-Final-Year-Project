@@ -1,26 +1,15 @@
 <script lang="ts">
-    import * as Comlink from "comlink";
-    import { onMount } from "svelte";
-
     import Modal from "$lib/components/Modal.svelte";
 
-    import type { DbWorker } from "$lib/database.worker";
     import { type Project } from "$lib/types/schema";
-    import { addProject, listProjects } from "$lib/utils/projects";
+    import { addProject } from "$lib/utils/projects";
 
-    let { selected = $bindable(), color = $bindable() } = $props();
-
-    let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
-    let projects: Project[] = $state([]);
-
-    const loadWorker = async () => {
-        const Worker = await import("$lib//database.worker?worker");
-        dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
-        await dbWorker.initWorker();
-        projects = await listProjects(dbWorker);
-    };
-
-    onMount(loadWorker);
+    let {
+        dbWorker,
+        selected = $bindable(),
+        color = $bindable(),
+        projects = $bindable(),
+    } = $props();
 
     let modal: Modal | null = $state(null);
     let userInput = $state("");
@@ -78,11 +67,6 @@
                             class="form-control form-control-color"
                             bind:value={option.color}
                             onchange={async () => {
-                                if (!dbWorker) {
-                                    console.error("Worker not ready.");
-                                    return;
-                                }
-
                                 projects = await addProject(
                                     dbWorker,
                                     option.name,

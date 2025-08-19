@@ -1,9 +1,5 @@
 <script lang="ts">
-    import { onMount } from "svelte";
     import { Calendar, Interaction, TimeGrid } from "@event-calendar/core";
-    import * as Comlink from "comlink";
-
-    import type { DbWorker } from "$lib/database.worker";
 
     import Modal from "$lib/components/Modal.svelte";
     import EditLogModal from "./EditLogModal.svelte";
@@ -12,28 +8,15 @@
     import { updateLog } from "./log";
 
     let {
+        dbWorker,
         events,
         refresh, // calls a method defined in the parent component to change the parent's state.
-    }: { events: CalendarEvent[]; refresh: () => Promise<void> } = $props();
+    } = $props();
 
     let modal: Modal | null = $state(null);
     let targetEvent: CalendarEvent | undefined = $state();
-    let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
-
-    const loadWorker = async () => {
-        const Worker = await import("$lib/database.worker?worker");
-        dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
-        await dbWorker.initWorker();
-    };
-
-    onMount(loadWorker);
 
     async function handleEventChange(arg: { event: CalendarEvent }) {
-        if (!dbWorker) {
-            console.error("DB worker is not available.");
-            return;
-        }
-
         let newStart = new Date(arg.event.start);
         let newEnd = new Date(arg.event.end);
 
@@ -59,6 +42,7 @@
 </script>
 
 <EditLogModal
+    {dbWorker}
     bind:modal
     bind:event={targetEvent}
     updateEvent={async () => {

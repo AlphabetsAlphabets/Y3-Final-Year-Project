@@ -2,21 +2,22 @@
     import { onMount } from "svelte";
     import * as Comlink from "comlink";
 
-    import Timer from "./Timer.svelte";
-
-    import { seconds } from "./timer";
-
     // If there is an ep.EventListener error then the cause is this import statement.
     // comlink requires the worker be exposed via Comlink.expose but importing this file
     // runs that code and it may be ran BEFORE the worker is ready. Which causes
     // the EventListener error.
     import type { DbWorker } from "$lib/database.worker";
+    import type { Activity, Project, Task } from "$lib/types/schema";
 
     import ProjectModal from "./ProjectModal.svelte";
     import SelectModal from "./SelectModal.svelte";
     import Todo from "./tasks/Todo.svelte";
+    import Timer from "./Timer.svelte";
+
     import { listTasks } from "./tasks/task";
-    import type { Task } from "$lib/types/schema";
+    import { listActivities } from "$lib/utils/activity";
+    import { listProjects } from "$lib/utils/projects";
+    import { seconds } from "./timer";
 
     let activityName: string = $state("Activity");
     let projectName: string = $state("Project");
@@ -24,12 +25,17 @@
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
 
     let tasks: Task[] = $state([]);
+    let activities: Activity[] = $state([]);
+    let projects: Project[] = $state([]);
+
     const loadWorker = async () => {
         const Worker = await import("$lib/database.worker?worker");
         dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
         await dbWorker.initWorker();
 
         tasks = await listTasks(dbWorker);
+        activities = await listActivities(dbWorker);
+        projects = await listProjects(dbWorker);
     };
 
     onMount(loadWorker);
@@ -54,12 +60,18 @@
                 <form onsubmit={(e) => e.preventDefault()}>
                     <div class="d-flex gap-2 mb-3">
                         <div class="flex-grow-1">
-                            <SelectModal bind:selected={activityName} />
+                            <SelectModal
+                                {dbWorker}
+                                bind:selected={activityName}
+                                bind:activities
+                            />
                         </div>
                         <div class="flex-grow-1">
                             <ProjectModal
+                                {dbWorker}
                                 bind:selected={projectName}
                                 bind:color={projectColor}
+                                bind:projects
                             />
                         </div>
                     </div>

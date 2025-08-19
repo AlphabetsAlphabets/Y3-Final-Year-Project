@@ -1,5 +1,13 @@
+import type Modal from "$lib/components/Modal.svelte";
+
 import type { Log, Project } from "$lib/types/schema";
 import type { DbWorker } from "$lib/database.worker";
+
+import {
+  updateEventColor,
+  updateEventTime,
+  updateEventTitle,
+} from "./calendar";
 
 export const listLog = async (dbWorker: DbWorker): Promise<Log[]> => {
   const response = await dbWorker.list("log");
@@ -49,4 +57,51 @@ export const updateLog = async (
   clause: string,
 ) => {
   await dbWorker.update("log", toUpdate, clause);
+};
+
+export const handleActivityUpdate = async (
+  modal: Modal,
+  dbWorker: DbWorker,
+  newTitle: string,
+  newColor: string,
+  event: any,
+  newStartTime: Date | null,
+  newEndTime: Date | null,
+  updateEvent: any,
+) => {
+  const toUpdate: string[] = [];
+
+  const updateTitle = await updateEventTitle(newTitle, event);
+  toUpdate.push(...updateTitle);
+
+  if (newStartTime && newEndTime) {
+    const update = await updateEventTime(newStartTime, newEndTime);
+    toUpdate.push(...update);
+  } else if (newStartTime) {
+    const updateStart = await updateEventTime(newStartTime, event.end);
+    toUpdate.push(...updateStart);
+  } else if (newEndTime) {
+    const updateEnd = await updateEventTime(event.start, newEndTime);
+    toUpdate.push(...updateEnd);
+  } else {
+    console.error("Something went wrong.");
+  }
+
+  const query = await updateEventColor(newColor, event);
+  if (query.length !== 0) {
+    dbWorker.update("project", query[0], query[1]);
+  }
+
+  if (toUpdate.length === 0) {
+    modal.closeModal();
+    if (query.length !== 0) {
+      updateEvent();
+    }
+    return;
+  }
+
+  await updateLog(dbWorker, toUpdate.join(", "), `id = ${event.id}`);
+
+  updateEvent();
+  modal.closeModal();
 };
