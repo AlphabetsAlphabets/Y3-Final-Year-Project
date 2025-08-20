@@ -1,5 +1,6 @@
 import type { DbWorker } from "$lib/database.worker";
 import type { Task } from "$lib/types/schema";
+import { listTasks } from "$lib/utils/task";
 
 const TABLE = "tasks";
 
@@ -16,11 +17,6 @@ export const addTask = async (
   );
 
   return await listTasks(dbWorker);
-};
-
-export const listTasks = async (dbWorker: DbWorker): Promise<Task[]> => {
-  const response = await dbWorker.list(TABLE);
-  return (response?.result?.resultRows as Task[]) || [];
 };
 
 export const deleteTask = async (

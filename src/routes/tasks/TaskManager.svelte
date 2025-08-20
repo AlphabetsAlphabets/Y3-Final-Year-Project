@@ -4,7 +4,7 @@
     import { onMount } from "svelte";
 
     import type { Task } from "$lib/types/schema";
-    import { listTasks } from "./task";
+    import { listTasks } from "$lib/utils/task";
 
     import TaskAdder from "./TaskAdder.svelte";
     import Done from "./Done.svelte";

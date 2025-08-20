@@ -14,7 +14,7 @@
     import Todo from "./tasks/Todo.svelte";
     import Timer from "./Timer.svelte";
 
-    import { listTasks } from "./tasks/task";
+    import { listTasks } from "$lib/utils/task";
     import { listActivities } from "$lib/utils/activity";
     import { listProjects } from "$lib/utils/projects";
     import { seconds } from "./timer";
