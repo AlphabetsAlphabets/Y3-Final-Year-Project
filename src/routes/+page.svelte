@@ -22,9 +22,12 @@
     let activityName: string = $state("Activity");
     let projectName: string = $state("Project");
     let projectColor: string = $state("");
+
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
 
     let tasks: Task[] = $state([]);
+    let taskAndActivities: { id: number; name: string; isTask: boolean }[] =
+        $state([]);
     let activities: Activity[] = $state([]);
     let projects: Project[] = $state([]);
 
@@ -34,7 +37,18 @@
         await dbWorker.initWorker();
 
         tasks = await listTasks(dbWorker);
+        taskAndActivities = tasks
+            .filter((task) => task.completed == 0)
+            .map((task: Task) => {
+                return { id: task.id, name: task.name, isTask: true };
+            });
+
         activities = await listActivities(dbWorker);
+        let taskifiedActivities = activities.map((activity: Activity) => {
+            return { id: activity.id, name: activity.name, isTask: false };
+        });
+
+        taskAndActivities.push(...taskifiedActivities);
         projects = await listProjects(dbWorker);
     };
 
@@ -63,7 +77,7 @@
                             <SelectModal
                                 {dbWorker}
                                 bind:selected={activityName}
-                                bind:activities
+                                bind:taskAndActivities
                             />
                         </div>
                         <div class="flex-grow-1">
