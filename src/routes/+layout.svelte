@@ -4,11 +4,6 @@
     let { children } = $props();
     let pages = [
         {
-            name: "Summary",
-            href: "/summary",
-            icon: "bi-bar-chart-line",
-        },
-        {
             name: "Home",
             href: "/",
             icon: "bi-house",
