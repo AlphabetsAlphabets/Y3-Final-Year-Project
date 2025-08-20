@@ -8,8 +8,10 @@ export type Project = {
   color: string;
 };
 
-// This is a custom type that doesn't correspond with the definition of the
-// log table in the database itself.
+/**
+ * This is a custom type that doesn't correspond with the definition of the
+ * log table in the database itself.
+ */
 export type Log = {
   id: number;
   activity: string;
