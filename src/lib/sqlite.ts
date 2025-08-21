@@ -1,5 +1,6 @@
 import type { Promiser } from "$lib/types/promiser";
 import sqlite3Worker1Promiser from "$lib/sqlite/jswasm/sqlite3-worker1-promiser.mjs";
+import { createSql } from "$lib/types/schema";
 
 export enum Command {
   SETUP,
@@ -44,30 +45,45 @@ export const initDb = async () => {
 
 export const setupTables = async () => {
   isPromiserReady(promiser);
+  const createTablesSql = createSql.join("\n");
 
   // Enable foreign key constraints
   await promiser("exec", {
-    sql: `
-      CREATE TABLE IF NOT EXISTS activity (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL
-      );
+    sql: createTablesSql,
+  });
+};
 
-      CREATE TABLE IF NOT EXISTS project (
-        name TEXT PRIMARY KEY,
-        color TEXT NOT NULL
-      );
+const concatColums = (columns: string, table: string): string => {
+  let query = "";
+  if (columns.length > 0) {
+    query += ` ${columns}`;
+  } else {
+    query += " *";
+  }
 
-      CREATE TABLE IF NOT EXISTS log (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        activity TEXT NOT NULL,
-        project_name TEXT,
-        elapsed INTEGER NOT NULL,
-        start INTEGER NOT NULL,
-        end INTEGER NOT NULL,
-        FOREIGN KEY (project_name) REFERENCES project(name) ON UPDATE CASCADE
-      );
-    `,
+  query += ` FROM ${table}`;
+
+  return query;
+};
+
+const concatClause = (clause: string): string => {
+  let query = "";
+  if (clause.length > 0) {
+    query += ` WHERE ${clause}`;
+  }
+
+  return query;
+};
+
+export const remove = async (table: string, clause: string) => {
+  isPromiserReady(promiser);
+
+  let query = `DELETE FROM ${table}`;
+  query += concatClause(clause);
+
+  return await promiser("exec", {
+    sql: query,
+    rowMode: "object",
   });
 };
 
@@ -79,17 +95,8 @@ export const list = async (
   isPromiserReady(promiser);
 
   let query = `SELECT`;
-  if (columns.length > 0) {
-    query += ` ${columns}`;
-  } else {
-    query += " *";
-  }
-
-  query += ` FROM ${table}`;
-
-  if (clause.length > 0) {
-    query += ` WHERE ${clause}`;
-  }
+  query += concatColums(columns, table);
+  query += concatClause(clause);
 
   return await promiser("exec", {
     sql: query,
@@ -150,6 +157,7 @@ export const reset = async (table?: string): Promise<void> => {
         DROP TABLE IF EXISTS log;
         DROP TABLE IF EXISTS activity;
         DROP TABLE IF EXISTS project;
+        DROP TABLE IF EXISTS tasks;
       `,
     });
     console.log("All tables have been dropped");

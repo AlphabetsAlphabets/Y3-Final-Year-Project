@@ -4,13 +4,19 @@
  * It checks for existing data to avoid duplicates.
  * @param dbWorker - The database worker instance to interact with the database.
  */
+
+import type { DbWorker } from "$lib/database.worker";
+import { addLog } from "../../routes/calendar/log";
+import { addActivity, listActivities } from "./activity";
+import { addProject, listProjects } from "./projects";
+
 /**
  * Populates the database with test data for projects, activities, and time logs.
  * This function is useful for development and testing purposes.
  *
  * @param dbWorker - The database worker instance to interact with the database.
  */
-export const addTestLog = async (dbWorker) => {
+export const addTestLog = async (dbWorker: DbWorker) => {
   // If the database worker is not available, exit the function.
   // If the database worker is not available, exit the function.
   if (!dbWorker) return;
@@ -32,27 +38,27 @@ export const addTestLog = async (dbWorker) => {
 
   // Retrieve all existing projects from the database to prevent duplicates.
   // Retrieve existing projects from the database to avoid duplicates.
-  const existingProjects = await dbWorker.listProjects();
+  const existingProjects = await listProjects(dbWorker);
   const existingProjectNames = new Set(existingProjects.map((p) => p.name));
 
   // Iterate over the sample projects and add them to the database if they don't already exist.
   // Add new projects if they don't already exist.
   for (const [projectName, projectColor] of Object.entries(projects)) {
     if (!existingProjectNames.has(projectName)) {
-      await dbWorker.addProject(projectName, projectColor);
+      await addProject(dbWorker, projectName, projectColor);
     }
   }
 
   // Retrieve all existing activities from the database to prevent duplicates.
   // Retrieve existing activities from the database to avoid duplicates.
-  const existingActivities = await dbWorker.listActivities();
+  const existingActivities = await listActivities(dbWorker);
   const existingActivityNames = new Set(existingActivities.map((a) => a.name));
 
   // Iterate over the sample activities and add them to the database if they don't already exist.
   // Add new activities if they don't already exist.
   for (const activity of activities) {
     if (!existingActivityNames.has(activity.name)) {
-      await dbWorker.addActivity(activity.name);
+      await addActivity(dbWorker, activity.name);
     }
   }
 
@@ -88,7 +94,8 @@ export const addTestLog = async (dbWorker) => {
   // Iterate over the sample logs and add them to the database.
   // Add the sample logs to the database.
   for (const log of logsToAdd) {
-    await dbWorker.addLog(
+    await addLog(
+      dbWorker,
       log.activityName,
       log.projectName,
       log.end - log.start,

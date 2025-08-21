@@ -8,17 +8,18 @@
         startCountdown,
         stopCountdown,
         TimerState,
-    } from "$lib/timer";
+    } from "./timer";
 
-    import type { DbWorker } from "$lib/workers/database.worker";
+    import type { DbWorker } from "$lib/database.worker";
+    import { addLog } from "./calendar/log";
 
-    let { activityName, projectName, projectColor } = $props();
+    let { activityName, projectName } = $props();
 
     let timerState = $state(TimerState.Stopped);
 
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
     const loadWorker = async () => {
-        const Worker = await import("$lib/workers/database.worker?worker");
+        const Worker = await import("$lib/database.worker?worker");
         dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
         await dbWorker.initWorker();
     };
@@ -77,7 +78,8 @@
                     return;
                 }
 
-                await dbWorker.addLog(
+                await addLog(
+                    dbWorker,
                     activityName,
                     projectName,
                     startDate,
