@@ -1,38 +1,27 @@
 <script lang="ts">
-    import * as Comlink from "comlink";
-    import { onMount } from "svelte";
+    import Modal from "$lib/components/Modal.svelte";
+    import type { Activity } from "$lib/types/schema";
 
-    import Modal from "../Modal.svelte";
+    import { addActivity } from "$lib/utils/activity";
 
-    import type { DbWorker } from "$lib/workers/database.worker";
-    import { type Activity } from "$lib/types/schema";
-
-    let { selected = $bindable() } = $props();
-
-    let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
-    let activities: Activity[] = $state([]);
-
-    const loadWorker = async () => {
-        const Worker = await import("$lib/workers/database.worker?worker");
-        dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
-        await dbWorker.initWorker();
-        activities = await dbWorker.listActivities();
-    };
-
-    onMount(loadWorker);
-
+    let {
+        dbWorker,
+        selected = $bindable(),
+        taskAndActivities = $bindable(),
+    } = $props();
     let modal: Modal | null = $state(null);
     let userInput = $state("");
 
-    let filteredOptions: { id: number; name: string }[] = $derived.by(() => {
-        if (userInput.length === 0) {
-            return activities;
-        }
+    let filteredOptions: { id: number; name: string; isTask: boolean }[] =
+        $derived.by(() => {
+            if (userInput.length === 0) {
+                return taskAndActivities;
+            }
 
-        return activities.filter((option: { id: number; name: string }) =>
-            option.name.toLowerCase().includes(userInput.toLowerCase()),
-        );
-    });
+            return taskAndActivities.filter((option: Activity) =>
+                option.name.toLowerCase().includes(userInput.toLowerCase()),
+            );
+        });
 </script>
 
 <button
@@ -54,7 +43,7 @@
     />
     {#if filteredOptions.length > 0 || userInput === ""}
         <ul class="options-list">
-            {#each filteredOptions as option (option.id)}
+            {#each filteredOptions as option (option.name)}
                 <li class="option-item">
                     <button
                         type="button"
@@ -64,6 +53,9 @@
                             modal?.closeModal();
                         }}
                     >
+                        {#if option.isTask}
+                            <span class="badge bg-success">TASK</span>
+                        {/if}
                         {option.name}
                     </button>
                 </li>
@@ -80,7 +72,7 @@
                     return;
                 }
 
-                activities = await dbWorker.addActivity(userInput);
+                taskAndActivities = await addActivity(dbWorker, userInput);
                 selected = userInput;
                 modal?.closeModal();
             }}>Create "{userInput}"</button

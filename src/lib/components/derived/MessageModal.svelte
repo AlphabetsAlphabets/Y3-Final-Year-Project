@@ -1,12 +1,13 @@
 <script lang="ts">
     import Modal from "../Modal.svelte";
 
-    let { modal = $bindable() } = $props();
+    let modal: Modal | null = $state(null);
+    let { children, title } = $props();
 </script>
 
 <div class="message-modal-wrapper">
-    <Modal bind:this={modal} title="Warning">
-        <p>You have failed your FYP.</p>
+    <Modal bind:this={modal} {title}>
+        {@render children()}
     </Modal>
 </div>
 
