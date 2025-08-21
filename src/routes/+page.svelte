@@ -26,8 +26,6 @@
     };
 
     onMount(loadWorker);
-
-    let isPomodoro = $state(false);
 </script>
 
 <div class="settings-container">
@@ -53,32 +51,15 @@
                         </div>
                     </div>
 
-                    <div class="input-group mb-3">
-                        <span class="input-group-text">Goal</span>
-                        <input
-                            type="text"
-                            class="form-control"
-                            placeholder="What are you working on?"
-                        />
-                    </div>
-
-                    <div class="d-grid gap-2 mb-4">
-                        <button
-                            type="button"
-                            class="btn"
-                            class:btn-success={isPomodoro}
-                            class:btn-outline-success={!isPomodoro}
-                            onclick={() => (isPomodoro = !isPomodoro)}
-                        >
-                            Pomodoro
-                        </button>
-                    </div>
-
                     <div class="display-1 fw-bold my-3">
                         {$seconds}<span class="fs-4 align-text-top">s</span>
                     </div>
 
-                    <Timer {activityName} {projectName} {projectColor} />
+                    {#if activityName === "Activity"}
+                        <p>Please select or create an activity to track.</p>
+                    {:else}
+                        <Timer {activityName} {projectName} {projectColor} />
+                    {/if}
                 </form>
             {:else}
                 <div class="d-flex flex-column align-items-center p-5">
