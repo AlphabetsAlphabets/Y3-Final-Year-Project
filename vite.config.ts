@@ -4,6 +4,9 @@ import fs from "fs";
 
 export default defineConfig({
   plugins: [sveltekit()],
+  ssr: {
+    noExternal: process.env.NODE_ENV === "production" ? ["@carbon/charts"] : [],
+  },
   server: {
     https: {
       key: fs.readFileSync("localhost-key.pem"),
