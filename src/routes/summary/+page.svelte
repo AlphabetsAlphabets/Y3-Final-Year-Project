@@ -10,14 +10,21 @@
     import type { Log } from "$lib/types/schema";
     import { listLog } from "../calendar/log";
 
-    import type { PieData } from "./charts";
+    import { defaultPieOptions, type PieData } from "./charts";
     import { timeDistributionByActivity } from "./time_distributions";
 
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
     let logs: Log[] = $state([]);
     let pieData: PieData[] = $state([]);
+    let selectedOption: string = $state("activity");
 
-    // Initialize the worker
+    // Handle dropdown change
+    const handleDropdownChange = (event: Event) => {
+        const target = event.target as HTMLSelectElement;
+        selectedOption = target.value;
+        console.log("Selected option:", selectedOption);
+    };
+
     const loadWorker = async () => {
         const Worker = await import("$lib/database.worker?worker");
         dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
@@ -27,40 +34,30 @@
         pieData = timeDistributionByActivity(logs);
     };
 
-    // Chart options
-    const pieOptions = {
-        title: "Time Distribution by Activity",
-        resizable: true,
-        height: "400px",
-        pie: {
-            alignment: "center",
-        },
-        donut: {
-            center: {
-                label: "Total Hours",
-            },
-        },
-        legend: {
-            position: "right",
-        },
-        color: {
-            scale: {
-                // Dynamic colors will be applied based on data
-            },
-        },
-    };
-
     onMount(loadWorker);
 </script>
 
 <div class="summary-page">
     <h1>Time Tracking Summary</h1>
+    <div class="distribution-selector">
+        <label for="distribution-type">View by:</label>
+        <select
+            id="distribution-type"
+            value={selectedOption}
+            onchange={handleDropdownChange}
+        >
+            <option value="activity">Activity</option>
+            <option value="project">Project</option>
+            <option value="date">By Date</option>
+            <option value="hour">By Hour</option>
+        </select>
+    </div>
 
     {#if dbWorker}
         {#key pieData}
             {#if pieData.length > 0}
                 <div class="chart-container">
-                    <PieChart data={pieData} options={pieOptions} />
+                    <PieChart data={pieData} options={defaultPieOptions} />
                 </div>
             {:else}
                 <div class="no-data">
@@ -90,139 +87,12 @@
         text-align: center;
     }
 
-    .summary-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-        padding: 1rem;
-        background: #f4f4f4;
-        border-radius: 8px;
-    }
-
-    .refresh-btn {
-        padding: 0.75rem 1.5rem;
-        background: #0f62fe;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-weight: 500;
-        transition: background-color 0.2s;
-    }
-
-    .refresh-btn:hover {
-        background: #0353e9;
-    }
-
-    .total-time {
-        font-size: 1.1rem;
-        color: #161616;
-    }
-
     .chart-container {
         margin: 2rem 0;
         padding: 1rem;
         background: #ffffff;
         border-radius: 8px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .summary-stats {
-        margin-top: 2rem;
-        padding: 1.5rem;
-        background: #f4f4f4;
-        border-radius: 8px;
-    }
-
-    .summary-stats h3 {
-        color: #161616;
-        margin-bottom: 1rem;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1rem;
-    }
-
-    .stat-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.75rem;
-        background: white;
-        border-radius: 4px;
-        border-left: 4px solid #0f62fe;
-    }
-
-    .stat-label {
-        font-weight: 500;
-        color: #525252;
-        flex: 1;
-    }
-
-    .stat-value {
-        font-weight: 600;
-        color: #161616;
-        margin-right: 0.5rem;
-    }
-
-    .stat-percentage {
-        font-size: 0.9rem;
-        color: #6f6f6f;
-    }
-
-    .recent-logs {
-        margin-top: 2rem;
-        padding: 1.5rem;
-        background: #ffffff;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .recent-logs h3 {
-        color: #161616;
-        margin-bottom: 1rem;
-    }
-
-    .logs-table {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .log-entry {
-        display: grid;
-        grid-template-columns: 2fr 2fr 1fr 1fr;
-        gap: 1rem;
-        padding: 0.75rem;
-        background: #f9f9f9;
-        border-radius: 4px;
-        align-items: center;
-    }
-
-    .log-activity {
-        font-weight: 500;
-        color: #161616;
-    }
-
-    .log-project {
-        padding-left: 0.5rem;
-        border-left: 3px solid #0f62fe;
-        color: #525252;
-    }
-
-    .log-duration {
-        font-weight: 600;
-        color: #0f62fe;
-        text-align: right;
-    }
-
-    .log-date {
-        color: #6f6f6f;
-        font-size: 0.9rem;
-        text-align: right;
     }
 
     .no-data,
@@ -238,25 +108,41 @@
         font-size: 1.1rem;
     }
 
-    @media (max-width: 768px) {
-        .summary-page {
-            padding: 1rem;
-        }
+    .distribution-selector {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
 
-        .summary-header {
-            flex-direction: column;
-            gap: 1rem;
-            text-align: center;
-        }
+    .distribution-selector label {
+        font-weight: 500;
+        color: #161616;
+        font-size: 1rem;
+    }
 
-        .log-entry {
-            grid-template-columns: 1fr;
-            gap: 0.5rem;
-        }
+    .distribution-selector select {
+        padding: 0.5rem 1rem;
+        border: 1px solid #d0d0d0;
+        border-radius: 4px;
+        background: white;
+        color: #161616;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: border-color 0.2s;
+    }
 
-        .log-duration,
-        .log-date {
-            text-align: left;
-        }
+    .distribution-selector select:hover {
+        border-color: #0f62fe;
+    }
+
+    .distribution-selector select:focus {
+        outline: none;
+        border-color: #0f62fe;
+        box-shadow: 0 0 0 2px rgba(15, 98, 254, 0.2);
     }
 </style>
