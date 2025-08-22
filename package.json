@@ -33,6 +33,7 @@
     "vite": "^6.2.5"
   },
   "dependencies": {
+    "@carbon/charts-svelte": "^1.22.18",
     "bootstrap": "^5.3.5",
     "bootstrap-icons": "^1.11.3",
     "comlink": "^4.4.2",
