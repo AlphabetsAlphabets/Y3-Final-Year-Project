@@ -16,6 +16,7 @@
         timeDistributionByProject,
         getSummaryStats,
         formatDateRange,
+        getColors,
     } from "./time_distributions";
 
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
@@ -36,8 +37,9 @@
         },
     });
 
-    pieOptions.title = "Time Distribution by Activity";
-
+    let pieTitle = `Time distribution by ${selectedOption}`;
+    pieOptions.title = pieTitle;
+    let colors = {};
     const filterLogsByDateRange = () => {
         if (!startDate && !endDate) {
             filteredLogs = logs;
@@ -60,11 +62,14 @@
 
         if (selectedOption === "activity") {
             pieData = timeDistributionByActivity(filteredLogs);
-            pieOptions.title = `Time Distribution by Activity (${dateRangeText})`;
+            colors = getColors(filteredLogs, true);
         } else if (selectedOption === "project") {
             pieData = timeDistributionByProject(filteredLogs);
-            pieOptions.title = `Time Distribution by Project (${dateRangeText})`;
+            colors = getColors(filteredLogs, false);
         }
+
+        pieOptions.title = `Time distribution by ${selectedOption} (${dateRangeText})`;
+        pieOptions.color.scale = colors;
     };
 
     const handleDropdownChange = (event: Event) => {
@@ -154,6 +159,9 @@
         logs = await listLog(dbWorker);
         filteredLogs = logs;
         pieData = timeDistributionByActivity(filteredLogs);
+
+        colors = getColors(filteredLogs, true);
+        pieOptions.color.scale = colors;
     };
 
     onMount(loadWorker);
