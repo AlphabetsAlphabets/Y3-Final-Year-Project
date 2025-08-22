@@ -3,7 +3,7 @@ export type PieData = {
   value: number;
 };
 
-export const defaultPieOptions = {
+export const activityDistributionPieOptions = {
   title: "Time Distribution by Activity",
   resizable: true,
   height: "400px",

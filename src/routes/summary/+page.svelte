@@ -10,19 +10,26 @@
     import type { Log } from "$lib/types/schema";
     import { listLog } from "../calendar/log";
 
-    import { defaultPieOptions, type PieData } from "./charts";
-    import { timeDistributionByActivity } from "./time_distributions";
+    import { activityDistributionPieOptions, type PieData } from "./charts";
+    import {
+        timeDistributionByActivity,
+        timeDistributionByProject,
+    } from "./time_distributions";
 
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
+
     let logs: Log[] = $state([]);
     let pieData: PieData[] = $state([]);
     let selectedOption: string = $state("activity");
 
-    // Handle dropdown change
     const handleDropdownChange = (event: Event) => {
         const target = event.target as HTMLSelectElement;
         selectedOption = target.value;
-        console.log("Selected option:", selectedOption);
+        if (selectedOption === "activity") {
+            pieData = timeDistributionByActivity(logs);
+        } else if (selectedOption === "project") {
+            pieData = timeDistributionByProject(logs);
+        }
     };
 
     const loadWorker = async () => {
@@ -48,8 +55,6 @@
         >
             <option value="activity">Activity</option>
             <option value="project">Project</option>
-            <option value="date">By Date</option>
-            <option value="hour">By Hour</option>
         </select>
     </div>
 
@@ -57,7 +62,10 @@
         {#key pieData}
             {#if pieData.length > 0}
                 <div class="chart-container">
-                    <PieChart data={pieData} options={defaultPieOptions} />
+                    <PieChart
+                        data={pieData}
+                        options={activityDistributionPieOptions}
+                    />
                 </div>
             {:else}
                 <div class="no-data">
