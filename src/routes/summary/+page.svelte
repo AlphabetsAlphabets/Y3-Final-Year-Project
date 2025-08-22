@@ -10,7 +10,7 @@
     import type { Log } from "$lib/types/schema";
     import { listLog } from "../calendar/log";
 
-    import { activityDistributionPieOptions, type PieData } from "./charts";
+    import { pieOptions, type PieData } from "./charts";
     import {
         timeDistributionByActivity,
         timeDistributionByProject,
@@ -22,13 +22,16 @@
     let pieData: PieData[] = $state([]);
     let selectedOption: string = $state("activity");
 
+    pieOptions.title = "Time Distribution by Activity";
     const handleDropdownChange = (event: Event) => {
         const target = event.target as HTMLSelectElement;
         selectedOption = target.value;
         if (selectedOption === "activity") {
             pieData = timeDistributionByActivity(logs);
+            pieOptions.title = "Time Distribution by Activity";
         } else if (selectedOption === "project") {
             pieData = timeDistributionByProject(logs);
+            pieOptions.title = "Time Distribution by Project";
         }
     };
 
@@ -62,10 +65,7 @@
         {#key pieData}
             {#if pieData.length > 0}
                 <div class="chart-container">
-                    <PieChart
-                        data={pieData}
-                        options={activityDistributionPieOptions}
-                    />
+                    <PieChart data={pieData} options={pieOptions} />
                 </div>
             {:else}
                 <div class="no-data">
