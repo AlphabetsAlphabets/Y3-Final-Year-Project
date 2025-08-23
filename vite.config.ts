@@ -1,6 +1,5 @@
 import { sveltekit } from "@sveltejs/kit/vite";
 import { defineConfig } from "vite";
-import fs from "fs";
 
 export default defineConfig({
   plugins: [sveltekit()],
@@ -8,10 +7,6 @@ export default defineConfig({
     noExternal: process.env.NODE_ENV === "production" ? ["@carbon/charts"] : [],
   },
   server: {
-    // https: {
-    //   key: fs.readFileSync("localhost-key.pem"),
-    //   cert: fs.readFileSync("localhost.pem"),
-    // },
     headers: {
       "Cross-Origin-Embedder-Policy": "require-corp",
       "Cross-Origin-Opener-Policy": "same-origin",
