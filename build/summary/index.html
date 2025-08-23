@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="icon" href="../favicon.png" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7"
+            crossorigin="anonymous"
+        />
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="icon" href="/icons/icon.jpg" />
+        
+		<link href="../_app/immutable/assets/4.DFzLthpT.css" rel="stylesheet">
+		<link rel="modulepreload" href="../_app/immutable/entry/start.B1zXZmz4.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/B2z_zy2v.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/Nagih0ik.js">
+		<link rel="modulepreload" href="../_app/immutable/entry/app.idGEKG-7.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/4bz4uomn.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/BlX3xRMM.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/DDpgsnWW.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/CGJs_zZ1.js">
+		<link rel="modulepreload" href="../_app/immutable/nodes/0.Vys8iMn2.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/BdrVcQUR.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/qkCkcpST.js">
+		<link rel="modulepreload" href="../_app/immutable/nodes/4.Bevfib8o.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/DUcmQWgZ.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/D7mLoLgg.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/B8fJUUNV.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/CLNk2ODh.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/XlJgZQad.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/Bm68CKNN.js"><!--[--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/><!--]-->
+    </head>
+    <body data-sveltekit-preload-data="hover">
+        <div style="display: contents"><!--[--><!--[--><!----><!----><div class="summary-page svelte-oymc29"><h1 class="svelte-oymc29">Time Tracking Summary</h1> <div class="distribution-selector svelte-oymc29"><label for="distribution-type" class="svelte-oymc29">View by:</label> <select id="distribution-type" class="svelte-oymc29"><option value="activity" selected>Activity</option><option value="project">Project</option><option value="date">By Date</option><option value="hour">By Hour</option></select> <div class="filters-container svelte-oymc29"><div class="distribution-selector svelte-oymc29"><label for="distribution-type" class="svelte-oymc29">View by:</label> <select id="distribution-type" class="svelte-oymc29"><option value="activity" selected>Activity</option><option value="project">Project</option></select></div> <div class="date-filter svelte-oymc29"><div class="date-input-group svelte-oymc29"><label for="start-date" class="svelte-oymc29">From:</label> <input id="start-date" type="date" value="" class="svelte-oymc29"/></div> <div class="date-input-group svelte-oymc29"><label for="end-date" class="svelte-oymc29">To:</label> <input id="end-date" type="date" value="" class="svelte-oymc29"/></div> <button class="clear-dates svelte-oymc29">Clear Dates</button></div> <div class="preset-buttons svelte-oymc29"><h3 class="svelte-oymc29">Quick Select:</h3> <div class="preset-grid svelte-oymc29"><button class="preset-btn svelte-oymc29">Today</button> <button class="preset-btn svelte-oymc29">Yesterday</button> <button class="preset-btn svelte-oymc29">This Week</button> <button class="preset-btn svelte-oymc29">Last Week</button> <button class="preset-btn svelte-oymc29">This Month</button> <button class="preset-btn svelte-oymc29">Last Month</button></div></div></div></div> <!--[!--><!--]--> <!--[!--><div class="loading svelte-oymc29"><p class="svelte-oymc29">Loading summary data...</p></div><!--]--></div><!----><!----> <div class="container mt-4 fixed-bottom mb-3"><div class="row justify-content-center"><div class="col-md-8 col-lg-6"><ul class="nav nav-pills nav-fill justify-content-center"><!--[--><li class="nav-item"><a class="nav-link active" aria-current="page" href="/summary" title="Summary"><i class="bi bi bi-bar-chart" style="font-size: 1.5rem;" aria-hidden="true"></i> <span class="visually-hidden">Summary</span></a></li><li class="nav-item"><a class="nav-link " href="/" title="Home"><i class="bi bi-house" style="font-size: 1.5rem;" aria-hidden="true"></i> <span class="visually-hidden">Home</span></a></li><li class="nav-item"><a class="nav-link " href="/calendar" title="Calendar"><i class="bi bi-calendar" style="font-size: 1.5rem;" aria-hidden="true"></i> <span class="visually-hidden">Calendar</span></a></li><li class="nav-item"><a class="nav-link " href="/tasks" title="Task"><i class="bi bi bi-list-check" style="font-size: 1.5rem;" aria-hidden="true"></i> <span class="visually-hidden">Task</span></a></li><!--]--></ul></div></div></div><!----><!--]--> <!--[!--><!--]--><!--]-->
+			
+			<script>
+				{
+					__sveltekit_1mt7hrk = {
+						base: new URL("..", location).pathname.slice(0, -1)
+					};
+
+					const element = document.currentScript.parentElement;
+
+					Promise.all([
+						import("../_app/immutable/entry/start.B1zXZmz4.js"),
+						import("../_app/immutable/entry/app.idGEKG-7.js")
+					]).then(([kit, app]) => {
+						kit.start(app, element, {
+							node_ids: [0, 4],
+							data: [null,null],
+							form: null,
+							error: null
+						});
+					});
+
+					if ('serviceWorker' in navigator) {
+						addEventListener('load', function () {
+							navigator.serviceWorker.register('../service-worker.js');
+						});
+					}
+				}
+			</script>
+		</div>
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq"
+            crossorigin="anonymous"
+        ></script>
+    </body>
+</html>
