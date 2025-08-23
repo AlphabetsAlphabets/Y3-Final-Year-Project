@@ -47,7 +47,11 @@ export const timeDistributionByProject = (logs: Log[]) => {
   });
 };
 
-export const getColors = (logs: Log[], activity: boolean) => {
+export type PieColor = {
+  [k: string]: string;
+};
+
+export const getColors = (logs: Log[], activity: boolean): PieColor => {
   const colorMap = new Map<string, string>();
   logs.forEach((log) => {
     const entry = activity ? log.activity : log.project_name;

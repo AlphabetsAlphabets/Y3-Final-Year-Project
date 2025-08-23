@@ -10,36 +10,26 @@
     import type { Log } from "$lib/types/schema";
     import { listLog } from "../calendar/log";
 
-    import { pieOptions, type PieData } from "./charts";
+    import { defaultPieOptions, type PieData } from "./charts";
     import {
         getColors,
         timeDistributionByActivity,
-        timeDistributionByProject,
+        type PieColor,
     } from "./time_distributions";
+
+    import Filter from "./Filter.svelte";
 
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
 
     let logs: Log[] = $state([]);
+
+    let pieOptions = $state(defaultPieOptions);
     let pieData: PieData[] = $state([]);
-    let selectedOption: string = $state("activity");
-    let colors = {};
 
-    pieOptions.title = `Time distribution by ${selectedOption}`;
+    let selectedOption = $state("activity");
+    let colors: PieColor = $state({});
 
-    const handleDropdownChange = (event: Event) => {
-        const target = event.target as HTMLSelectElement;
-        selectedOption = target.value;
-        if (selectedOption === "activity") {
-            pieData = timeDistributionByActivity(logs);
-            colors = getColors(logs, true);
-        } else if (selectedOption === "project") {
-            pieData = timeDistributionByProject(logs);
-            colors = getColors(logs, false);
-        }
-
-        pieOptions.color.scale = colors;
-        pieOptions.title = `Time distribution by ${selectedOption}`;
-    };
+    pieOptions.title = `Time distribution by activity`;
 
     const loadWorker = async () => {
         const Worker = await import("$lib/database.worker?worker");
@@ -47,8 +37,9 @@
         await dbWorker.initWorker();
 
         logs = await listLog(dbWorker);
-        colors = getColors(logs, true);
         pieData = timeDistributionByActivity(logs);
+
+        colors = getColors(logs, true);
         pieOptions.color.scale = colors;
     };
 
@@ -57,17 +48,13 @@
 
 <div class="summary-page">
     <h1>Time Tracking Summary</h1>
-    <div class="distribution-selector">
-        <label for="distribution-type">View by:</label>
-        <select
-            id="distribution-type"
-            value={selectedOption}
-            onchange={handleDropdownChange}
-        >
-            <option value="activity">Activity</option>
-            <option value="project">Project</option>
-        </select>
-    </div>
+    <Filter
+        bind:pieData
+        bind:colors
+        bind:selectedOption
+        bind:pieOptions
+        {logs}
+    />
 
     {#if dbWorker}
         {#key pieData}
@@ -122,43 +109,5 @@
     .loading p {
         margin: 0.5rem 0;
         font-size: 1.1rem;
-    }
-
-    .distribution-selector {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 1rem;
-        padding: 1rem;
-        background: #ffffff;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .distribution-selector label {
-        font-weight: 500;
-        color: #161616;
-        font-size: 1rem;
-    }
-
-    .distribution-selector select {
-        padding: 0.5rem 1rem;
-        border: 1px solid #d0d0d0;
-        border-radius: 4px;
-        background: white;
-        color: #161616;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: border-color 0.2s;
-    }
-
-    .distribution-selector select:hover {
-        border-color: #0f62fe;
-    }
-
-    .distribution-selector select:focus {
-        outline: none;
-        border-color: #0f62fe;
-        box-shadow: 0 0 0 2px rgba(15, 98, 254, 0.2);
     }
 </style>
