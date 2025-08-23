@@ -1,0 +1,1 @@
+import{m as c,o as i,s as _,b as h,h as r,a as d,p as k,c as u,d as y,U as b}from"./Nagih0ik.js";function p(f,n,o){r&&d();var e=f,s=b,a,t=c()?i:_;h(()=>{t(s,s=n())&&(a&&k(a),a=u(()=>o(e)))}),r&&(e=y)}export{p as k};

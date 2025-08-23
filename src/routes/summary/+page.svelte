@@ -75,6 +75,15 @@
     const handleDropdownChange = (event: Event) => {
         const target = event.target as HTMLSelectElement;
         selectedOption = target.value;
+        if (selectedOption === "activity") {
+            pieData = timeDistributionByActivity(logs);
+            pieOptions.title = "Time Distribution by Activity";
+        } else if (selectedOption === "project") {
+            pieData = timeDistributionByProject(logs);
+            pieOptions.title = "Time Distribution by Project";
+        }
+
+        console.log("Selected option:", selectedOption);
         updateChartData();
     };
 
@@ -169,18 +178,6 @@
 
 <div class="summary-page">
     <h1>Time Tracking Summary</h1>
-<<<<<<< HEAD
-    <div class="distribution-selector">
-        <label for="distribution-type">View by:</label>
-        <select
-            id="distribution-type"
-            value={selectedOption}
-            onchange={handleDropdownChange}
-        >
-            <option value="activity">Activity</option>
-            <option value="project">Project</option>
-        </select>
-||||||| 51206db
     <div class="distribution-selector">
         <label for="distribution-type">View by:</label>
         <select
@@ -193,87 +190,85 @@
             <option value="date">By Date</option>
             <option value="hour">By Hour</option>
         </select>
-=======
-
-    <div class="filters-container">
-        <div class="distribution-selector">
-            <label for="distribution-type">View by:</label>
-            <select
-                id="distribution-type"
-                value={selectedOption}
-                onchange={handleDropdownChange}
-            >
-                <option value="activity">Activity</option>
-                <option value="project">Project</option>
-            </select>
-        </div>
-
-        <div class="date-filter">
-            <div class="date-input-group">
-                <label for="start-date">From:</label>
-                <input
-                    id="start-date"
-                    type="date"
-                    bind:value={startDate}
-                    onchange={handleDateChange}
-                />
+        <div class="filters-container">
+            <div class="distribution-selector">
+                <label for="distribution-type">View by:</label>
+                <select
+                    id="distribution-type"
+                    value={selectedOption}
+                    onchange={handleDropdownChange}
+                >
+                    <option value="activity">Activity</option>
+                    <option value="project">Project</option>
+                </select>
             </div>
-            <div class="date-input-group">
-                <label for="end-date">To:</label>
-                <input
-                    id="end-date"
-                    type="date"
-                    bind:value={endDate}
-                    onchange={handleDateChange}
-                />
-            </div>
-            <button class="clear-dates" onclick={clearDates}>
-                Clear Dates
-            </button>
-        </div>
 
-        <div class="preset-buttons">
-            <h3>Quick Select:</h3>
-            <div class="preset-grid">
-                <button
-                    class="preset-btn"
-                    onclick={() => setPresetRange("today")}
-                >
-                    Today
-                </button>
-                <button
-                    class="preset-btn"
-                    onclick={() => setPresetRange("yesterday")}
-                >
-                    Yesterday
-                </button>
-                <button
-                    class="preset-btn"
-                    onclick={() => setPresetRange("thisWeek")}
-                >
-                    This Week
-                </button>
-                <button
-                    class="preset-btn"
-                    onclick={() => setPresetRange("lastWeek")}
-                >
-                    Last Week
-                </button>
-                <button
-                    class="preset-btn"
-                    onclick={() => setPresetRange("thisMonth")}
-                >
-                    This Month
-                </button>
-                <button
-                    class="preset-btn"
-                    onclick={() => setPresetRange("lastMonth")}
-                >
-                    Last Month
+            <div class="date-filter">
+                <div class="date-input-group">
+                    <label for="start-date">From:</label>
+                    <input
+                        id="start-date"
+                        type="date"
+                        bind:value={startDate}
+                        onchange={handleDateChange}
+                    />
+                </div>
+                <div class="date-input-group">
+                    <label for="end-date">To:</label>
+                    <input
+                        id="end-date"
+                        type="date"
+                        bind:value={endDate}
+                        onchange={handleDateChange}
+                    />
+                </div>
+                <button class="clear-dates" onclick={clearDates}>
+                    Clear Dates
                 </button>
             </div>
+
+            <div class="preset-buttons">
+                <h3>Quick Select:</h3>
+                <div class="preset-grid">
+                    <button
+                        class="preset-btn"
+                        onclick={() => setPresetRange("today")}
+                    >
+                        Today
+                    </button>
+                    <button
+                        class="preset-btn"
+                        onclick={() => setPresetRange("yesterday")}
+                    >
+                        Yesterday
+                    </button>
+                    <button
+                        class="preset-btn"
+                        onclick={() => setPresetRange("thisWeek")}
+                    >
+                        This Week
+                    </button>
+                    <button
+                        class="preset-btn"
+                        onclick={() => setPresetRange("lastWeek")}
+                    >
+                        Last Week
+                    </button>
+                    <button
+                        class="preset-btn"
+                        onclick={() => setPresetRange("thisMonth")}
+                    >
+                        This Month
+                    </button>
+                    <button
+                        class="preset-btn"
+                        onclick={() => setPresetRange("lastMonth")}
+                    >
+                        Last Month
+                    </button>
+                </div>
+            </div>
         </div>
->>>>>>> mobile
     </div>
 
     {#if filteredLogs.length > 0}
