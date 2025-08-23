@@ -12,6 +12,7 @@
 
     import { pieOptions, type PieData } from "./charts";
     import {
+        getColors,
         timeDistributionByActivity,
         timeDistributionByProject,
     } from "./time_distributions";
@@ -21,18 +22,23 @@
     let logs: Log[] = $state([]);
     let pieData: PieData[] = $state([]);
     let selectedOption: string = $state("activity");
+    let colors = {};
 
-    pieOptions.title = "Time Distribution by Activity";
+    pieOptions.title = `Time distribution by ${selectedOption}`;
+
     const handleDropdownChange = (event: Event) => {
         const target = event.target as HTMLSelectElement;
         selectedOption = target.value;
         if (selectedOption === "activity") {
             pieData = timeDistributionByActivity(logs);
-            pieOptions.title = "Time Distribution by Activity";
+            colors = getColors(logs, true);
         } else if (selectedOption === "project") {
             pieData = timeDistributionByProject(logs);
-            pieOptions.title = "Time Distribution by Project";
+            colors = getColors(logs, false);
         }
+
+        pieOptions.color.scale = colors;
+        pieOptions.title = `Time distribution by ${selectedOption}`;
     };
 
     const loadWorker = async () => {
@@ -41,7 +47,9 @@
         await dbWorker.initWorker();
 
         logs = await listLog(dbWorker);
+        colors = getColors(logs, true);
         pieData = timeDistributionByActivity(logs);
+        pieOptions.color.scale = colors;
     };
 
     onMount(loadWorker);

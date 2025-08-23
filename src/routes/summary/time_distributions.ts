@@ -46,3 +46,14 @@ export const timeDistributionByProject = (logs: Log[]) => {
     };
   });
 };
+
+export const getColors = (logs: Log[], activity: boolean) => {
+  const colorMap = new Map<string, string>();
+  logs.forEach((log) => {
+    const entry = activity ? log.activity : log.project_name;
+    colorMap.set(entry, log.project_color);
+  });
+
+  // Convert Map to a single object
+  return Object.fromEntries(colorMap);
+};
