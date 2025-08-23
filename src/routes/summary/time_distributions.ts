@@ -1,5 +1,42 @@
 import type { Log } from "$lib/types/schema";
 
+// Helper function to format date for display
+export const formatDateRange = (startDate: string, endDate: string): string => {
+  if (!startDate && !endDate) return "All Time";
+  if (startDate && !endDate)
+    return `From ${new Date(startDate).toLocaleDateString()}`;
+  if (!startDate && endDate)
+    return `Until ${new Date(endDate).toLocaleDateString()}`;
+  return `${new Date(startDate).toLocaleDateString()} - ${new Date(endDate).toLocaleDateString()}`;
+};
+
+// Helper function to get summary statistics
+export const getSummaryStats = (logs: Log[]) => {
+  if (logs.length === 0) {
+    return {
+      totalHours: 0,
+      totalSessions: 0,
+      averageSessionLength: 0,
+      dateRange: { earliest: null as Date | null, latest: null as Date | null },
+    };
+  }
+
+  const totalMs = logs.reduce((sum, log) => sum + log.elapsed, 0);
+  const totalHours = totalMs / (1000 * 60 * 60);
+  const averageSessionLength = totalHours / logs.length;
+
+  const timestamps = logs.map((log) => log.start).sort((a, b) => a - b);
+  const earliest = new Date(timestamps[0]);
+  const latest = new Date(timestamps[timestamps.length - 1]);
+
+  return {
+    totalHours: Math.round(totalHours * 100) / 100,
+    totalSessions: logs.length,
+    averageSessionLength: Math.round(averageSessionLength * 100) / 100,
+    dateRange: { earliest, latest },
+  };
+};
+
 export const timeDistributionByActivity = (logs: Log[]) => {
   const activityTotals = new Map<string, number>();
   logs.forEach((log) => {
@@ -45,4 +82,15 @@ export const timeDistributionByProject = (logs: Log[]) => {
       value: Math.round(total * 100) / 100, // Round to 2 decimal places
     };
   });
+};
+
+export const getColors = (logs: Log[], activity: boolean) => {
+  const colorMap = new Map<string, string>();
+  logs.forEach((log) => {
+    const entry = activity ? log.activity : log.project_name;
+    colorMap.set(entry, log.project_color);
+  });
+
+  // Convert Map to a single object
+  return Object.fromEntries(colorMap);
 };
