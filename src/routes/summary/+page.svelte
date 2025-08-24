@@ -92,55 +92,6 @@
         margin-bottom: 2rem;
         text-align: center;
     }
-
-    .filters-container {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    .summary-stats {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
-
-    .stat-card {
-        background: #ffffff;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        padding: 1.5rem;
-        text-align: center;
-        border-left: 4px solid #0f62fe;
-    }
-
-    .stat-card h3 {
-        color: #525252;
-        font-size: 0.875rem;
-        font-weight: 500;
-        margin: 0 0 0.5rem 0;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .stat-value {
-        color: #161616;
-        font-size: 2rem;
-        font-weight: 600;
-        margin: 0;
-        line-height: 1;
-    }
-
-    .stat-value-small {
-        color: #161616;
-        font-size: 1rem;
-        font-weight: 500;
-        margin: 0;
-        line-height: 1.2;
-    }
-
     .chart-container {
         margin: 2rem 0;
         padding: 1rem;
