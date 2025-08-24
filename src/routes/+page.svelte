@@ -26,10 +26,25 @@
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
 
     let tasks: Task[] = $state([]);
-    let taskAndActivities: { id: number; name: string; isTask: boolean }[] =
-        $state([]);
     let activities: Activity[] = $state([]);
     let projects: Project[] = $state([]);
+
+    const getTaskAndActivities = (tasks: Task[], activities: Activity[]) => {
+        const taskItems = tasks
+            .filter((task) => task.completed == 0)
+            .map((task: Task) => {
+                return { id: task.id, name: task.name, isTask: true };
+            });
+
+        const activityItems = activities.map((activity: Activity) => {
+            return { id: activity.id, name: activity.name, isTask: false };
+        });
+
+        return [...taskItems, ...activityItems];
+    };
+
+    let taskAndActivities: { id: number; name: string; isTask: boolean }[] =
+        $derived(getTaskAndActivities(tasks, activities));
 
     const loadWorker = async () => {
         const Worker = await import("$lib/database.worker?worker");
@@ -37,18 +52,7 @@
         await dbWorker.initWorker();
 
         tasks = await listTasks(dbWorker);
-        taskAndActivities = tasks
-            .filter((task) => task.completed == 0)
-            .map((task: Task) => {
-                return { id: task.id, name: task.name, isTask: true };
-            });
-
         activities = await listActivities(dbWorker);
-        let taskifiedActivities = activities.map((activity: Activity) => {
-            return { id: activity.id, name: activity.name, isTask: false };
-        });
-
-        taskAndActivities.push(...taskifiedActivities);
         projects = await listProjects(dbWorker);
     };
 
@@ -64,10 +68,11 @@
 <main class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6 text-center">
-            <Todo {dbWorker} {tasks} />
-
-            <br />
             {#if dbWorker}
+                <Todo {dbWorker} bind:tasks />
+
+                <br />
+
                 <form onsubmit={(e) => e.preventDefault()}>
                     <div class="d-flex gap-2 mb-3">
                         <div class="flex-grow-1">
