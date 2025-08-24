@@ -62,6 +62,7 @@
     .distribution-selector {
         display: flex;
         align-items: center;
+        flex-wrap: wrap;
         gap: 1rem;
         margin-bottom: 1rem;
         padding: 1rem;
@@ -95,5 +96,21 @@
         outline: none;
         border-color: #0f62fe;
         box-shadow: 0 0 0 2px rgba(15, 98, 254, 0.2);
+    }
+
+    @media (max-width: 768px) {
+        .distribution-selector {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.5rem;
+        }
+
+        .distribution-selector label {
+            margin-bottom: 0.25rem;
+        }
+
+        .distribution-selector select {
+            margin-bottom: 0.5rem;
+        }
     }
 </style>

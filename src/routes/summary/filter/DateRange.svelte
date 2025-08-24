@@ -102,6 +102,7 @@
     .date-range-selector {
         display: flex;
         align-items: center;
+        flex-wrap: wrap;
         gap: 1rem;
         margin-bottom: 1rem;
         padding: 1rem;
@@ -139,8 +140,29 @@
 
     .button-group {
         display: flex;
+        flex-wrap: wrap;
         gap: 0.5rem;
         margin-left: auto;
+    }
+
+    @media (max-width: 768px) {
+        .date-range-selector {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .button-group {
+            margin-left: 0;
+            justify-content: center;
+        }
+
+        .date-range-selector label {
+            margin-bottom: 0.25rem;
+        }
+
+        .date-range-selector input[type="text"] {
+            margin-bottom: 0.5rem;
+        }
     }
 
     .date-button {
