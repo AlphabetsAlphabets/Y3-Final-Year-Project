@@ -1,43 +1,60 @@
 <script lang="ts">
-    import {
-        getColors,
-        timeDistributionByActivity,
-        timeDistributionByProject,
-    } from "./time_distributions";
+    import { pieChartByActivityOrProject, viewByMinute } from "./filter";
+    import { getColors } from "./time_distributions";
 
     let {
         pieData = $bindable(),
         colors = $bindable(),
-        selectedOption = $bindable(),
+        viewBy = $bindable(),
+        timeUnit = $bindable(),
         pieOptions = $bindable(),
         logs,
     } = $props();
 
-    const handleDropdownChange = (event: Event) => {
+    const handleViewByChange = (event: Event) => {
         const target = event.target as HTMLSelectElement;
-        selectedOption = target.value;
+        viewBy = target.value;
 
-        if (selectedOption === "activity") {
-            pieData = timeDistributionByActivity(logs);
-            colors = getColors(logs, true);
-        } else if (selectedOption === "project") {
-            pieData = timeDistributionByProject(logs);
-            colors = getColors(logs, false);
+        let newPieData = pieChartByActivityOrProject(viewBy, logs);
+        let pieColor = getColors(logs, true);
+
+        if (viewBy === "project") {
+            pieColor = getColors(logs, false);
+            newPieData = pieChartByActivityOrProject(viewBy, logs);
         }
 
-        pieOptions.color.scale = colors;
+        pieOptions.color.scale = pieColor;
+        pieData = newPieData;
+    };
+
+    const handleTimeUnitChange = (event: Event) => {
+        const target = event.target as HTMLSelectElement;
+        timeUnit = target.value;
+
+        let newPieData = pieChartByActivityOrProject(viewBy, logs);
+
+        if (timeUnit === "minutes") {
+            newPieData = viewByMinute(newPieData);
+        }
+
+        pieData = newPieData;
     };
 </script>
 
 <div class="distribution-selector">
-    <label for="distribution-type">View by:</label>
-    <select
-        id="distribution-type"
-        value={selectedOption}
-        onchange={handleDropdownChange}
-    >
+    <label for="view-by-select">View by:</label>
+    <select id="view-by-select" value={viewBy} onchange={handleViewByChange}>
         <option value="activity">Activity</option>
         <option value="project">Project</option>
+    </select>
+    <label for="time-unit-select">Time unit:</label>
+    <select
+        id="time-unit-select"
+        value={timeUnit}
+        onchange={handleTimeUnitChange}
+    >
+        <option value="hours">Hours</option>
+        <option value="minutes">Minutes</option>
     </select>
 </div>
 

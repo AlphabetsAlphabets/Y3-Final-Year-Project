@@ -26,7 +26,8 @@
     let pieOptions = $state(defaultPieOptions);
     let pieData: PieData[] = $state([]);
 
-    let selectedOption = $state("activity");
+    let viewBy = $state("activity");
+    let timeUnit = $state("hours");
     let colors: PieColor = $state({});
 
     pieOptions.title = `Time distribution by activity`;
@@ -37,8 +38,8 @@
         await dbWorker.initWorker();
 
         logs = await listLog(dbWorker);
+
         pieData = timeDistributionByActivity(logs);
-        console.log("PIE DATA: ", pieData);
 
         colors = getColors(logs, true);
         pieOptions.color.scale = colors;
@@ -52,7 +53,8 @@
     <Filter
         bind:pieData
         bind:colors
-        bind:selectedOption
+        bind:viewBy
+        bind:timeUnit
         bind:pieOptions
         {logs}
     />
