@@ -17,7 +17,7 @@
         type PieColor,
     } from "./time_distributions";
 
-    import Filter from "./Filter.svelte";
+    import Filter from "./filter/Filter.svelte";
 
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
 

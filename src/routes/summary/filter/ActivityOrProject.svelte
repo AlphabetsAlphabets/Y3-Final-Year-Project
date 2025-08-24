@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { pieChartByActivityOrProject, viewByMinute } from "./filter";
-    import { getColors } from "./time_distributions";
+    import { pieChartByActivityOrProject, viewByMinute } from "../filter";
+    import { getColors } from "../time_distributions";
 
     let {
         pieData = $bindable(),
