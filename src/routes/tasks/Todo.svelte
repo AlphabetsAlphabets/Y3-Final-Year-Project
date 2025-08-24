@@ -49,6 +49,8 @@
 <style>
     .tasks-section {
         margin-bottom: 2rem;
+        width: 100%;
+        max-width: 100%;
     }
 
     .section-title {

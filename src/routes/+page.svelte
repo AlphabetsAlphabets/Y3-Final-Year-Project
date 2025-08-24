@@ -63,13 +63,10 @@
 
 <main class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <Todo {dbWorker} {tasks} />
-        </div>
-
-        <br />
-
         <div class="col-md-8 col-lg-6 text-center">
+            <Todo {dbWorker} {tasks} />
+
+            <br />
             {#if dbWorker}
                 <form onsubmit={(e) => e.preventDefault()}>
                     <div class="d-flex gap-2 mb-3">
