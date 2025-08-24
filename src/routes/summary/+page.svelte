@@ -38,7 +38,6 @@
         await dbWorker.initWorker();
 
         logs = await listLog(dbWorker);
-
         pieData = timeDistributionByActivity(logs);
 
         colors = getColors(logs, true);
@@ -59,6 +58,35 @@
         {logs}
     />
 
+    {#if filteredLogs.length > 0}
+        <div class="summary-stats">
+            <div class="stat-card">
+                <h3>Total Hours</h3>
+                <p class="stat-value">{summaryStats.totalHours}h</p>
+            </div>
+            <div class="stat-card">
+                <h3>Sessions</h3>
+                <p class="stat-value">{summaryStats.totalSessions}</p>
+            </div>
+            <div class="stat-card">
+                <h3>Avg Session</h3>
+                <p class="stat-value">{summaryStats.averageSessionLength}h</p>
+            </div>
+            {#if summaryStats.dateRange.earliest && summaryStats.dateRange.latest}
+                <div class="stat-card">
+                    <h3>Date Range</h3>
+                    <p class="stat-value-small">
+                        {summaryStats.dateRange.earliest.toLocaleDateString()}
+                        {#if summaryStats.dateRange.earliest.toDateString() !== summaryStats.dateRange.latest.toDateString()}
+                            <br />to<br />
+                            {summaryStats.dateRange.latest.toLocaleDateString()}
+                        {/if}
+                    </p>
+                </div>
+            {/if}
+        </div>
+    {/if}
+
     {#if dbWorker}
         {#key pieData}
             {#if pieData.length > 0}
@@ -67,8 +95,19 @@
                 </div>
             {:else}
                 <div class="no-data">
-                    <p>No time tracking data found.</p>
-                    <p>Start logging your activities to see the summary!</p>
+                    <p>
+                        No time tracking data found{startDate || endDate
+                            ? " for the selected date range"
+                            : ""}.
+                    </p>
+                    {#if startDate || endDate}
+                        <p>
+                            Try adjusting your date range or clearing the
+                            filters.
+                        </p>
+                    {:else}
+                        <p>Start logging your activities to see the summary!</p>
+                    {/if}
                 </div>
             {/if}
         {/key}
@@ -91,6 +130,54 @@
         font-size: 2.5rem;
         margin-bottom: 2rem;
         text-align: center;
+    }
+
+    .filters-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .summary-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        text-align: center;
+        border-left: 4px solid #0f62fe;
+    }
+
+    .stat-card h3 {
+        color: #525252;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin: 0 0 0.5rem 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+        color: #161616;
+        font-size: 2rem;
+        font-weight: 600;
+        margin: 0;
+        line-height: 1;
+    }
+
+    .stat-value-small {
+        color: #161616;
+        font-size: 1rem;
+        font-weight: 500;
+        margin: 0;
+        line-height: 1.2;
     }
 
     .chart-container {

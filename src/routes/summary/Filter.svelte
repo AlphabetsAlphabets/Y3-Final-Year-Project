@@ -1,0 +1,346 @@
+<script lang="ts">
+    import { createEventDispatcher } from "svelte";
+    import type { FilterChangeEvent, FilterOption, PresetRange } from "./types";
+
+    const dispatch = createEventDispatcher<{
+        filterChange: FilterChangeEvent;
+    }>();
+
+    export let selectedOption: FilterOption = "activity";
+    export let startDate: string = "";
+    export let endDate: string = "";
+
+    const handleDropdownChange = (event: Event) => {
+        const target = event.target as HTMLSelectElement;
+        selectedOption = target.value as FilterOption;
+        dispatchFilterChange();
+    };
+
+    const handleDateChange = () => {
+        dispatchFilterChange();
+    };
+
+    const clearDates = () => {
+        startDate = "";
+        endDate = "";
+        dispatchFilterChange();
+    };
+
+    const setPresetRange = (preset: PresetRange) => {
+        const today = new Date();
+        const todayStr = today.toISOString().split("T")[0];
+
+        switch (preset) {
+            case "today":
+                startDate = todayStr;
+                endDate = todayStr;
+                break;
+            case "yesterday": {
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yesterdayStr = yesterday.toISOString().split("T")[0];
+                startDate = yesterdayStr;
+                endDate = yesterdayStr;
+                break;
+            }
+            case "thisWeek": {
+                const weekStart = new Date(today);
+                weekStart.setDate(today.getDate() - today.getDay());
+                startDate = weekStart.toISOString().split("T")[0];
+                endDate = todayStr;
+                break;
+            }
+            case "lastWeek": {
+                const lastWeekEnd = new Date(today);
+                lastWeekEnd.setDate(today.getDate() - today.getDay() - 1);
+                const lastWeekStart = new Date(lastWeekEnd);
+                lastWeekStart.setDate(lastWeekEnd.getDate() - 6);
+                startDate = lastWeekStart.toISOString().split("T")[0];
+                endDate = lastWeekEnd.toISOString().split("T")[0];
+                break;
+            }
+            case "thisMonth": {
+                const monthStart = new Date(
+                    today.getFullYear(),
+                    today.getMonth(),
+                    1,
+                );
+                startDate = monthStart.toISOString().split("T")[0];
+                endDate = todayStr;
+                break;
+            }
+            case "lastMonth": {
+                const lastMonth = new Date(
+                    today.getFullYear(),
+                    today.getMonth() - 1,
+                    1,
+                );
+                const lastMonthEnd = new Date(
+                    today.getFullYear(),
+                    today.getMonth(),
+                    0,
+                );
+                startDate = lastMonth.toISOString().split("T")[0];
+                endDate = lastMonthEnd.toISOString().split("T")[0];
+                break;
+            }
+        }
+        dispatchFilterChange();
+    };
+
+    const dispatchFilterChange = () => {
+        dispatch("filterChange", {
+            selectedOption,
+            startDate,
+            endDate,
+        });
+    };
+</script>
+
+<div class="filters-container">
+    <div class="distribution-selector">
+        <label for="distribution-type">View by:</label>
+        <select
+            id="distribution-type"
+            bind:value={selectedOption}
+            onchange={handleDropdownChange}
+        >
+            <option value="activity">Activity</option>
+            <option value="project">Project</option>
+        </select>
+    </div>
+
+    <div class="date-filter">
+        <div class="date-input-group">
+            <label for="start-date">From:</label>
+            <input
+                id="start-date"
+                type="date"
+                bind:value={startDate}
+                onchange={handleDateChange}
+            />
+        </div>
+        <div class="date-input-group">
+            <label for="end-date">To:</label>
+            <input
+                id="end-date"
+                type="date"
+                bind:value={endDate}
+                onchange={handleDateChange}
+            />
+        </div>
+        <button class="clear-dates" onclick={clearDates}> Clear Dates </button>
+    </div>
+
+    <div class="preset-buttons">
+        <h3>Quick Select:</h3>
+        <div class="preset-grid">
+            <button class="preset-btn" onclick={() => setPresetRange("today")}>
+                Today
+            </button>
+            <button
+                class="preset-btn"
+                onclick={() => setPresetRange("yesterday")}
+            >
+                Yesterday
+            </button>
+            <button
+                class="preset-btn"
+                onclick={() => setPresetRange("thisWeek")}
+            >
+                This Week
+            </button>
+            <button
+                class="preset-btn"
+                onclick={() => setPresetRange("lastWeek")}
+            >
+                Last Week
+            </button>
+            <button
+                class="preset-btn"
+                onclick={() => setPresetRange("thisMonth")}
+            >
+                This Month
+            </button>
+            <button
+                class="preset-btn"
+                onclick={() => setPresetRange("lastMonth")}
+            >
+                Last Month
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .filters-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .distribution-selector {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .date-filter {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        flex-wrap: wrap;
+    }
+
+    .date-input-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .distribution-selector label,
+    .date-input-group label {
+        font-weight: 500;
+        color: #161616;
+        font-size: 1rem;
+        white-space: nowrap;
+    }
+
+    .distribution-selector select,
+    .date-input-group input {
+        padding: 0.5rem 1rem;
+        border: 1px solid #d0d0d0;
+        border-radius: 4px;
+        background: white;
+        color: #161616;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: border-color 0.2s;
+    }
+
+    .distribution-selector select:hover,
+    .date-input-group input:hover {
+        border-color: #0f62fe;
+    }
+
+    .distribution-selector select:focus,
+    .date-input-group input:focus {
+        outline: none;
+        border-color: #0f62fe;
+        box-shadow: 0 0 0 2px rgba(15, 98, 254, 0.2);
+    }
+
+    .clear-dates {
+        padding: 0.5rem 1rem;
+        background: #da1e28;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        white-space: nowrap;
+    }
+
+    .clear-dates:hover {
+        background: #ba1b23;
+    }
+
+    .clear-dates:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(218, 30, 40, 0.2);
+    }
+
+    .preset-buttons {
+        padding: 1rem;
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .preset-buttons h3 {
+        margin: 0 0 1rem 0;
+        color: #161616;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    .preset-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 0.5rem;
+    }
+
+    .preset-btn {
+        padding: 0.5rem 0.75rem;
+        background: #f4f4f4;
+        color: #161616;
+        border: 1px solid #d0d0d0;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: center;
+    }
+
+    .preset-btn:hover {
+        background: #e0e0e0;
+        border-color: #0f62fe;
+    }
+
+    .preset-btn:focus {
+        outline: none;
+        border-color: #0f62fe;
+        box-shadow: 0 0 0 2px rgba(15, 98, 254, 0.2);
+    }
+
+    .preset-btn:active {
+        background: #0f62fe;
+        color: white;
+        border-color: #0f62fe;
+    }
+
+    @media (max-width: 768px) {
+        .filters-container {
+            gap: 1rem;
+        }
+
+        .date-filter {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .date-input-group {
+            justify-content: space-between;
+        }
+
+        .clear-dates {
+            align-self: center;
+            margin-top: 0.5rem;
+        }
+    }
+
+    @media (min-width: 769px) {
+        .filters-container {
+            flex-direction: row;
+        }
+
+        .distribution-selector,
+        .date-filter {
+            flex: 1;
+        }
+
+        .preset-buttons {
+            flex: 2;
+        }
+    }
+</style>
