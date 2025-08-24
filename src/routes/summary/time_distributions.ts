@@ -5,8 +5,9 @@ export const timeDistributionByActivity = (logs: Log[]) => {
   logs.forEach((log) => {
     // Convert ms to hours. Because unix timestamp is in ms.
     const hours = log.elapsed / (1000 * 60 * 60);
-    let totals = 0;
-    if (activityTotals.get(log.activity)) {
+
+    let totals = activityTotals.get(log.activity);
+    if (totals) {
       totals += hours;
     } else {
       totals = hours;

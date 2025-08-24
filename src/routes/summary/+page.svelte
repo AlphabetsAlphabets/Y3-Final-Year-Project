@@ -38,6 +38,7 @@
 
         logs = await listLog(dbWorker);
         pieData = timeDistributionByActivity(logs);
+        console.log("PIE DATA: ", pieData);
 
         colors = getColors(logs, true);
         pieOptions.color.scale = colors;
