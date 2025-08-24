@@ -3,7 +3,7 @@ export type PieData = {
   value: number;
 };
 
-export const pieOptions = {
+export const defaultPieOptions = {
   title: "Not set",
   resizable: true,
   height: "400px",

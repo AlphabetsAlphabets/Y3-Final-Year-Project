@@ -82,9 +82,9 @@
                     dbWorker,
                     activityName,
                     projectName,
+                    elapsed,
                     startDate,
                     endDate,
-                    elapsed,
                 );
 
                 timerState = TimerState.Stopped;

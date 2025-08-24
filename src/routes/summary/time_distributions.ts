@@ -42,8 +42,9 @@ export const timeDistributionByActivity = (logs: Log[]) => {
   logs.forEach((log) => {
     // Convert ms to hours. Because unix timestamp is in ms.
     const hours = log.elapsed / (1000 * 60 * 60);
-    let totals = 0;
-    if (activityTotals.get(log.activity)) {
+
+    let totals = activityTotals.get(log.activity);
+    if (totals) {
       totals += hours;
     } else {
       totals = hours;
@@ -84,7 +85,11 @@ export const timeDistributionByProject = (logs: Log[]) => {
   });
 };
 
-export const getColors = (logs: Log[], activity: boolean) => {
+export type PieColor = {
+  [k: string]: string;
+};
+
+export const getColors = (logs: Log[], activity: boolean): PieColor => {
   const colorMap = new Map<string, string>();
   logs.forEach((log) => {
     const entry = activity ? log.activity : log.project_name;
