@@ -7,22 +7,22 @@
     // runs that code and it may be ran BEFORE the worker is ready. Which causes
     // the EventListener error.
     import type { DbWorker } from "$lib/database.worker";
-    import type { Activity, Project, Task } from "$lib/types/schema";
+    import type { Activity, Log, Project, Task } from "$lib/types/schema";
 
     import ProjectModal from "./ProjectModal.svelte";
     import SelectModal from "./SelectModal.svelte";
     import Todo from "../tasks/Todo.svelte";
     import Timer from "./Timer.svelte";
+    import RecentlyDone from "./RecentlyDone.svelte";
 
     import { listTasks } from "$lib/utils/task";
     import { listActivities } from "$lib/utils/activity";
     import { listProjects } from "$lib/utils/projects";
     import { seconds } from "./timer";
-    import RecentlyDone from "./RecentlyDone.svelte";
     import { listLog } from "../calendar/log";
 
     let activityName: string = $state("Activity");
-    let projectName: string = $state("Project");
+    let projectName: string = $state("No Project");
     let projectColor: string = $state("");
 
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
