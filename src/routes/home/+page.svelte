@@ -75,6 +75,12 @@
         logs = await listLog(dbWorker);
     };
 
+    const refreshLogs = async () => {
+        if (dbWorker) {
+            logs = await listLog(dbWorker);
+        }
+    };
+
     onMount(loadWorker);
 </script>
 
@@ -118,9 +124,15 @@
                     {#if activityName === "Activity"}
                         <p>Please select or create an activity to track.</p>
                     {:else}
-                        <Timer {activityName} {projectName} />
+                        <Timer
+                            {activityName}
+                            {projectName}
+                            onActivityStopped={refreshLogs}
+                        />
                     {/if}
                 </form>
+
+                <br />
 
                 <RecentlyDone {dbWorker} {logs} />
             {:else}
