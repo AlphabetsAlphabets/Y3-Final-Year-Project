@@ -18,6 +18,8 @@
     import { listActivities } from "$lib/utils/activity";
     import { listProjects } from "$lib/utils/projects";
     import { seconds } from "./timer";
+    import RecentlyDone from "./RecentlyDone.svelte";
+    import { listLog } from "../calendar/log";
 
     let activityName: string = $state("Activity");
     let projectName: string = $state("Project");
@@ -26,6 +28,8 @@
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
 
     let tasks: Task[] = $state([]);
+    let logs: Log[] = $state([]);
+
     let activities: Activity[] = $state([]);
     let projects: Project[] = $state([]);
 
@@ -68,6 +72,7 @@
         tasks = await listTasks(dbWorker);
         activities = await listActivities(dbWorker);
         projects = await listProjects(dbWorker);
+        logs = await listLog(dbWorker);
     };
 
     onMount(loadWorker);
@@ -116,6 +121,8 @@
                         <Timer {activityName} {projectName} />
                     {/if}
                 </form>
+
+                <RecentlyDone {dbWorker} {logs} />
             {:else}
                 <div class="d-flex flex-column align-items-center p-5">
                     <div class="spinner-border text-primary" role="status">
