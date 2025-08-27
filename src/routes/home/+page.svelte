@@ -11,13 +11,15 @@
 
     import ProjectModal from "./ProjectModal.svelte";
     import SelectModal from "./SelectModal.svelte";
-    import Todo from "./tasks/Todo.svelte";
+    import Todo from "../tasks/Todo.svelte";
     import Timer from "./Timer.svelte";
 
     import { listTasks } from "$lib/utils/task";
     import { listActivities } from "$lib/utils/activity";
     import { listProjects } from "$lib/utils/projects";
     import { seconds } from "./timer";
+    import RecentlyDone from "./RecentlyDone.svelte";
+    import { listLog } from "../calendar/log";
 
     let activityName: string = $state("Activity");
     let projectName: string = $state("Project");
@@ -26,6 +28,8 @@
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
 
     let tasks: Task[] = $state([]);
+    let logs: Log[] = $state([]);
+
     let activities: Activity[] = $state([]);
     let projects: Project[] = $state([]);
 
@@ -46,6 +50,20 @@
     let taskAndActivities: { id: number; name: string; isTask: boolean }[] =
         $derived(getTaskAndActivities(tasks, activities));
 
+    const formatTime = (totalSeconds: number): string => {
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        const parts: string[] = [];
+        if (hours > 0) parts.push(`${hours}<sup>h</sup>`);
+        if (minutes > 0) parts.push(`${minutes}<sup>m</sup>`);
+        if (seconds > 0 || parts.length === 0)
+            parts.push(`${seconds}<sup>s</sup>`);
+
+        return parts.join("");
+    };
+
     const loadWorker = async () => {
         const Worker = await import("$lib/database.worker?worker");
         dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
@@ -54,6 +72,7 @@
         tasks = await listTasks(dbWorker);
         activities = await listActivities(dbWorker);
         projects = await listProjects(dbWorker);
+        logs = await listLog(dbWorker);
     };
 
     onMount(loadWorker);
@@ -93,7 +112,7 @@
                     </div>
 
                     <div class="display-1 fw-bold my-3">
-                        {$seconds}<span class="fs-4 align-text-top">s</span>
+                        {@html formatTime($seconds)}
                     </div>
 
                     {#if activityName === "Activity"}
@@ -102,6 +121,8 @@
                         <Timer {activityName} {projectName} />
                     {/if}
                 </form>
+
+                <RecentlyDone {dbWorker} {logs} />
             {:else}
                 <div class="d-flex flex-column align-items-center p-5">
                     <div class="spinner-border text-primary" role="status">

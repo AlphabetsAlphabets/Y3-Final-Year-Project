@@ -11,7 +11,7 @@
     } from "./timer";
 
     import type { DbWorker } from "$lib/database.worker";
-    import { addLog } from "./calendar/log";
+    import { addLog } from "../calendar/log";
 
     let { activityName, projectName } = $props();
 
