@@ -42,7 +42,7 @@
         return parts.join("");
     };
 
-    // Load logs when dbWorker is available
+    // Load logs when logs prop changes
     $effect(() => {
         loadRecentLogs();
     });

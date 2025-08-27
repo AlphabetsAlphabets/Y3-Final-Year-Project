@@ -13,7 +13,7 @@
     import type { DbWorker } from "$lib/database.worker";
     import { addLog } from "../calendar/log";
 
-    let { activityName, projectName } = $props();
+    let { activityName, projectName, onActivityStopped } = $props();
 
     let timerState = $state(TimerState.Stopped);
 
@@ -88,6 +88,11 @@
                 );
 
                 timerState = TimerState.Stopped;
+
+                // Notify parent component to refresh logs
+                if (onActivityStopped) {
+                    await onActivityStopped();
+                }
             }}>Stop</button
         >
     </div>

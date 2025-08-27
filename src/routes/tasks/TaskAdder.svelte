@@ -6,6 +6,10 @@
     let newTaskDescription = $state("");
 
     let addNewTask = async () => {
+        if (newTaskName.length === 0) {
+            return;
+        }
+
         if (dbWorker) {
             tasks = await addTask(dbWorker, newTaskName, newTaskDescription);
         } else {
