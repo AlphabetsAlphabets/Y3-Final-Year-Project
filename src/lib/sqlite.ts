@@ -43,6 +43,23 @@ export const initDb = async () => {
   });
 };
 
+export const createDefaultProject = async () => {
+  isPromiserReady(promiser);
+
+  // Check if the default "No Project" already exists
+  const existingProject = await list("project", "*", "name = 'No Project'");
+
+  if (
+    existingProject.result &&
+    existingProject.result.resultRows &&
+    existingProject.result.resultRows.length === 0
+  ) {
+    // Insert the default "No Project" project if it doesn't exist
+    await insert("project", "name, color", "'No Project', '#000000'");
+    console.log("Default 'No Project' project created");
+  }
+};
+
 export const setupTables = async () => {
   isPromiserReady(promiser);
   const createTablesSql = createSql.join("\n");
@@ -51,6 +68,9 @@ export const setupTables = async () => {
   await promiser("exec", {
     sql: createTablesSql,
   });
+
+  // Create the default "No Project" project
+  await createDefaultProject();
 };
 
 const concatColums = (columns: string, table: string): string => {

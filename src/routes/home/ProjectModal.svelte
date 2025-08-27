@@ -34,7 +34,7 @@
         modal?.showModal();
     }}
 >
-    {userInput || "Project"}
+    {userInput || "No Project"}
 </button>
 <Modal bind:this={modal} title="Select a project">
     <input
