@@ -27,9 +27,12 @@
     };
 
     const formatDuration = (elapsed: number) => {
-        const hours = Math.floor(elapsed / 3600);
-        const minutes = Math.floor((elapsed % 3600) / 60);
-        const seconds = elapsed % 60;
+        // Convert milliseconds to seconds
+        const totalSeconds = Math.floor(elapsed / 1000);
+
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
 
         const parts: string[] = [];
         if (hours > 0) parts.push(`${hours}h`);
