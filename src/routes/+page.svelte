@@ -46,6 +46,20 @@
     let taskAndActivities: { id: number; name: string; isTask: boolean }[] =
         $derived(getTaskAndActivities(tasks, activities));
 
+    const formatTime = (totalSeconds: number): string => {
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        const parts: string[] = [];
+        if (hours > 0) parts.push(`${hours}<sup>h</sup>`);
+        if (minutes > 0) parts.push(`${minutes}<sup>m</sup>`);
+        if (seconds > 0 || parts.length === 0)
+            parts.push(`${seconds}<sup>s</sup>`);
+
+        return parts.join("");
+    };
+
     const loadWorker = async () => {
         const Worker = await import("$lib/database.worker?worker");
         dbWorker = Comlink.wrap<DbWorker>(new Worker.default());
@@ -93,7 +107,7 @@
                     </div>
 
                     <div class="display-1 fw-bold my-3">
-                        {$seconds}<span class="fs-4 align-text-top">s</span>
+                        {@html formatTime($seconds)}
                     </div>
 
                     {#if activityName === "Activity"}
