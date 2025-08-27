@@ -10,7 +10,7 @@
         },
         {
             name: "Home",
-            href: "/",
+            href: "/home",
             icon: "bi-house",
         },
         {
@@ -32,8 +32,8 @@
      * @param href The link's destination
      */
     function isActive(href: string): boolean {
-        if (href === "/") {
-            return $page.url.pathname === "/";
+        if (href === "/home") {
+            return $page.url.pathname === "/home";
         }
         return $page.url.pathname.startsWith(href);
     }

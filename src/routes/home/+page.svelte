@@ -11,7 +11,7 @@
 
     import ProjectModal from "./ProjectModal.svelte";
     import SelectModal from "./SelectModal.svelte";
-    import Todo from "./tasks/Todo.svelte";
+    import Todo from "../tasks/Todo.svelte";
     import Timer from "./Timer.svelte";
 
     import { listTasks } from "$lib/utils/task";
