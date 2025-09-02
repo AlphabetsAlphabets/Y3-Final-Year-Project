@@ -48,7 +48,7 @@ export async function updateEventTime(
 ): Promise<string[]> {
   const toUpdate: string[] = [];
 
-  const newElapsed = newStartTime.getTime() - newEndTime.getTime();
+  const newElapsed = (newEndTime.getTime() - newStartTime.getTime()) / 1000;
   if (newStartTime.getTime() >= newEndTime.getTime()) {
     console.error("Start time must be before end time.");
     // TODO: You might want to show this error to the user in the UI
