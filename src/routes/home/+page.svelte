@@ -19,7 +19,7 @@
     import { listActivities } from "$lib/utils/activity";
     import { listProjects } from "$lib/utils/projects";
     import { seconds } from "./timer";
-    import { listLog } from "../calendar/log";
+    import { listLog, addLog } from "../calendar/log";
 
     let activityName: string = $state("Activity");
     let projectName: string = $state("No Project");
@@ -81,6 +81,24 @@
         }
     };
 
+    const add75SecondActivity = async () => {
+        if (dbWorker) {
+            const now = Date.now();
+            const start = now - 75000; // 75 seconds ago
+            const end = now;
+
+            await addLog(
+                dbWorker,
+                "75s Quick Activity",
+                "No Project",
+                75,
+                start,
+                end,
+            );
+            await refreshLogs();
+        }
+    };
+
     onMount(loadWorker);
 </script>
 
@@ -131,6 +149,16 @@
                         />
                     {/if}
                 </form>
+
+                <div class="mt-3">
+                    <button
+                        class="btn btn-secondary"
+                        onclick={add75SecondActivity}
+                        type="button"
+                    >
+                        Add 75s Activity
+                    </button>
+                </div>
 
                 <br />
 
