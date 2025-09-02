@@ -7,7 +7,6 @@
 
     import type { DbWorker } from "$lib/database.worker";
     import type { Log } from "$lib/types/schema";
-    import { addTestLog } from "$lib/utils/calendar";
     import { listLog } from "./log";
 
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
@@ -37,21 +36,10 @@
         await refreshCalendar();
     };
 
-    const createDummyLogs = async () => {
-        if (!dbWorker) {
-            console.error("Worker not ready yet.");
-            return;
-        }
-
-        addTestLog(dbWorker);
-        await refreshCalendar();
-    };
-
     onMount(loadWorker);
 </script>
 
 {#if dbWorker}
-    <button onclick={createDummyLogs}> Add test log </button>
     {#key calendarEvents}
         <Calendar
             {dbWorker}

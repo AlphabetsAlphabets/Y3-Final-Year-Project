@@ -79,32 +79,27 @@
         }
     };
 
-    const add75SecondActivity = async () => {
+    const addTestActivity = async () => {
         if (dbWorker) {
             const now = Date.now();
-            const start = now - 75000; // 75 seconds ago
+            const start = now - 2 * 60 * 60;
             const end = now;
 
             await addLog(
                 dbWorker,
-                "75s Quick Activity",
+                "TEST ACTIVITY",
                 "No Project",
-                75,
-                start,
+                end - start,
+                now - 2 * 60 * 60 * 1000,
                 end,
             );
+
             await refreshLogs();
         }
     };
 
     onMount(loadWorker);
 </script>
-
-<div class="settings-container">
-    <button id="settings" class="btn btn-light rounded-circle p-2 lh-1">
-        <img src="/gear.svg" alt="gear" />
-    </button>
-</div>
 
 <main class="container mt-5">
     <div class="row justify-content-center">
@@ -151,10 +146,10 @@
                 <div class="mt-3">
                     <button
                         class="btn btn-secondary"
-                        onclick={add75SecondActivity}
+                        onclick={addTestActivity}
                         type="button"
                     >
-                        Add 75s Activity
+                        ADD TEST ACTIVITY
                     </button>
                 </div>
 
