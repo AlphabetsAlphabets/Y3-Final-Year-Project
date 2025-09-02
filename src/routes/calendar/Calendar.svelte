@@ -4,7 +4,12 @@
     import Modal from "$lib/components/Modal.svelte";
     import EditLogModal from "./EditLogModal.svelte";
 
-    import { updateEventTime, type CalendarEvent } from "./calendar";
+    import {
+        createEventWithClick,
+        updateEventTime,
+        type CalendarEvent,
+        type FullCalendarCalendarEvent,
+    } from "./calendar";
     import { updateLog } from "./log";
 
     let {
@@ -29,11 +34,13 @@
     let options = $state({
         view: "timeGridWeek",
         events: events,
-        eventDidMount: function (arg: { event: CalendarEvent }) {
-            arg.el.addEventListener("click", () => {
-                targetEvent = arg.event;
-                modal?.showModal();
-            });
+        eventClick: function (arg: FullCalendarCalendarEvent) {
+            targetEvent = arg.event;
+            modal?.showModal();
+        },
+        dateClick: async function () {
+            targetEvent = await createEventWithClick(dbWorker);
+            modal?.showModal();
         },
         eventDrop: handleEventChange,
         eventResize: handleEventChange,

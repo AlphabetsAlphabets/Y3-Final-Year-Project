@@ -59,6 +59,10 @@ export const updateLog = async (
   await dbWorker.update("log", toUpdate, clause);
 };
 
+export const deleteLog = async (dbWorker: DbWorker, id: number) => {
+  await dbWorker.remove("log", `id = ${id}`);
+};
+
 export const handleActivityUpdate = async (
   modal: Modal,
   dbWorker: DbWorker,

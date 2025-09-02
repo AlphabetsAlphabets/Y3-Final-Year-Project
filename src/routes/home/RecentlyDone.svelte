@@ -2,6 +2,7 @@
     import type { DbWorker } from "$lib/database.worker";
     import * as Comlink from "comlink";
     import type { Log } from "$lib/types/schema";
+    import { secondsToHMS } from "./timer";
 
     let {
         dbWorker,
@@ -27,12 +28,7 @@
     };
 
     const formatDuration = (elapsed: number) => {
-        // Convert milliseconds to seconds
-        const totalSeconds = Math.floor(elapsed / 1000);
-
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
+        let { hours, minutes, seconds } = secondsToHMS(elapsed);
 
         const parts: string[] = [];
         if (hours > 0) parts.push(`${hours}h`);

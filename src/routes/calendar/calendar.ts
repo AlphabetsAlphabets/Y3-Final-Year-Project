@@ -1,3 +1,8 @@
+import type { DbWorker } from "$lib/database.worker";
+import type { Log } from "$lib/types/schema";
+import { startCountdown, stopCountdown } from "../home/timer";
+import { addLog } from "./log";
+
 export interface CalendarEvent {
   id: number;
   title: string;
@@ -5,6 +10,13 @@ export interface CalendarEvent {
   end: Date;
   backgroundColor: string;
 }
+
+export type FullCalendarCalendarEvent = {
+  event: CalendarEvent;
+  allDay: false;
+  date: string;
+  dateStr: string;
+};
 
 export function formatDateForInput(date: Date): string {
   const year = date.getFullYear();
@@ -48,7 +60,7 @@ export async function updateEventTime(
 ): Promise<string[]> {
   const toUpdate: string[] = [];
 
-  const newElapsed = newStartTime.getTime() - newEndTime.getTime();
+  const newElapsed = (newEndTime.getTime() - newStartTime.getTime()) / 1000;
   if (newStartTime.getTime() >= newEndTime.getTime()) {
     console.error("Start time must be before end time.");
     // TODO: You might want to show this error to the user in the UI
@@ -61,3 +73,41 @@ export async function updateEventTime(
 
   return toUpdate;
 }
+
+export const createEventWithClick = async (
+  dbWorker: DbWorker,
+): Promise<CalendarEvent> => {
+  startCountdown();
+  const [startDate, endDate, elapsed] = stopCountdown();
+
+  await addLog(
+    dbWorker,
+    "NEW EVENT",
+    "No Project",
+    elapsed,
+    startDate,
+    endDate,
+  );
+
+  const queryResult = await dbWorker.list(
+    "log",
+    "",
+    `elapsed = ${elapsed} AND start = ${startDate} AND end = ${endDate}`,
+  );
+
+  const resultRows = queryResult.result.resultRows;
+
+  if (resultRows.length != 1) {
+    console.error("Something went wrong.");
+  }
+
+  const newEvent = resultRows[0] as Log;
+
+  return {
+    id: newEvent.id,
+    title: newEvent.activity,
+    start: new Date(newEvent.start),
+    end: new Date(newEvent.end),
+    backgroundColor: "#000000",
+  };
+};
