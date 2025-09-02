@@ -18,7 +18,7 @@
     import { listTasks } from "$lib/utils/task";
     import { listActivities } from "$lib/utils/activity";
     import { listProjects } from "$lib/utils/projects";
-    import { seconds } from "./timer";
+    import { seconds, secondsToHMS } from "./timer";
     import { listLog, addLog } from "../calendar/log";
 
     let activityName: string = $state("Activity");
@@ -51,9 +51,7 @@
         $derived(getTaskAndActivities(tasks, activities));
 
     const formatTime = (totalSeconds: number): string => {
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
+        let { hours, minutes, seconds } = secondsToHMS(totalSeconds);
 
         const parts: string[] = [];
         if (hours > 0) parts.push(`${hours}<sup>h</sup>`);
