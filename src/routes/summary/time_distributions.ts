@@ -1,50 +1,44 @@
 import type { Log } from "$lib/types/schema";
 
+const mapKeytoValue = (key: string, value: number) => {
+  return {
+    group: key,
+    value: value,
+  };
+};
+
+const entryToMap = (map: Map<string, number>, key: string, value: number) => {
+  if (map.has(key)) {
+    map.set(key, (map.get(key) as number) + value);
+  } else {
+    map.set(key, value);
+  }
+};
+
 export const timeDistributionByActivity = (logs: Log[]) => {
   const activityTotals = new Map<string, number>();
   logs.forEach((log) => {
-    // Convert ms to hours. Because unix timestamp is in ms.
-    const hours = log.elapsed / (1000 * 60 * 60);
-
-    let totals = activityTotals.get(log.activity);
-    if (totals) {
-      totals += hours;
-    } else {
-      totals = hours;
-    }
-
-    activityTotals.set(log.activity, totals);
+    const hours = log.elapsed / (60 * 60);
+    entryToMap(activityTotals, log.activity, hours);
   });
 
-  return Array.from(activityTotals.entries()).map(([activity, total]) => {
-    return {
-      group: activity,
-      value: Math.round(total * 100) / 100, // Round to 2 decimal places
-    };
+  const data = Array.from(activityTotals.entries()).map(([activity, total]) => {
+    return mapKeytoValue(activity, total);
   });
+
+  return data;
 };
 
 export const timeDistributionByProject = (logs: Log[]) => {
   // Group time spent per activity
   const projectTotals = new Map<string, number>();
   logs.forEach((log) => {
-    // Convert ms to hours. Because unix timestamp is in ms.
-    const hours = log.elapsed / (1000 * 60 * 60);
-    let totals = 0;
-    if (projectTotals.get(log.project_name)) {
-      totals += hours;
-    } else {
-      totals = hours;
-    }
-
-    projectTotals.set(log.project_name, totals);
+    const hours = log.elapsed / (60 * 60);
+    entryToMap(projectTotals, log.project_name, hours);
   });
 
   return Array.from(projectTotals.entries()).map(([project, total]) => {
-    return {
-      group: project,
-      value: Math.round(total * 100) / 100, // Round to 2 decimal places
-    };
+    return mapKeytoValue(project, total);
   });
 };
 

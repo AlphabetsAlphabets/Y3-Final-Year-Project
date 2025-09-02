@@ -11,6 +11,7 @@ export type Project = {
 /**
  * This is a custom type that doesn't correspond with the definition of the
  * log table in the database itself.
+ * @param elapsed - Elapsed time in seconds.
  */
 export type Log = {
   id: number;
