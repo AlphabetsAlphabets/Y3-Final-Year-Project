@@ -150,11 +150,6 @@
         text-overflow: ellipsis;
     }
 
-    .color-preview {
-        width: 25%;
-        min-height: 100%;
-    }
-
     .new-project-section {
         margin-top: 0.5rem;
     }
