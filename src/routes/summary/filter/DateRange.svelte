@@ -146,11 +146,6 @@
     }
 
     @media (max-width: 768px) {
-        .date-range-selector {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
         .button-group {
             margin-left: 0;
             justify-content: center;
