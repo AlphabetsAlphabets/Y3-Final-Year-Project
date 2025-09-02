@@ -3,7 +3,7 @@
 
     import { formatDateForInput } from "./calendar";
 
-    import { handleActivityUpdate } from "./log";
+    import { deleteLog, handleActivityUpdate } from "./log";
 
     // updateEvent will call a method defined in the parent component to change the parent's state.
     let {
@@ -75,6 +75,14 @@
         </div>
 
         <div class="form-actions">
+            <button
+                type="button"
+                onclick={async () => {
+                    await deleteLog(dbWorker, event.id);
+                    updateEvent();
+                    modal?.closeModal();
+                }}>Delete</button
+            >
             <button type="submit">Confirm</button>
             <button type="button" onclick={() => modal?.closeModal()}
                 >Cancel</button
