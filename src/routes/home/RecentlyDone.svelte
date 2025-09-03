@@ -31,9 +31,10 @@
         let { hours, minutes, seconds } = secondsToHMS(elapsed);
 
         const parts: string[] = [];
-        if (hours > 0) parts.push(`${hours}h`);
-        if (minutes > 0) parts.push(`${minutes}m`);
-        if (seconds > 0 || parts.length === 0) parts.push(`${seconds}s`);
+        if (hours > 0) parts.push(`${Math.round(hours)}h`);
+        if (minutes > 0) parts.push(`${Math.round(minutes)}m`);
+        if (seconds > 0 || parts.length === 0)
+            parts.push(`${Math.round(seconds)}s`);
 
         return parts.join("");
     };
