@@ -16,3 +16,11 @@ export const addActivity = async (
   await dbWorker.insert("activity", "name", `'${name}'`);
   return await listActivities(dbWorker);
 };
+
+export const deleteActivity = async (
+  dbWorker: DbWorker,
+  activityId: number,
+): Promise<Activity[]> => {
+  await dbWorker.remove("activity", `id = ${activityId}`);
+  return await listActivities(dbWorker);
+};

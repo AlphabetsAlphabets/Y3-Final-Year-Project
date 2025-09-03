@@ -2,7 +2,7 @@
     import Modal from "$lib/components/Modal.svelte";
     import type { Activity } from "$lib/types/schema";
 
-    import { addActivity } from "$lib/utils/activity";
+    import { addActivity, deleteActivity } from "$lib/utils/activity";
 
     let {
         dbWorker,
@@ -45,19 +45,39 @@
         <ul class="options-list">
             {#each filteredOptions as option (option.name)}
                 <li class="option-item">
-                    <button
-                        type="button"
-                        class="btn btn-outline-primary w-100"
-                        onclick={() => {
-                            selected = option.name;
-                            modal?.closeModal();
-                        }}
-                    >
-                        {#if option.isTask}
-                            <span class="badge bg-success">TASK</span>
-                        {/if}
-                        {option.name}
-                    </button>
+                    <div class="option-container">
+                        <button
+                            type="button"
+                            class="btn btn-outline-primary option-select-btn"
+                            onclick={() => {
+                                selected = option.name;
+                                modal?.closeModal();
+                            }}
+                        >
+                            {#if option.isTask}
+                                <span class="badge bg-success">TASK</span>
+                            {/if}
+                            {option.name}
+                        </button>
+                        <button
+                            type="button"
+                            class="delete-btn"
+                            aria-label="Delete activity"
+                            onclick={async (e) => {
+                                e.stopPropagation();
+                                if (!dbWorker) {
+                                    console.error("dbWorker not ready yet.");
+                                    return;
+                                }
+                                taskAndActivities = await deleteActivity(
+                                    dbWorker,
+                                    option.id,
+                                );
+                            }}
+                        >
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
                 </li>
             {/each}
         </ul>
@@ -93,6 +113,39 @@
 
     .option-item {
         margin-bottom: 0.5rem;
+    }
+
+    .option-container {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .option-select-btn {
+        flex: 1;
+    }
+
+    .delete-btn {
+        background: none;
+        border: none;
+        color: #6c757d;
+        padding: 0.375rem 0.5rem;
+        border-radius: 0.25rem;
+        opacity: 0.7;
+        transition:
+            opacity 0.2s,
+            color 0.2s,
+            background-color 0.2s;
+    }
+
+    .delete-btn:hover {
+        opacity: 1;
+        color: #dc3545;
+        background-color: #f8d7da;
+    }
+
+    .option-item:hover .delete-btn {
+        opacity: 1;
     }
 
     /*
