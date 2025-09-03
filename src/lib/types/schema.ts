@@ -1,8 +1,16 @@
+/**
+ * @param id - The unique ID of an activity.
+ * @param name - Unique name of an activity.
+ */
 export type Activity = {
   id: number;
   name: string;
 };
 
+/**
+ * @param name - Unique name of an project.
+ * @param color - Unique color of an project.
+ */
 export type Project = {
   name: string;
   color: string;
@@ -12,6 +20,8 @@ export type Project = {
  * This is a custom type that doesn't correspond with the definition of the
  * log table in the database itself.
  * @param elapsed - Elapsed time in seconds.
+ * @param start - A timestamp in milliseconds.
+ * @param end - A timestamp in milliseconds.
  */
 export type Log = {
   id: number;
@@ -23,6 +33,15 @@ export type Log = {
   end: number;
 };
 
+/**
+ * Represents the task table in the database.
+ * @param id - The unique ID of a task.
+ * @param name - name of a task.
+ * @param description - Description of a task. This is an optional field.
+ * @param completed - Whether a task is completed.
+ * @param created_at - Timestamp when a task was created.
+ * @param completed_at - Timestamp when a task was completed.
+ */
 export type Task = {
   id: number;
   name: string;

@@ -129,11 +129,6 @@ export const insert = async (
   columns: string,
   values: string,
 ) => {
-  // Using exec's built-in parameter binding (implicit prepared statement)
-  // It needs to go from structured to a flat array. Like a flat_map operation.
-  // The number of ? is equal to the number of things that needs to be inserted and this applies
-  // to multiple inserts at a time as well.
-  // So, I need to get the length after it has been flattened. So flat map's length.
   isPromiserReady(promiser);
 
   const query = `INSERT INTO ${table} (${columns}) VALUES (${values})`;
