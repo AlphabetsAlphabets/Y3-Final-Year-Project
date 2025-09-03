@@ -2,7 +2,7 @@
     import Modal from "$lib/components/Modal.svelte";
 
     import { type Project } from "$lib/types/schema";
-    import { addProject } from "$lib/utils/projects";
+    import { addProject, updateProjectColor } from "$lib/utils/projects";
 
     let {
         dbWorker,
@@ -67,13 +67,13 @@
                             class="form-control form-control-color"
                             bind:value={option.color}
                             onchange={async () => {
-                                projects = await addProject(
+                                projects = await updateProjectColor(
                                     dbWorker,
                                     option.name,
                                     option.color,
                                 );
                             }}
-                            title="Choose project color"
+                            title="Update project color"
                         />
                     </div>
                 </li>
