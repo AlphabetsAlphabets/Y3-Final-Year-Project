@@ -1,8 +1,3 @@
-Create private keys so that HTTPS can be used.
+This is a project I decided to work on for my thesis for my final year of university. It is a productivity application meant to help you keep track of your time. The goal is when you actively begin tracking your time, you'll be aware of how you spend your time. You are also able to reflect on your time spent by viewing a simple summary and looking at a calendar view.
 
-```
-brew install mkcert
-mkcert -install
-brew install nss
-mkcert localhost
-```
+It is intended for this application to be used on and off over a period of time. You are advised to use it for 2-3 weeks to establish your existing behaviour. After that point, you are free to continue tracking or not. A few weeks after you stop tracking, you are expected to return to the application and repeat the cycle.
