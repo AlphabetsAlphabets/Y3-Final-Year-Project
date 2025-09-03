@@ -1,5 +1,7 @@
 <script lang="ts">
     import Modal from "$lib/components/Modal.svelte";
+    import type { Project } from "$lib/types/schema";
+    import { findProjectFromColor } from "$lib/utils/projects";
 
     import { formatDateForInput } from "./calendar";
 
@@ -10,6 +12,7 @@
         dbWorker,
         modal = $bindable(),
         event = $bindable(),
+        projects,
         updateEvent,
     } = $props();
 
@@ -17,6 +20,32 @@
     let newColor = $state("");
     let newStartTime: Date | null = $state(null);
     let newEndTime: Date | null = $state(null);
+    let projectName = $state("");
+    let selectedProjectColor = $state("");
+
+    $effect(() => {
+        if (event?.backgroundColor) {
+            Promise.all([
+                findProjectFromColor(dbWorker, event.backgroundColor),
+            ]).then((values) => {
+                projectName = values[0].name;
+            });
+        }
+    });
+
+    // Update color when project changes
+    $effect(() => {
+        if (projectName && projects) {
+            const selectedProject = projects.find(
+                (p: Project) => p.name === projectName,
+            );
+            if (selectedProject) {
+                selectedProjectColor = selectedProject.color;
+            }
+        } else {
+            selectedProjectColor = event?.backgroundColor || "";
+        }
+    });
 </script>
 
 <Modal bind:this={modal} title="Edit Event">
@@ -30,6 +59,7 @@
                 event,
                 newStartTime,
                 newEndTime,
+                projectName,
                 updateEvent,
             );
         }}
@@ -65,11 +95,24 @@
                 }}
             />
 
+            <label for="project">Project</label>
+            <select
+                id="project"
+                value={projectName}
+                onchange={(e) => {
+                    projectName = e.currentTarget.value;
+                }}
+            >
+                {#each projects as project (project.name)}
+                    <option value={project.name}>{project.name}</option>
+                {/each}
+            </select>
+
             <label for="color">Color</label>
             <input
                 id="color"
                 type="color"
-                value={event.backgroundColor}
+                value={selectedProjectColor || event.backgroundColor}
                 oninput={(e) => (newColor = e.currentTarget.value)}
             />
         </div>
@@ -102,7 +145,8 @@
         text-align: right;
         font-weight: 500;
     }
-    .form-grid input {
+    .form-grid input,
+    .form-grid select {
         width: 100%;
         padding: 0.5rem;
         border: 1px solid #ccc;

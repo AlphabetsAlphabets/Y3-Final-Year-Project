@@ -7,6 +7,7 @@ import {
   updateEventColor,
   updateEventTime,
   updateEventTitle,
+  type CalendarEvent,
 } from "./calendar";
 
 export const listLog = async (dbWorker: DbWorker): Promise<Log[]> => {
@@ -63,21 +64,34 @@ export const deleteLog = async (dbWorker: DbWorker, id: number) => {
   await dbWorker.remove("log", `id = ${id}`);
 };
 
-export const handleActivityUpdate = async (
-  modal: Modal,
+const updateProjectName = async (
   dbWorker: DbWorker,
-  newTitle: string,
-  newColor: string,
-  event: any,
+  event: CalendarEvent,
+  newProjectName: string,
+) => {
+  // Get current project name from database
+  const currentLog = await dbWorker.list(
+    "log",
+    "project_name",
+    `id = ${event.id}`,
+  );
+
+  const projects = currentLog.result.resultRows as Project[];
+  const currentProjectName = projects[0].name;
+
+  if (newProjectName !== currentProjectName) {
+    return `project_name = '${newProjectName}'`;
+  }
+
+  return "";
+};
+
+const updateStartOrEndTimes = async (
   newStartTime: Date | null,
   newEndTime: Date | null,
-  updateEvent: any,
+  event: CalendarEvent,
 ) => {
-  const toUpdate: string[] = [];
-
-  const updateTitle = await updateEventTitle(newTitle, event);
-  toUpdate.push(...updateTitle);
-
+  const toUpdate = [];
   if (newStartTime && newEndTime) {
     const update = await updateEventTime(newStartTime, newEndTime);
     toUpdate.push(...update);
@@ -90,6 +104,34 @@ export const handleActivityUpdate = async (
   } else {
     console.error("Something went wrong.");
   }
+
+  return toUpdate;
+};
+
+export const handleActivityUpdate = async (
+  modal: Modal,
+  dbWorker: DbWorker,
+  newTitle: string,
+  newColor: string,
+  event: CalendarEvent,
+  newStartTime: Date | null,
+  newEndTime: Date | null,
+  newProjectName: string,
+  updateEvent: any,
+) => {
+  const toUpdate: string[] = [];
+
+  const updateTitle = await updateEventTitle(newTitle, event);
+  toUpdate.push(...updateTitle);
+
+  const result = await updateProjectName(dbWorker, event, newProjectName);
+  if (result.length !== 0) {
+    toUpdate.push(result);
+  }
+
+  toUpdate.push(
+    ...(await updateStartOrEndTimes(newStartTime, newEndTime, event)),
+  );
 
   const query = await updateEventColor(newColor, event);
   if (query.length !== 0) {

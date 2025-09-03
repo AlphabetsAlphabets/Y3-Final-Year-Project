@@ -11,12 +11,18 @@
         type FullCalendarCalendarEvent,
     } from "./calendar";
     import { updateLog } from "./log";
+    import { listProjects } from "$lib/utils/projects";
+    import type { Project } from "$lib/types/schema";
 
     let {
         dbWorker,
         events,
         refresh, // calls a method defined in the parent component to change the parent's state.
     } = $props();
+
+    let projects: Project[] = $state([]);
+
+    listProjects(dbWorker).then((values) => (projects = values));
 
     let modal: Modal | null = $state(null);
     let targetEvent: CalendarEvent | undefined = $state();
@@ -50,6 +56,7 @@
 
 <EditLogModal
     {dbWorker}
+    {projects}
     bind:modal
     bind:event={targetEvent}
     updateEvent={async () => {
