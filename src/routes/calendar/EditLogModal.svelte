@@ -1,5 +1,6 @@
 <script lang="ts">
     import Modal from "$lib/components/Modal.svelte";
+    import type { Project } from "$lib/types/schema";
     import { findProjectFromColor } from "$lib/utils/projects";
 
     import { formatDateForInput } from "./calendar";
@@ -20,6 +21,7 @@
     let newStartTime: Date | null = $state(null);
     let newEndTime: Date | null = $state(null);
     let projectName = $state("");
+    let selectedProjectColor = $state("");
 
     $effect(() => {
         if (event?.backgroundColor) {
@@ -28,6 +30,20 @@
             ]).then((values) => {
                 projectName = values[0].name;
             });
+        }
+    });
+
+    // Update color when project changes
+    $effect(() => {
+        if (projectName && projects) {
+            const selectedProject = projects.find(
+                (p: Project) => p.name === projectName,
+            );
+            if (selectedProject) {
+                selectedProjectColor = selectedProject.color;
+            }
+        } else {
+            selectedProjectColor = event?.backgroundColor || "";
         }
     });
 </script>
@@ -43,6 +59,7 @@
                 event,
                 newStartTime,
                 newEndTime,
+                projectName,
                 updateEvent,
             );
         }}
@@ -79,7 +96,13 @@
             />
 
             <label for="project">Project</label>
-            <select id="project" value={projectName}>
+            <select
+                id="project"
+                value={projectName}
+                onchange={(e) => {
+                    projectName = e.currentTarget.value;
+                }}
+            >
                 {#each projects as project (project.name)}
                     <option value={project.name}>{project.name}</option>
                 {/each}
@@ -89,7 +112,7 @@
             <input
                 id="color"
                 type="color"
-                value={event.backgroundColor}
+                value={selectedProjectColor || event.backgroundColor}
                 oninput={(e) => (newColor = e.currentTarget.value)}
             />
         </div>
