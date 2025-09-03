@@ -85,11 +85,14 @@
             const start = now - 2 * 60 * 60;
             const end = now;
 
+            // milliseconds
+            const elapsed = end - start;
+
             await addLog(
                 dbWorker,
                 "TEST ACTIVITY",
                 "No Project",
-                end - start,
+                elapsed,
                 now - 2 * 60 * 60 * 1000,
                 end,
             );

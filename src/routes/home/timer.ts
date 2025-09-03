@@ -34,11 +34,14 @@ export function stopCountdown(): [number, number, number] {
   }
 
   endDate = Date.now();
+  // milliseconds
+  const elapsed = endDate - startDate;
 
   seconds.set(0);
   is_paused = false;
 
-  return [startDate, endDate, endDate - startDate];
+  // Convert elapsed to seconds
+  return [startDate, endDate, elapsed / 1000];
 }
 
 export function pauseCountdown() {
