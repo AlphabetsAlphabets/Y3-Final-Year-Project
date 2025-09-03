@@ -1,5 +1,3 @@
-// This file contains primitives for interacting with the database. Any specific functionality
-// should be implemented elsewhere.
 import * as Comlink from "comlink";
 
 import {

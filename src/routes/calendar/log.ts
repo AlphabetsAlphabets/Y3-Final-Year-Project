@@ -7,6 +7,7 @@ import {
   updateEventColor,
   updateEventTime,
   updateEventTitle,
+  type CalendarEvent,
 } from "./calendar";
 
 export const listLog = async (dbWorker: DbWorker): Promise<Log[]> => {
@@ -68,7 +69,7 @@ export const handleActivityUpdate = async (
   dbWorker: DbWorker,
   newTitle: string,
   newColor: string,
-  event: any,
+  event: CalendarEvent,
   newStartTime: Date | null,
   newEndTime: Date | null,
   updateEvent: any,

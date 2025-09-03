@@ -1,5 +1,6 @@
 <script lang="ts">
     import Modal from "$lib/components/Modal.svelte";
+    import { findProjectFromColor } from "$lib/utils/projects";
 
     import { formatDateForInput } from "./calendar";
 
@@ -10,6 +11,7 @@
         dbWorker,
         modal = $bindable(),
         event = $bindable(),
+        projects,
         updateEvent,
     } = $props();
 
@@ -17,6 +19,17 @@
     let newColor = $state("");
     let newStartTime: Date | null = $state(null);
     let newEndTime: Date | null = $state(null);
+    let projectName = $state("");
+
+    $effect(() => {
+        if (event?.backgroundColor) {
+            Promise.all([
+                findProjectFromColor(dbWorker, event.backgroundColor),
+            ]).then((values) => {
+                projectName = values[0].name;
+            });
+        }
+    });
 </script>
 
 <Modal bind:this={modal} title="Edit Event">
@@ -65,6 +78,13 @@
                 }}
             />
 
+            <label for="project">Project</label>
+            <select id="project" value={projectName}>
+                {#each projects as project (project.name)}
+                    <option value={project.name}>{project.name}</option>
+                {/each}
+            </select>
+
             <label for="color">Color</label>
             <input
                 id="color"
@@ -102,7 +122,8 @@
         text-align: right;
         font-weight: 500;
     }
-    .form-grid input {
+    .form-grid input,
+    .form-grid select {
         width: 100%;
         padding: 0.5rem;
         border: 1px solid #ccc;
