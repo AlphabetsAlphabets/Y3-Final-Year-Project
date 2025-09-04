@@ -172,17 +172,5 @@
 </main>
 
 <style>
-    .settings-container {
-        position: fixed;
-        top: 0;
-        right: 0;
-        margin: 1rem;
-        z-index: 1050; /* Ensure it's above other content */
-    }
-
     /* Make the settings button icon a bit cleaner */
-    #settings img {
-        width: 1.5rem;
-        height: 1.5rem;
-    }
 </style>
