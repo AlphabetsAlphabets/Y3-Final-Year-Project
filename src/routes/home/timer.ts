@@ -11,26 +11,33 @@ export const TimerState = {
 let startDate: number = -1;
 let endDate: number = -1;
 
-let id: ReturnType<typeof setInterval> | null = null;
 let is_paused = false;
 
 export function startCountdown() {
   is_paused = false;
   seconds.set(0);
 
-  id = setInterval(() => {
+  const timer = setInterval(() => {
     if (!is_paused) {
       seconds.update((s) => s + 1);
     }
   }, 1000);
 
+  const id = +timer;
+  localStorage.setItem("timerId", `${id}`);
+
   startDate = Date.now();
 }
 
 export function stopCountdown(): [number, number, number] {
-  if (id !== null) {
+  let id = Number(localStorage.getItem("timerId"));
+  if (id !== -1) {
     clearInterval(id);
-    id = null;
+    id = -1;
+
+    localStorage.removeItem("timerId");
+    localStorage.removeItem("currentActivity");
+    localStorage.removeItem("timerState");
   }
 
   endDate = Date.now();

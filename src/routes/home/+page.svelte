@@ -20,8 +20,17 @@
     import { listProjects } from "$lib/utils/projects";
     import { seconds, secondsToHMS } from "./timer";
     import { listLog, addLog } from "../calendar/log";
+    import { getLocalStorage } from "$lib/utils/localStorage";
 
-    let activityName: string = $state("Activity");
+    let activityName = $state("Activity");
+
+    if (getLocalStorage()) {
+        let activity = localStorage.getItem("currentActivity");
+        if (activity) {
+            activityName = activity;
+        }
+    }
+
     let projectName: string = $state("No Project");
     let projectColor: string = $state("");
 
@@ -102,6 +111,12 @@
     };
 
     onMount(loadWorker);
+
+    $effect(() => {
+        if (getLocalStorage()) {
+            localStorage.setItem("currentActivity", activityName);
+        }
+    });
 </script>
 
 <main class="container mt-5">
