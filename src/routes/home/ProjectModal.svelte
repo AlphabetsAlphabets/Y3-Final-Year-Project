@@ -31,6 +31,7 @@
     type="button"
     class="btn btn-outline-primary w-100"
     onclick={() => {
+        userInput = "";
         modal?.showModal();
     }}
 >
