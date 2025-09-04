@@ -156,10 +156,6 @@
         .date-range-selector label {
             margin-bottom: 0.25rem;
         }
-
-        .date-range-selector input[type="text"] {
-            margin-bottom: 0.5rem;
-        }
     }
 
     .date-button {
