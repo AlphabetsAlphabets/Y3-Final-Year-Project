@@ -12,10 +12,18 @@
 
     import type { DbWorker } from "$lib/database.worker";
     import { addLog } from "../calendar/log";
+    import { getLocalStorage } from "$lib/utils/localStorage";
 
     let { activityName, projectName, onActivityStopped } = $props();
 
     let timerState = $state(TimerState.Stopped);
+
+    if (getLocalStorage()) {
+        let state = localStorage.getItem("timerState");
+        if (state) {
+            timerState = state;
+        }
+    }
 
     let dbWorker: Comlink.Remote<DbWorker> | null = $state(null);
     const loadWorker = async () => {
@@ -25,6 +33,12 @@
     };
 
     onMount(loadWorker);
+
+    $effect(() => {
+        if (getLocalStorage()) {
+            localStorage.setItem("timerState", timerState);
+        }
+    });
 </script>
 
 {#if timerState === TimerState.Stopped}
