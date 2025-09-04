@@ -1,10 +1,25 @@
 <script lang="ts">
-    import { deleteCompletedTasks, deleteTask } from "./task";
+    import {
+        deleteCompletedTasks,
+        deleteTask,
+        updateTaskName,
+        markTaskIncomplete,
+    } from "./task";
 
     import ConfirmDeleteModal from "./ConfirmDeleteModal.svelte";
     let { dbWorker, tasks = $bindable() } = $props();
 
     let isDoneListCollapsed = $state(true);
+    let editingTaskId = $state(null);
+    let editingTaskName = $state("");
+
+    let unfinishTask = async (taskId: number) => {
+        if (dbWorker) {
+            tasks = await markTaskIncomplete(dbWorker, taskId);
+        } else {
+            console.error("Worker is not ready. Please try again.");
+        }
+    };
 </script>
 
 <div class="tasks-section">
@@ -30,11 +45,67 @@
             {#each tasks as task (task.id)}
                 {#if task.completed}
                     <li class="task-item">
-                        <button aria-label="Finish task" class="checkbox">
+                        <button
+                            aria-label="Mark task as uncompleted"
+                            class="checkbox"
+                            onclick={async () => unfinishTask(task.id)}
+                        >
                             <i class="bi bi-check"></i>
                         </button>
-                        <span class="task-name">{task.name}</span>
+                        {#if editingTaskId === task.id}
+                            <input
+                                type="text"
+                                bind:value={editingTaskName}
+                                class="task-edit-input"
+                                onkeydown={async (e) => {
+                                    if (e.key === "Enter") {
+                                        if (
+                                            dbWorker &&
+                                            editingTaskName.trim()
+                                        ) {
+                                            tasks = await updateTaskName(
+                                                dbWorker,
+                                                task.id,
+                                                editingTaskName.trim(),
+                                            );
+                                        }
+                                        editingTaskId = null;
+                                        editingTaskName = "";
+                                    } else if (e.key === "Escape") {
+                                        editingTaskId = null;
+                                        editingTaskName = "";
+                                    }
+                                }}
+                                onblur={async () => {
+                                    if (
+                                        dbWorker &&
+                                        editingTaskName.trim() &&
+                                        editingTaskName !== task.name
+                                    ) {
+                                        tasks = await updateTaskName(
+                                            dbWorker,
+                                            task.id,
+                                            editingTaskName.trim(),
+                                        );
+                                    }
+                                    editingTaskId = null;
+                                    editingTaskName = "";
+                                }}
+                            />
+                        {:else}
+                            <span class="task-name">{task.name}</span>
+                        {/if}
                         <small>{task.description}</small>
+                        <button
+                            class="delete-btn"
+                            aria-label="Edit task name"
+                            onclick={() => {
+                                editingTaskId = task.id;
+                                editingTaskName = task.name;
+                            }}
+                        >
+                            <i class="bi bi-pencil"></i>
+                        </button>
                         <button
                             class="delete-btn"
                             aria-label="Delete task"
@@ -190,5 +261,21 @@
 
     .section-title-button .bi-chevron-down.rotated {
         transform: rotate(-90deg);
+    }
+
+    .task-edit-input {
+        flex-grow: 1;
+        border: 1px solid #007bff;
+        border-radius: 4px;
+        padding: 0.25rem 0.5rem;
+        font-size: 1rem;
+        color: #495057;
+        background-color: #fff;
+        outline: none;
+    }
+
+    .task-edit-input:focus {
+        border-color: #0056b3;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
     }
 </style>
