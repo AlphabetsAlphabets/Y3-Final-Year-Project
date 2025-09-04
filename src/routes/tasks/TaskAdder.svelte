@@ -12,6 +12,8 @@
 
         if (dbWorker) {
             tasks = await addTask(dbWorker, newTaskName, newTaskDescription);
+            newTaskName = "";
+            newTaskDescription = "";
         } else {
             console.error("Worker is not ready. Please try again.");
         }
@@ -29,15 +31,27 @@
             type="text"
             bind:value={newTaskName}
             placeholder="e.g., Finish project report"
+            tabindex="0"
+            onkeydown={async (e) => {
+                if (e.key === "Enter") {
+                    await addNewTask();
+                }
+            }}
         />
         <input
             type="text"
             class="description-input"
             bind:value={newTaskDescription}
             placeholder="description"
+            tabindex="0"
+            onkeydown={async (e) => {
+                if (e.key === "Enter") {
+                    await addNewTask();
+                }
+            }}
         />
     </div>
-    <button aria-label="Add new task" onclick={addNewTask}>
+    <button aria-label="Add new task" tabindex="0" onclick={addNewTask}>
         <i class="bi bi-plus-lg"></i>
         <span>Add Task</span>
     </button>
