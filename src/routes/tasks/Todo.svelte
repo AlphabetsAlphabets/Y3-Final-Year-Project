@@ -172,14 +172,10 @@
         color: #6c757d;
         font-size: 1.2rem;
         cursor: pointer;
-        opacity: 0;
+        opacity: 1;
         transition:
             opacity 0.15s ease-in-out,
             color 0.15s ease-in-out;
-    }
-
-    .task-item:hover .delete-btn {
-        opacity: 1;
     }
 
     .delete-btn:hover {
