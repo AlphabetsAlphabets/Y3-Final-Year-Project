@@ -34,7 +34,33 @@
                         <i class="bi bi-check"></i>
                     </button>
                     {#if editingTaskId === task.id}
-                        <div class="task-edit-container">
+                        <div
+                            class="task-edit-container"
+                            onblur={async (e) => {
+                                // Only exit edit mode if focus is leaving the entire container
+                                if (
+                                    !e.currentTarget.contains(e.relatedTarget)
+                                ) {
+                                    if (
+                                        dbWorker &&
+                                        editingTaskName.trim() &&
+                                        (editingTaskName !== task.name ||
+                                            editingTaskDescription !==
+                                                task.description)
+                                    ) {
+                                        tasks = await updateTask(
+                                            dbWorker,
+                                            task.id,
+                                            editingTaskName.trim(),
+                                            editingTaskDescription.trim(),
+                                        );
+                                    }
+                                    editingTaskId = null;
+                                    editingTaskName = "";
+                                    editingTaskDescription = "";
+                                }
+                            }}
+                        >
                             <input
                                 type="text"
                                 bind:value={editingTaskName}
@@ -61,25 +87,6 @@
                                         editingTaskName = "";
                                         editingTaskDescription = "";
                                     }
-                                }}
-                                onblur={async () => {
-                                    if (
-                                        dbWorker &&
-                                        editingTaskName.trim() &&
-                                        (editingTaskName !== task.name ||
-                                            editingTaskDescription !==
-                                                task.description)
-                                    ) {
-                                        tasks = await updateTask(
-                                            dbWorker,
-                                            task.id,
-                                            editingTaskName.trim(),
-                                            editingTaskDescription.trim(),
-                                        );
-                                    }
-                                    editingTaskId = null;
-                                    editingTaskName = "";
-                                    editingTaskDescription = "";
                                 }}
                             />
                             <input
@@ -108,25 +115,6 @@
                                         editingTaskName = "";
                                         editingTaskDescription = "";
                                     }
-                                }}
-                                onblur={async () => {
-                                    if (
-                                        dbWorker &&
-                                        editingTaskName.trim() &&
-                                        (editingTaskName !== task.name ||
-                                            editingTaskDescription !==
-                                                task.description)
-                                    ) {
-                                        tasks = await updateTask(
-                                            dbWorker,
-                                            task.id,
-                                            editingTaskName.trim(),
-                                            editingTaskDescription.trim(),
-                                        );
-                                    }
-                                    editingTaskId = null;
-                                    editingTaskName = "";
-                                    editingTaskDescription = "";
                                 }}
                             />
                         </div>
