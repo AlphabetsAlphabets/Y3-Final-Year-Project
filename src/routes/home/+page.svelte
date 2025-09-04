@@ -50,16 +50,16 @@
     let taskAndActivities: { id: number; name: string; isTask: boolean }[] =
         $derived(getTaskAndActivities(tasks, activities));
 
-    const formatTime = (totalSeconds: number): string => {
+    const formatTime = (totalSeconds: number) => {
         let { hours, minutes, seconds } = secondsToHMS(totalSeconds);
 
-        const parts: string[] = [];
-        if (hours > 0) parts.push(`${hours}<sup>h</sup>`);
-        if (minutes > 0) parts.push(`${minutes}<sup>m</sup>`);
+        const parts: { value: number; unit: string }[] = [];
+        if (hours > 0) parts.push({ value: hours, unit: "h" });
+        if (minutes > 0) parts.push({ value: minutes, unit: "m" });
         if (seconds > 0 || parts.length === 0)
-            parts.push(`${seconds}<sup>s</sup>`);
+            parts.push({ value: seconds, unit: "s" });
 
-        return parts.join("");
+        return parts;
     };
 
     const loadWorker = async () => {
@@ -132,7 +132,9 @@
                     </div>
 
                     <div class="display-1 fw-bold my-3">
-                        {@html formatTime($seconds)}
+                        {#each formatTime($seconds) as part (part.unit)}
+                            {part.value}<sup>{part.unit}</sup>
+                        {/each}
                     </div>
 
                     {#if activityName === "Activity"}
