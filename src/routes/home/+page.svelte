@@ -148,7 +148,7 @@
                     {/if}
                 </form>
 
-                <div class="mt-3">
+                <!-- <div class="mt-3">
                     <button
                         class="btn btn-secondary"
                         onclick={addTestActivity}
@@ -156,7 +156,7 @@
                     >
                         ADD TEST ACTIVITY
                     </button>
-                </div>
+                </div> -->
 
                 <br />
 
