@@ -46,3 +46,14 @@ export const markTaskComplete = async (
   );
   return await listTasks(dbWorker);
 };
+
+export const updateTaskName = async (
+  dbWorker: DbWorker,
+  taskId: number,
+  newName: string,
+): Promise<Task[]> => {
+  console.log("NEW NAME: ", newName);
+
+  await dbWorker.update(TABLE, `name = '${newName}'`, `id = ${taskId}`);
+  return await listTasks(dbWorker);
+};
