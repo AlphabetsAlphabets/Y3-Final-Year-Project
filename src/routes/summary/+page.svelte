@@ -67,7 +67,7 @@
                 </div>
             {:else}
                 <div class="no-data">
-                    <p>No time tracking data found.</p>
+                    <p>No time tracking data found</p>
                     <p>Start logging your activities to see the summary!</p>
                 </div>
             {/if}
@@ -92,7 +92,6 @@
         margin-bottom: 2rem;
         text-align: center;
     }
-
     .chart-container {
         margin: 2rem 0;
         padding: 1rem;

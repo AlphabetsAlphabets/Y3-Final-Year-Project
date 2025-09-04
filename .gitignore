@@ -3,7 +3,6 @@ node_modules/
 .ropeproject
 
 .svelte-kit/
-build/
 
 *.pem
 .vercel
