@@ -29,6 +29,7 @@
     type="button"
     class="btn btn-outline-primary w-100"
     onclick={() => {
+        userInput = "";
         modal?.showModal();
     }}
 >
@@ -51,6 +52,7 @@
                             class="btn btn-outline-primary option-select-btn"
                             onclick={() => {
                                 selected = option.name;
+                                userInput = "";
                                 modal?.closeModal();
                             }}
                         >
@@ -94,6 +96,7 @@
 
                 taskAndActivities = await addActivity(dbWorker, userInput);
                 selected = userInput;
+                userInput = "";
                 modal?.closeModal();
             }}>Create "{userInput}"</button
         >
@@ -101,7 +104,10 @@
     <button
         type="button"
         class="btn btn-secondary w-100 mt-3"
-        onclick={modal?.closeModal}>Cancel</button
+        onclick={() => {
+            userInput = "";
+            modal?.closeModal();
+        }}>Cancel</button
     >
 </Modal>
 
