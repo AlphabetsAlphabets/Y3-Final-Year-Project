@@ -12,6 +12,16 @@
     let isDoneListCollapsed = $state(true);
     let editingTaskId = $state(null);
     let editingTaskName = $state("");
+    let clickedTaskId = $state(null);
+    let isTouchDevice = $state(false);
+
+    import { onMount } from "svelte";
+
+    onMount(() => {
+        // Detect if device supports touch
+        isTouchDevice =
+            "ontouchstart" in window || navigator.maxTouchPoints > 0;
+    });
 
     let unfinishTask = async (taskId: number) => {
         if (dbWorker) {
@@ -93,21 +103,38 @@
                                 }}
                             />
                         {:else}
-                            <span class="task-name">{task.name}</span>
+                            <span
+                                class="task-name"
+                                onclick={() => {
+                                    if (isTouchDevice) {
+                                        clickedTaskId =
+                                            clickedTaskId === task.id
+                                                ? null
+                                                : task.id;
+                                    }
+                                }}
+                            >
+                                {task.name}
+                            </span>
                         {/if}
                         <small>{task.description}</small>
                         <button
                             class="delete-btn"
+                            class:mobile-visible={isTouchDevice &&
+                                clickedTaskId === task.id}
                             aria-label="Edit task name"
                             onclick={() => {
                                 editingTaskId = task.id;
                                 editingTaskName = task.name;
+                                clickedTaskId = null;
                             }}
                         >
                             <i class="bi bi-pencil"></i>
                         </button>
                         <button
                             class="delete-btn"
+                            class:mobile-visible={isTouchDevice &&
+                                clickedTaskId === task.id}
                             aria-label="Delete task"
                             onclick={async () => {
                                 if (dbWorker) {
@@ -117,6 +144,7 @@
                                         "Worker not ready. Please wait.",
                                     );
                                 }
+                                clickedTaskId = null;
                             }}
                         >
                             <i class="bi bi-trash"></i>
@@ -228,6 +256,19 @@
         flex-grow: 1;
         color: #495057;
         transition: color 0.2s ease;
+        cursor: pointer;
+        user-select: none;
+        padding: 0.25rem;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
+    }
+
+    .task-name:hover {
+        background-color: #f8f9fa;
+    }
+
+    .task-name:active {
+        background-color: #e9ecef;
     }
 
     .task-item {
@@ -277,5 +318,22 @@
     .task-edit-input:focus {
         border-color: #0056b3;
         box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    }
+
+    .mobile-visible {
+        opacity: 1 !important;
+    }
+
+    /* On touch devices, make task names more obviously clickable */
+    @media (hover: none) and (pointer: coarse) {
+        .task-name {
+            background-color: #f8f9fa;
+            border: 1px solid transparent;
+        }
+
+        .task-name:active {
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+        }
     }
 </style>
