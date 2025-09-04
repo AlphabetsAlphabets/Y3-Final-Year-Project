@@ -1,5 +1,10 @@
 <script lang="ts">
-    import { deleteCompletedTasks, deleteTask, updateTaskName } from "./task";
+    import {
+        deleteCompletedTasks,
+        deleteTask,
+        updateTaskName,
+        markTaskIncomplete,
+    } from "./task";
 
     import ConfirmDeleteModal from "./ConfirmDeleteModal.svelte";
     let { dbWorker, tasks = $bindable() } = $props();
@@ -7,6 +12,14 @@
     let isDoneListCollapsed = $state(true);
     let editingTaskId = $state(null);
     let editingTaskName = $state("");
+
+    let unfinishTask = async (taskId: number) => {
+        if (dbWorker) {
+            tasks = await markTaskIncomplete(dbWorker, taskId);
+        } else {
+            console.error("Worker is not ready. Please try again.");
+        }
+    };
 </script>
 
 <div class="tasks-section">
@@ -32,7 +45,11 @@
             {#each tasks as task (task.id)}
                 {#if task.completed}
                     <li class="task-item">
-                        <button aria-label="Finish task" class="checkbox">
+                        <button
+                            aria-label="Mark task as uncompleted"
+                            class="checkbox"
+                            onclick={async () => unfinishTask(task.id)}
+                        >
                             <i class="bi bi-check"></i>
                         </button>
                         {#if editingTaskId === task.id}

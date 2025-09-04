@@ -52,8 +52,18 @@ export const updateTaskName = async (
   taskId: number,
   newName: string,
 ): Promise<Task[]> => {
-  console.log("NEW NAME: ", newName);
-
   await dbWorker.update(TABLE, `name = '${newName}'`, `id = ${taskId}`);
+  return await listTasks(dbWorker);
+};
+
+export const markTaskIncomplete = async (
+  dbWorker: DbWorker,
+  taskId: number,
+): Promise<Task[]> => {
+  await dbWorker.update(
+    TABLE,
+    `completed = 0, completed_at = NULL`,
+    `id = ${taskId}`,
+  );
   return await listTasks(dbWorker);
 };
