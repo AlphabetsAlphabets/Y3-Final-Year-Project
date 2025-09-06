@@ -8,9 +8,11 @@
     } from "./task";
 
     import ConfirmDeleteModal from "./ConfirmDeleteModal.svelte";
+    import type { Task } from "$lib/types/schema";
     let { dbWorker, tasks = $bindable() } = $props();
 
     let isDoneListCollapsed = $state(true);
+
     let editingTaskId = $state(null);
     let editingTaskName = $state("");
     let editingTaskDescription = $state("");
@@ -21,6 +23,21 @@
         } else {
             console.error("Worker is not ready. Please try again.");
         }
+    };
+
+    const handleTaskUpdate = async (task: Task) => {
+        if (editingTaskName.trim() || editingTaskDescription.trim()) {
+            tasks = await updateTaskName(
+                dbWorker,
+                task.id,
+                editingTaskName,
+                editingTaskDescription,
+            );
+        }
+
+        editingTaskId = null;
+        editingTaskName = "";
+        editingTaskDescription = "";
     };
 </script>
 
@@ -55,107 +72,66 @@
                             <i class="bi bi-check"></i>
                         </button>
                         {#if editingTaskId === task.id}
-                            <div
-                                class="task-edit-container"
-                                onblur={async (e) => {
-                                    // Only exit edit mode if focus is leaving the entire container
-                                    if (
-                                        !e.currentTarget.contains(
-                                            e.relatedTarget,
-                                        )
-                                    ) {
-                                        if (
-                                            dbWorker &&
-                                            editingTaskName.trim() &&
-                                            (editingTaskName !== task.name ||
-                                                editingTaskDescription !==
-                                                    task.description)
-                                        ) {
-                                            tasks = await updateTask(
-                                                dbWorker,
-                                                task.id,
-                                                editingTaskName.trim(),
-                                                editingTaskDescription.trim(),
-                                            );
+                            <input
+                                type="text"
+                                bind:value={editingTaskName}
+                                class="task-edit-input"
+                                onkeydown={async (e) => {
+                                    if (e.key === "Enter") {
+                                        if (dbWorker) {
+                                            await handleTaskUpdate(task);
                                         }
+                                    } else if (e.key === "Escape") {
                                         editingTaskId = null;
                                         editingTaskName = "";
                                         editingTaskDescription = "";
                                     }
                                 }}
-                            >
-                                <input
-                                    type="text"
-                                    bind:value={editingTaskName}
-                                    class="task-edit-input"
-                                    placeholder="Task name"
-                                    onkeydown={async (e) => {
-                                        if (e.key === "Enter") {
-                                            if (
-                                                dbWorker &&
-                                                editingTaskName.trim()
-                                            ) {
-                                                tasks = await updateTask(
-                                                    dbWorker,
-                                                    task.id,
-                                                    editingTaskName.trim(),
-                                                    editingTaskDescription.trim(),
-                                                );
-                                            }
-                                            editingTaskId = null;
-                                            editingTaskName = "";
-                                            editingTaskDescription = "";
-                                        } else if (e.key === "Escape") {
-                                            editingTaskId = null;
-                                            editingTaskName = "";
-                                            editingTaskDescription = "";
+                                onblur={async () => {
+                                    if (dbWorker) {
+                                        await handleTaskUpdate(task);
+                                    }
+                                }}
+                            />
+
+                            <input
+                                type="text"
+                                bind:value={editingTaskDescription}
+                                class="task-edit-input"
+                                onkeydown={async (e) => {
+                                    if (e.key === "Enter") {
+                                        if (dbWorker) {
+                                            await handleTaskUpdate(task);
                                         }
-                                    }}
-                                />
-                                <input
-                                    type="text"
-                                    bind:value={editingTaskDescription}
-                                    class="task-edit-input task-description-input"
-                                    placeholder="Task description"
-                                    onkeydown={async (e) => {
-                                        if (e.key === "Enter") {
-                                            if (
-                                                dbWorker &&
-                                                editingTaskName.trim()
-                                            ) {
-                                                tasks = await updateTask(
-                                                    dbWorker,
-                                                    task.id,
-                                                    editingTaskName.trim(),
-                                                    editingTaskDescription.trim(),
-                                                );
-                                            }
-                                            editingTaskId = null;
-                                            editingTaskName = "";
-                                            editingTaskDescription = "";
-                                        } else if (e.key === "Escape") {
-                                            editingTaskId = null;
-                                            editingTaskName = "";
-                                            editingTaskDescription = "";
-                                        }
-                                    }}
-                                />
-                            </div>
+                                    } else if (e.key === "Escape") {
+                                        editingTaskId = null;
+                                        editingTaskName = "";
+                                        editingTaskDescription = "";
+                                    }
+                                }}
+                                onblur={async () => {
+                                    if (dbWorker) {
+                                        await handleTaskUpdate(task);
+                                    }
+                                }}
+                            />
                         {:else}
-                            <div class="task-content">
-                                <span class="task-name">{task.name}</span>
-                                <small class="task-description"
-                                    >{task.description}</small
-                                >
-                            </div>
+                            <span class="task-name">{task.name}</span>
+                            <small>{task.description}</small>
                         {/if}
                         <button
                             class="delete-btn"
                             aria-label="Edit task name"
                             onclick={() => {
-                                editingTaskId = task.id;
-                                editingTaskName = task.name;
-                                editingTaskDescription = task.description || "";
+                                if (!editingTaskId) {
+                                    editingTaskId = task.id;
+                                    editingTaskName = task.name;
+                                    editingTaskDescription = task.description;
+                                } else {
+                                    editingTaskId = null;
+                                    editingTaskName = "";
+                                    editingTaskDescription = "";
+                                }
                             }}
                         >
                             <i class="bi bi-pencil"></i>
