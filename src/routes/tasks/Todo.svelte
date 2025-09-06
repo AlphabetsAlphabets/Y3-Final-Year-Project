@@ -46,48 +46,52 @@
                         <i class="bi bi-check"></i>
                     </button>
                     {#if editingTaskId === task.id}
-                        <input
-                            type="text"
-                            bind:value={editingTaskName}
-                            class="task-edit-input"
-                            onkeydown={async (e) => {
-                                if (e.key === "Enter") {
+                        <div class="task-edit-container">
+                            <input
+                                type="text"
+                                bind:value={editingTaskName}
+                                class="task-edit-input task-name-input"
+                                placeholder="Task name"
+                                onkeydown={async (e) => {
+                                    if (e.key === "Enter") {
+                                        if (dbWorker) {
+                                            await handleTaskUpdate(task);
+                                        }
+                                    } else if (e.key === "Escape") {
+                                        editingTaskId = null;
+                                        editingTaskName = "";
+                                        editingTaskDescription = "";
+                                    }
+                                }}
+                                onblur={async () => {
                                     if (dbWorker) {
                                         await handleTaskUpdate(task);
                                     }
-                                } else if (e.key === "Escape") {
-                                    editingTaskId = null;
-                                    editingTaskName = "";
-                                    editingTaskDescription = "";
-                                }
-                            }}
-                            onblur={async () => {
-                                if (dbWorker) {
-                                    await handleTaskUpdate(task);
-                                }
-                            }}
-                        />
-                        <input
-                            type="text"
-                            bind:value={editingTaskDescription}
-                            class="task-edit-input"
-                            onkeydown={async (e) => {
-                                if (e.key === "Enter") {
+                                }}
+                            />
+                            <input
+                                type="text"
+                                bind:value={editingTaskDescription}
+                                class="task-edit-input task-description-input"
+                                placeholder="Description (optional)"
+                                onkeydown={async (e) => {
+                                    if (e.key === "Enter") {
+                                        if (dbWorker) {
+                                            await handleTaskUpdate(task);
+                                        }
+                                    } else if (e.key === "Escape") {
+                                        editingTaskId = null;
+                                        editingTaskName = "";
+                                        editingTaskDescription = "";
+                                    }
+                                }}
+                                onblur={async () => {
                                     if (dbWorker) {
                                         await handleTaskUpdate(task);
                                     }
-                                } else if (e.key === "Escape") {
-                                    editingTaskId = null;
-                                    editingTaskName = "";
-                                    editingTaskDescription = "";
-                                }
-                            }}
-                            onblur={async () => {
-                                if (dbWorker) {
-                                    await handleTaskUpdate(task);
-                                }
-                            }}
-                        />
+                                }}
+                            />
+                        </div>
                     {:else}
                         <span class="task-name">{task.name}</span>
                         <small>{task.description}</small>
@@ -217,8 +221,15 @@
         color: #dc3545;
     }
 
-    .task-edit-input {
+    .task-edit-container {
         flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        min-width: 0; /* Allow container to shrink */
+    }
+
+    .task-edit-input {
         border: 1px solid #007bff;
         border-radius: 4px;
         padding: 0.25rem 0.5rem;
@@ -226,6 +237,17 @@
         color: #495057;
         background-color: #fff;
         outline: none;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .task-name-input {
+        font-weight: 500;
+    }
+
+    .task-description-input {
+        font-size: 0.9rem;
+        color: #6c757d;
     }
 
     .task-edit-input:focus {
