@@ -13,17 +13,13 @@
 
     const filterLogsByDateRange = () => {
         let filtered: Log[] = [];
-        if (startDate) {
-            // timestamp for start of the day before from the current date.
-            const startTimestamp = new Date(startDate).getTime();
-            filtered = logs.filter((log: Log) => log.start >= startTimestamp);
-        }
+        const startTimestamp = new Date(startDate).getTime();
+        const endTimestamp = new Date(endDate).getTime() + 3600 * 24 * 1000;
 
-        if (endDate) {
-            // Add a day from today, filter for everything before it.
-            const endTimestamp = new Date(endDate).getTime() + 3600 * 24 * 1000;
-            filtered = logs.filter((log: Log) => log.end <= endTimestamp);
-        }
+        filtered = logs.filter(
+            (log: Log) =>
+                log.start >= startTimestamp && log.end <= endTimestamp,
+        );
 
         let newPieData = pieChartByActivityOrProject(viewBy, filtered);
 
