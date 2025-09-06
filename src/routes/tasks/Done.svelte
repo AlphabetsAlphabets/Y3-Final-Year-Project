@@ -3,7 +3,6 @@
         deleteCompletedTasks,
         deleteTask,
         updateTaskName,
-        updateTask,
         markTaskIncomplete,
     } from "./task";
 
@@ -207,6 +206,10 @@
         padding-right: 0.5rem; /* For scrollbar spacing */
     }
 
+    .task-item:hover .delete-btn {
+        opacity: 1;
+    }
+
     .task-item {
         display: flex;
         align-items: center;
@@ -221,7 +224,7 @@
         color: #6c757d;
         font-size: 1.2rem;
         cursor: pointer;
-        opacity: 1;
+        opacity: 0;
         transition:
             opacity 0.15s ease-in-out,
             color 0.15s ease-in-out;
@@ -250,29 +253,10 @@
         padding-right: 0.5rem; /* For scrollbar spacing */
     }
 
-    .task-content {
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-    }
-
     .task-name {
+        flex-grow: 1;
         color: #495057;
         transition: color 0.2s ease;
-        font-weight: 500;
-    }
-
-    .task-description {
-        color: #6c757d;
-        font-size: 0.875rem;
-    }
-
-    .task-edit-container {
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
     }
 
     .task-item {
@@ -322,10 +306,5 @@
     .task-edit-input:focus {
         border-color: #0056b3;
         box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-    }
-
-    .task-description-input {
-        font-size: 0.875rem;
-        color: #6c757d;
     }
 </style>
