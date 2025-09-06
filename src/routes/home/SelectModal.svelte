@@ -118,8 +118,13 @@
                             type="button"
                             class="btn btn-outline-secondary"
                             onclick={() => {
-                                editingActivity = option.name;
-                                editingActivityName = option.name;
+                                if (!editingActivity) {
+                                    editingActivity = option.name;
+                                    editingActivityName = option.name;
+                                } else {
+                                    editingActivity = null;
+                                    editingActivityName = "";
+                                }
                             }}
                             title="Edit activity name"
                         >
@@ -138,6 +143,8 @@
                                             editingActivity = null;
                                             editingActivityName = "";
                                         } else if (e.key === "Enter") {
+                                            e.preventDefault();
+                                            e.stopPropagation();
                                             await handleActivityNameUpdate(
                                                 option,
                                             );

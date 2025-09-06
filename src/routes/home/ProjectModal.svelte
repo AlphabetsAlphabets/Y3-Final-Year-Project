@@ -90,8 +90,13 @@
                             type="button"
                             class="btn btn-outline-secondary"
                             onclick={() => {
-                                editingProject = option.name;
-                                editingProjectName = option.name;
+                                if (!editingProject) {
+                                    editingProject = option.name;
+                                    editingProjectName = option.name;
+                                } else {
+                                    editingProject = null;
+                                    editingProjectName = "";
+                                }
                             }}
                             title="Edit project name"
                         >
@@ -109,6 +114,8 @@
                                             editingProject = null;
                                             editingProjectName = "";
                                         } else if (e.key === "Enter") {
+                                            e.preventDefault();
+                                            e.stopPropagation();
                                             await handleProjectNameUpdate(
                                                 option,
                                             );
