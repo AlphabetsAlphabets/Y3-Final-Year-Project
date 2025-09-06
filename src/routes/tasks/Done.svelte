@@ -88,11 +88,6 @@
                                             editingTaskDescription = "";
                                         }
                                     }}
-                                    onblur={async () => {
-                                        if (dbWorker) {
-                                            await handleTaskUpdate(task);
-                                        }
-                                    }}
                                 />
                                 <input
                                     type="text"
@@ -108,11 +103,6 @@
                                             editingTaskId = null;
                                             editingTaskName = "";
                                             editingTaskDescription = "";
-                                        }
-                                    }}
-                                    onblur={async () => {
-                                        if (dbWorker) {
-                                            await handleTaskUpdate(task);
                                         }
                                     }}
                                 />
