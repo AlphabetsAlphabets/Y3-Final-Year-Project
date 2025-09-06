@@ -11,8 +11,9 @@
         logs,
     } = $props();
 
-    let startDate = $state("");
-    let endDate = $state("");
+    const today = new Date().toISOString().split("T")[0];
+    let startDate = $state(today);
+    let endDate = $state(today);
 </script>
 
 <DateRange
