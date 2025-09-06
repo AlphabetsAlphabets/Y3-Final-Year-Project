@@ -1,9 +1,12 @@
 <script lang="ts">
+    import type { Task } from "$lib/types/schema";
     import { deleteTask, markTaskComplete, updateTaskName } from "./task";
 
     let { dbWorker, tasks = $bindable() } = $props();
+
     let editingTaskId = $state(null);
     let editingTaskName = $state("");
+    let editingTaskDescription = $state("");
 
     let finishTask = async (taskId: number) => {
         if (dbWorker) {
@@ -11,6 +14,21 @@
         } else {
             console.error("Worker is not ready. Please try again.");
         }
+    };
+
+    const handleTaskUpdate = async (task: Task) => {
+        if (editingTaskName.trim() || editingTaskDescription.trim()) {
+            tasks = await updateTaskName(
+                dbWorker,
+                task.id,
+                editingTaskName,
+                editingTaskDescription,
+            );
+        }
+
+        editingTaskId = null;
+        editingTaskName = "";
+        editingTaskDescription = "";
     };
 </script>
 
@@ -34,46 +52,59 @@
                             class="task-edit-input"
                             onkeydown={async (e) => {
                                 if (e.key === "Enter") {
-                                    if (dbWorker && editingTaskName.trim()) {
-                                        tasks = await updateTaskName(
-                                            dbWorker,
-                                            task.id,
-                                            editingTaskName.trim(),
-                                        );
+                                    if (dbWorker) {
+                                        await handleTaskUpdate(task);
                                     }
-                                    editingTaskId = null;
-                                    editingTaskName = "";
                                 } else if (e.key === "Escape") {
                                     editingTaskId = null;
                                     editingTaskName = "";
+                                    editingTaskDescription = "";
                                 }
                             }}
                             onblur={async () => {
-                                if (
-                                    dbWorker &&
-                                    editingTaskName.trim() &&
-                                    editingTaskName !== task.name
-                                ) {
-                                    tasks = await updateTaskName(
-                                        dbWorker,
-                                        task.id,
-                                        editingTaskName.trim(),
-                                    );
+                                if (dbWorker) {
+                                    await handleTaskUpdate(task);
                                 }
-                                editingTaskId = null;
-                                editingTaskName = "";
+                            }}
+                        />
+                        <input
+                            type="text"
+                            bind:value={editingTaskDescription}
+                            class="task-edit-input"
+                            onkeydown={async (e) => {
+                                if (e.key === "Enter") {
+                                    if (dbWorker) {
+                                        await handleTaskUpdate(task);
+                                    }
+                                } else if (e.key === "Escape") {
+                                    editingTaskId = null;
+                                    editingTaskName = "";
+                                    editingTaskDescription = "";
+                                }
+                            }}
+                            onblur={async () => {
+                                if (dbWorker) {
+                                    await handleTaskUpdate(task);
+                                }
                             }}
                         />
                     {:else}
                         <span class="task-name">{task.name}</span>
+                        <small>{task.description}</small>
                     {/if}
-                    <small>{task.description}</small>
                     <button
                         class="delete-btn"
                         aria-label="Edit task name"
                         onclick={() => {
-                            editingTaskId = task.id;
-                            editingTaskName = task.name;
+                            if (!editingTaskId) {
+                                editingTaskId = task.id;
+                                editingTaskName = task.name;
+                                editingTaskDescription = task.description;
+                            } else {
+                                editingTaskId = null;
+                                editingTaskName = "";
+                                editingTaskDescription = "";
+                            }
                         }}
                     >
                         <i class="bi bi-pencil"></i>
