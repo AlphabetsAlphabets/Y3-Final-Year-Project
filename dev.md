@@ -1,3 +1,5 @@
+My name is Yap Jia Hong (TP063375) intake APU3F2502CS.
+
 Note that there are two important branches in the repository ([link here](https://github.com/AlphabetsAlphabets/Y3-Final-Year-Project/tree/master)):
 1. master ([link here](https://github.com/AlphabetsAlphabets/Y3-Final-Year-Project/tree/master))
 

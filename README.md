@@ -1,6 +1,6 @@
 # Introduction
 
-> NOTE: If you are the lecturer or marker, please refer to [dev.md](https://github.com/AlphabetsAlphabets/Y3-Final-Year-Project/blob/master/dev.md) instead.
+> NOTE: If you are the lecturer or marker, please refer to [dev.md](https://github.com/AlphabetsAlphabets/Y3-Final-Year-Project/blob/master/dev.md) instead. If you're a user, please click [here](https://y3-final-year-project.vercel.app/home) to use the application.
 
 This is a project I decided to work on for my thesis for my final year of university. It is a productivity application meant to help you keep track of your time. The goal is when you actively begin tracking your time, you'll be aware of how you spend your time. You are also able to reflect on your time spent by viewing a simple summary and looking at a calendar view.
 
@@ -20,3 +20,5 @@ The calendar page is where you manage your tracked activities after it is said a
 
 ## Task page
 This is where you manage your tasks. The distinct between activity and task is the importance. You'd keep track of a task, and an activity is something you happen to be doing. For example, reading a book. But if it is serious, like something for a freelance job, you'd put it under task. You can edit tasks, mark them as completed, so on and so forth.
+
+> NOTE: If you are the lecturer or marker, please refer to [dev.md](https://github.com/AlphabetsAlphabets/Y3-Final-Year-Project/blob/master/dev.md) instead. If you're a user, please click [here](https://y3-final-year-project.vercel.app/home) to use the application.

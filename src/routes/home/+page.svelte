@@ -19,7 +19,7 @@
     import { listActivities } from "$lib/utils/activity";
     import { listProjects } from "$lib/utils/projects";
     import { seconds, secondsToHMS } from "./timer";
-    import { listLog, addLog } from "../calendar/log";
+    import { listLog } from "../calendar/log";
     import { getLocalStorage } from "$lib/utils/localStorage";
 
     let activityName = $state("Activity");
@@ -120,6 +120,7 @@
                                 bind:selected={projectName}
                                 bind:color={projectColor}
                                 bind:projects
+                                onProjectUpdated={refreshLogs}
                             />
                         </div>
                     </div>
