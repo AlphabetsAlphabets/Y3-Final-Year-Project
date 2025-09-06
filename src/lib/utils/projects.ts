@@ -24,6 +24,19 @@ export const updateProjectColor = async (
   return await listProjects(dbWorker);
 };
 
+export const updateProjectName = async (
+  dbWorker: DbWorker,
+  oldName: string,
+  newName: string,
+): Promise<Project[]> => {
+  await dbWorker.update(
+    "project",
+    `name = '${newName}'`,
+    `name = '${oldName}'`,
+  );
+  return await listProjects(dbWorker);
+};
+
 export const findProjectFromColor = async (
   dbWorker: DbWorker,
   color: string,

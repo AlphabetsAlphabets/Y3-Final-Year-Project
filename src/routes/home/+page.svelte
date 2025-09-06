@@ -19,7 +19,7 @@
     import { listActivities } from "$lib/utils/activity";
     import { listProjects } from "$lib/utils/projects";
     import { seconds, secondsToHMS } from "./timer";
-    import { listLog, addLog } from "../calendar/log";
+    import { listLog } from "../calendar/log";
     import { getLocalStorage } from "$lib/utils/localStorage";
 
     let activityName = $state("Activity");
@@ -88,28 +88,6 @@
         }
     };
 
-    const addTestActivity = async () => {
-        if (dbWorker) {
-            const now = Date.now();
-            const start = now - 2 * 60 * 60;
-            const end = now;
-
-            // milliseconds
-            const elapsed = end - start;
-
-            await addLog(
-                dbWorker,
-                "TEST ACTIVITY",
-                "No Project",
-                elapsed,
-                now - 2 * 60 * 60 * 1000,
-                end,
-            );
-
-            await refreshLogs();
-        }
-    };
-
     onMount(loadWorker);
 
     $effect(() => {
@@ -142,6 +120,7 @@
                                 bind:selected={projectName}
                                 bind:color={projectColor}
                                 bind:projects
+                                onProjectUpdated={refreshLogs}
                             />
                         </div>
                     </div>
@@ -162,16 +141,6 @@
                         />
                     {/if}
                 </form>
-
-                <div class="mt-3">
-                    <button
-                        class="btn btn-secondary"
-                        onclick={addTestActivity}
-                        type="button"
-                    >
-                        ADD TEST ACTIVITY
-                    </button>
-                </div>
 
                 <br />
 
