@@ -2,15 +2,30 @@
     import Modal from "$lib/components/Modal.svelte";
     import type { Activity } from "$lib/types/schema";
 
-    import { addActivity, deleteActivity } from "$lib/utils/activity";
+    import {
+        addActivity,
+        deleteActivity,
+        updateActivityName,
+    } from "$lib/utils/activity";
+    import { deleteTask, updateTaskName } from "../tasks/task";
+    import { getTaskAndActivities } from "./SelectModal";
 
     let {
         dbWorker,
         selected = $bindable(),
-        taskAndActivities = $bindable(),
+        tasks = $bindable(),
+        activities = $bindable(),
+        refreshActivities,
     } = $props();
+
+    let taskAndActivities: { id: number; name: string; isTask: boolean }[] =
+        $derived(getTaskAndActivities(tasks, activities));
+
     let modal: Modal | null = $state(null);
     let userInput = $state("");
+
+    let editingActivity = $state<string | null>(null);
+    let editingActivityName = $state("");
 
     let filteredOptions: { id: number; name: string; isTask: boolean }[] =
         $derived.by(() => {
@@ -22,6 +37,57 @@
                 option.name.toLowerCase().includes(userInput.toLowerCase()),
             );
         });
+
+    function focusOnMount(node: HTMLElement) {
+        node.focus();
+        return {
+            destroy() {},
+        };
+    }
+
+    const handleActivityNameUpdate = async (option: {
+        id: number;
+        name: string;
+        isTask: boolean;
+    }) => {
+        if (editingActivityName.trim() && editingActivityName !== option.name) {
+            if (option.isTask) {
+                tasks = await updateTaskName(
+                    dbWorker,
+                    option.id,
+                    editingActivityName,
+                );
+            } else {
+                await updateActivityName(
+                    dbWorker,
+                    option.name,
+                    editingActivityName,
+                );
+            }
+
+            await refreshActivities();
+        }
+
+        editingActivity = null;
+        editingActivityName = "";
+    };
+
+    const handleDelete = async (option: {
+        id: number;
+        name: string;
+        isTask: boolean;
+    }) => {
+        if (!dbWorker) {
+            console.error("dbWorker not ready yet.");
+            return;
+        }
+
+        if (option.isTask) {
+            tasks = await deleteTask(dbWorker, option.id);
+        } else {
+            activities = await deleteActivity(dbWorker, option.id);
+        }
+    };
 </script>
 
 <button
@@ -46,39 +112,77 @@
         <ul class="options-list">
             {#each filteredOptions as option (option.name)}
                 <li class="option-item">
-                    <div class="option-container">
+                    <div class="d-flex">
                         <button
+                            aria-label="Edit activity name"
                             type="button"
-                            class="btn btn-outline-primary option-select-btn"
+                            class="btn btn-outline-secondary"
                             onclick={() => {
-                                selected = option.name;
-                                userInput = "";
-                                modal?.closeModal();
+                                editingActivity = option.name;
+                                editingActivityName = option.name;
                             }}
+                            title="Edit activity name"
                         >
-                            {#if option.isTask}
-                                <span class="badge bg-success">TASK</span>
-                            {/if}
-                            {option.name}
+                            <i class="bi bi-pencil"></i>
                         </button>
-                        <button
-                            type="button"
-                            class="delete-btn"
-                            aria-label="Delete activity"
-                            onclick={async (e) => {
-                                e.stopPropagation();
-                                if (!dbWorker) {
-                                    console.error("dbWorker not ready yet.");
-                                    return;
-                                }
-                                taskAndActivities = await deleteActivity(
-                                    dbWorker,
-                                    option.id,
-                                );
-                            }}
-                        >
-                            <i class="bi bi-trash"></i>
-                        </button>
+
+                        {#if editingActivity === option.name}
+                            <div class="d-flex w-100">
+                                <input
+                                    type="text"
+                                    class="form-control edit-input flex-grow-1"
+                                    bind:value={editingActivityName}
+                                    use:focusOnMount
+                                    onkeydown={async (e) => {
+                                        if (e.key === "Escape") {
+                                            editingActivity = null;
+                                            editingActivityName = "";
+                                        } else if (e.key === "Enter") {
+                                            await handleActivityNameUpdate(
+                                                option,
+                                            );
+                                        }
+                                    }}
+                                />
+                                <button
+                                    aria-label="Confirm changes to activity name"
+                                    type="button"
+                                    class="btn btn-success btn-sm ms-1"
+                                    onclick={async () => {
+                                        await handleActivityNameUpdate(option);
+                                    }}
+                                    title="Confirm changes"
+                                >
+                                    ✓
+                                </button>
+                            </div>
+                        {:else}
+                            <button
+                                type="button"
+                                class="btn btn-outline-primary option-select-btn"
+                                onclick={() => {
+                                    selected = option.name;
+                                    userInput = "";
+                                    modal?.closeModal();
+                                }}
+                            >
+                                {#if option.isTask}
+                                    <span class="badge bg-success">TASK</span>
+                                {/if}
+                                {option.name}
+                            </button>
+                            <button
+                                type="button"
+                                class="delete-btn"
+                                aria-label="Delete activity"
+                                onclick={async (e) => {
+                                    e.stopPropagation();
+                                    await handleDelete(option);
+                                }}
+                            >
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        {/if}
                     </div>
                 </li>
             {/each}
@@ -94,7 +198,7 @@
                     return;
                 }
 
-                taskAndActivities = await addActivity(dbWorker, userInput);
+                activities = await addActivity(dbWorker, userInput);
                 selected = userInput;
                 userInput = "";
                 modal?.closeModal();

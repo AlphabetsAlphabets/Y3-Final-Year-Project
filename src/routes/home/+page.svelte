@@ -42,23 +42,6 @@
     let activities: Activity[] = $state([]);
     let projects: Project[] = $state([]);
 
-    const getTaskAndActivities = (tasks: Task[], activities: Activity[]) => {
-        const taskItems = tasks
-            .filter((task) => task.completed == 0)
-            .map((task: Task) => {
-                return { id: task.id, name: task.name, isTask: true };
-            });
-
-        const activityItems = activities.map((activity: Activity) => {
-            return { id: activity.id, name: activity.name, isTask: false };
-        });
-
-        return [...taskItems, ...activityItems];
-    };
-
-    let taskAndActivities: { id: number; name: string; isTask: boolean }[] =
-        $derived(getTaskAndActivities(tasks, activities));
-
     const formatTime = (totalSeconds: number) => {
         let { hours, minutes, seconds } = secondsToHMS(totalSeconds);
 
@@ -80,6 +63,12 @@
         activities = await listActivities(dbWorker);
         projects = await listProjects(dbWorker);
         logs = await listLog(dbWorker);
+    };
+
+    const refreshActivities = async () => {
+        if (dbWorker) {
+            activities = await listActivities(dbWorker);
+        }
     };
 
     const refreshLogs = async () => {
@@ -110,8 +99,10 @@
                         <div class="flex-grow-1">
                             <SelectModal
                                 {dbWorker}
+                                bind:tasks
+                                bind:activities
                                 bind:selected={activityName}
-                                bind:taskAndActivities
+                                {refreshActivities}
                             />
                         </div>
                         <div class="flex-grow-1">
