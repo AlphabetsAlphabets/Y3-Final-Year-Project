@@ -88,28 +88,6 @@
         }
     };
 
-    const addTestActivity = async () => {
-        if (dbWorker) {
-            const now = Date.now();
-            const start = now - 2 * 60 * 60;
-            const end = now;
-
-            // milliseconds
-            const elapsed = end - start;
-
-            await addLog(
-                dbWorker,
-                "TEST ACTIVITY",
-                "No Project",
-                elapsed,
-                now - 2 * 60 * 60 * 1000,
-                end,
-            );
-
-            await refreshLogs();
-        }
-    };
-
     onMount(loadWorker);
 
     $effect(() => {
@@ -162,16 +140,6 @@
                         />
                     {/if}
                 </form>
-
-                <!-- <div class="mt-3">
-                    <button
-                        class="btn btn-secondary"
-                        onclick={addTestActivity}
-                        type="button"
-                    >
-                        ADD TEST ACTIVITY
-                    </button>
-                </div> -->
 
                 <br />
 
