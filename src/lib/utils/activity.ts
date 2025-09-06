@@ -24,3 +24,16 @@ export const deleteActivity = async (
   await dbWorker.remove("activity", `id = ${activityId}`);
   return await listActivities(dbWorker);
 };
+
+export const updateActivityName = async (
+  dbWorker: DbWorker,
+  oldName: string,
+  newName: string,
+): Promise<Activity[]> => {
+  await dbWorker.update(
+    "activity",
+    `name = '${newName}'`,
+    `name = '${oldName}'`,
+  );
+  return await listActivities(dbWorker);
+};

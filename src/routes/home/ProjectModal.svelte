@@ -19,6 +19,7 @@
     let modal: Modal | null = $state(null);
     let userInput = $state("");
     let selectedColor = $state("#3498db"); // Default color
+
     let editingProject = $state<string | null>(null);
     let editingProjectName = $state("");
 
