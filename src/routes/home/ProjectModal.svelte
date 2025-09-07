@@ -63,7 +63,6 @@
 </script>
 
 <button
-    id="activity select"
     type="button"
     class="btn btn-outline-primary w-100"
     onclick={() => {
@@ -106,7 +105,7 @@
                             <div class="d-flex w-100">
                                 <input
                                     type="text"
-                                    class="form-control edit-input flex-grow-1"
+                                    class="form-control flex-grow-1"
                                     bind:value={editingProjectName}
                                     use:focusOnMount
                                     onkeydown={async (e) => {
@@ -147,7 +146,7 @@
                                     modal?.closeModal();
                                 }}
                             >
-                                <span class="project-name">{option.name}</span>
+                                <span class="modal-item">{option.name}</span>
                             </button>
                         {/if}
                         <input
@@ -169,11 +168,10 @@
         </ul>
     {:else}
         <p>No options found for "{userInput}"</p>
-        <div class="new-project-section">
-            <div class="color-picker-container">
+        <div>
+            <div>
                 <input
                     type="color"
-                    id="project-color"
                     bind:value={selectedColor}
                     title="Choose project color"
                 />
@@ -209,79 +207,11 @@
 </Modal>
 
 <style>
-    .options-list {
-        list-style: none;
-        padding: 0;
-    }
-
-    .option-item {
-        margin-bottom: 0.5rem;
-    }
-
-    .option-item .btn {
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
-    }
+    @import "./modal.css";
 
     .option-item .form-control-color {
         border-top-left-radius: 0;
         border-bottom-left-radius: 0;
         width: 50px; /* Adjust width as needed */
-    }
-
-    .project-name {
-        width: 100%;
-        padding: 0.375rem 0.75rem;
-        text-align: left;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .new-project-section {
-        margin-top: 0.5rem;
-    }
-
-    .color-picker-container {
-        height: 38px;
-    }
-
-    #project-color {
-        padding: 0;
-        margin: 0;
-        border: none;
-        border-left: 1px solid #dee2e6;
-        width: 100%;
-        height: 100%;
-        cursor: pointer;
-        background-clip: padding-box;
-    }
-
-    .edit-input {
-        margin: 0 !important;
-        border: none !important;
-        outline: none !important;
-        box-shadow: none !important;
-        background: transparent;
-        padding: 0.375rem 0.75rem;
-        font-size: inherit;
-    }
-
-    .edit-input:focus {
-        border: 1px solid #0d6efd !important;
-        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25) !important;
-        background: #fff;
-    }
-
-    .edit-input {
-        border-top-right-radius: 0 !important;
-        border-bottom-right-radius: 0 !important;
-    }
-
-    .btn-success.btn-sm {
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
-        font-size: 0.875rem;
-        padding: 0.25rem 0.5rem;
     }
 </style>

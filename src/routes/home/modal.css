@@ -1,0 +1,29 @@
+.options-list {
+    list-style: none;
+    padding: 0;
+}
+
+.option-item {
+    margin-bottom: 0.5rem;
+}
+
+.option-item .btn {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.modal-item {
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn-success.btn-sm {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+}

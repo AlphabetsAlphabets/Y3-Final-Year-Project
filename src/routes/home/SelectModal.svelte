@@ -7,7 +7,7 @@
         deleteActivity,
         updateActivityName,
     } from "$lib/utils/activity";
-    import { deleteTask, updateTaskName } from "../tasks/task";
+    import { deleteTask } from "../tasks/task";
     import { getTaskAndActivities } from "./SelectModal";
 
     let {
@@ -51,19 +51,11 @@
         isTask: boolean;
     }) => {
         if (editingActivityName.trim() && editingActivityName !== option.name) {
-            if (option.isTask) {
-                tasks = await updateTaskName(
-                    dbWorker,
-                    option.id,
-                    editingActivityName,
-                );
-            } else {
-                await updateActivityName(
-                    dbWorker,
-                    option.name,
-                    editingActivityName,
-                );
-            }
+            await updateActivityName(
+                dbWorker,
+                option.name,
+                editingActivityName,
+            );
 
             await refreshActivities();
         }
@@ -91,7 +83,6 @@
 </script>
 
 <button
-    id="activity select"
     type="button"
     class="btn btn-outline-primary w-100"
     onclick={() => {
@@ -104,7 +95,7 @@
 <Modal bind:this={modal} title="Select an activity">
     <input
         type="text"
-        class="form-control mb-3"
+        class="form-control flex-grow-1 mb-3"
         placeholder="Name of an activity. Reading, writing, etc."
         bind:value={userInput}
     />
@@ -166,7 +157,7 @@
                         {:else}
                             <button
                                 type="button"
-                                class="btn btn-outline-primary option-select-btn"
+                                class="btn modal-item btn-outline-primary option-select-btn"
                                 onclick={() => {
                                     selected = option.name;
                                     userInput = "";
@@ -223,24 +214,7 @@
 </Modal>
 
 <style>
-    .options-list {
-        list-style: none;
-        padding: 0;
-    }
-
-    .option-item {
-        margin-bottom: 0.5rem;
-    }
-
-    .option-container {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .option-select-btn {
-        flex: 1;
-    }
+    @import "./modal.css";
 
     .delete-btn {
         background: none;
@@ -263,34 +237,5 @@
 
     .option-item:hover .delete-btn {
         opacity: 1;
-    }
-
-    /*
-      NOTE: This :global() selector targets the Modal's content pane.
-      This approach is taken because the modal's DOM structure is rendered
-      outside of this component, making direct styling difficult without
-      modifying the base Modal component.
-
-      This may have unintended side effects if other modals with different
-      width requirements are added to the app, as this style will apply
-      globally to any element with the `.modal-content` class.
-    */
-    :global(.modal-content) {
-        width: 90%; /* Default for smaller screens */
-        max-width: none; /* Override any potential max-width from the base modal style */
-    }
-
-    /* Mimic Bootstrap's grid system for col-md-8 */
-    @media (min-width: 768px) {
-        :global(.modal-content) {
-            width: 66.66666667%;
-        }
-    }
-
-    /* Mimic Bootstrap's grid system for col-lg-6 */
-    @media (min-width: 992px) {
-        :global(.modal-content) {
-            width: 50%;
-        }
     }
 </style>

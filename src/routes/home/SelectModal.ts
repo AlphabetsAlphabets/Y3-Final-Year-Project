@@ -1,4 +1,5 @@
 import type { Activity, Task } from "$lib/types/schema";
+import { updateActivityName } from "$lib/utils/activity";
 
 export const getTaskAndActivities = (tasks: Task[], activities: Activity[]) => {
   const taskItems = tasks

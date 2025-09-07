@@ -52,6 +52,7 @@
         justify-content: center;
         z-index: 1000;
     }
+
     .modal-content {
         background: white;
         padding: 2rem;
@@ -59,6 +60,7 @@
         min-width: 300px;
         position: relative;
     }
+
     .modal-close {
         position: absolute;
         top: 10px;
@@ -70,5 +72,24 @@
     }
     .modal-title {
         margin-top: 0;
+    }
+
+    :global(.modal-content) {
+        width: 90%; /* Default for smaller screens */
+        max-width: none; /* Override any potential max-width from the base modal style */
+    }
+
+    /* Mimic Bootstrap's grid system for col-md-8 */
+    @media (min-width: 768px) {
+        :global(.modal-content) {
+            width: 66.66666667%;
+        }
+    }
+
+    /* Mimic Bootstrap's grid system for col-lg-6 */
+    @media (min-width: 992px) {
+        :global(.modal-content) {
+            width: 50%;
+        }
     }
 </style>
