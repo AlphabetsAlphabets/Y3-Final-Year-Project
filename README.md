@@ -13,23 +13,23 @@ It is intended for this application to be used on and off over a period of time.
 ## Summary page
 This is where you view data about your time spent. How you spend your time in a week, month, year, etc. You can choose the date range you want. You can choose to either view your stats by activity or by project. You can filter by hours or minutes as well. A pie chart will be presented to show how much time you spent on a project or activity. You can also download the data in the form of a CSV.
 
-<img src="https://i.imgur.com/wjRnV21.png" alt="Summary page"/>
+<img src="./images/Summary.png" alt="Summary page"/>
 
 ## Home page
 The home page is the main page where you track your activities and link them with projects. For example, a project is broad and an activity is specific. Examples:
 1. If you have a "gym" project, the activities could be "arms", "legs", etc.
 2. If you're tracking time to be able to properly bill someone, you'll group projects based on actual project names. If the project is "Make a website", activities could be "research", "design", etc. This is just a recommendation. You can use this however you'd like.
 
-<img src="https://i.imgur.com/e4okxVB.png" alt="Home page"/>
+<img src="./images/Home.png" alt="Home page"/>
 
 ## Calendar page
 The calendar page is where you manage your tracked activities after it is said and done. You can delete logs, create new ones, update existing ones, edit their start and end times, etc. You can generally see what you've worked on for the week.
 
-<img src="https://i.imgur.com/8RResrs.png" alt="Calendar page"/>
+<img src="./images/Calendar.png" alt="Calendar page"/>
 
 ## Task page
 This is where you manage your tasks. The distinct between activity and task is the importance. You'd keep track of a task, and an activity is something you happen to be doing. For example, reading a book. But if it is serious, like something for a freelance job, you'd put it under task. You can edit tasks, mark them as completed, so on and so forth.
 
-<img src="https://i.imgur.com/hCiVYI6.png" alt="Task page"/>
+<img src="./images/Tasks.png" alt="Task page"/>
 
 > NOTE: If you are the lecturer or marker, please refer to [dev.md](https://github.com/AlphabetsAlphabets/Y3-Final-Year-Project/blob/master/dev.md) instead. If you're a user, please click [here](https://y3-final-year-project.vercel.app/home) to use the application.
