@@ -13,7 +13,7 @@ It is intended for this application to be used on and off over a period of time.
 ## Summary page
 This is where you view data about your time spent. How you spend your time in a week, month, year, etc. You can choose the date range you want. You can choose to either view your stats by activity or by project. You can filter by hours or minutes as well. A pie chart will be presented to show how much time you spent on a project or activity. You can also download the data in the form of a CSV.
 
-<img href="https://i.imgur.com/wjRnV21.png" alt="Summary page"/>
+<img src="https://i.imgur.com/wjRnV21.png" alt="Summary page"/>
 
 ## Home page
 The home page is the main page where you track your activities and link them with projects. For example, a project is broad and an activity is specific. Examples:
