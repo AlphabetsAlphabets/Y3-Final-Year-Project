@@ -20,10 +20,16 @@ The home page is the main page where you track your activities and link them wit
 1. If you have a "gym" project, the activities could be "arms", "legs", etc.
 2. If you're tracking time to be able to properly bill someone, you'll group projects based on actual project names. If the project is "Make a website", activities could be "research", "design", etc. This is just a recommendation. You can use this however you'd like.
 
+<img src="https://i.imgur.com/e4okxVB.png" alt="Home page"/>
+
 ## Calendar page
 The calendar page is where you manage your tracked activities after it is said and done. You can delete logs, create new ones, update existing ones, edit their start and end times, etc. You can generally see what you've worked on for the week.
 
+<img src="https://i.imgur.com/8RResrs.png" alt="Calendar page"/>
+
 ## Task page
 This is where you manage your tasks. The distinct between activity and task is the importance. You'd keep track of a task, and an activity is something you happen to be doing. For example, reading a book. But if it is serious, like something for a freelance job, you'd put it under task. You can edit tasks, mark them as completed, so on and so forth.
+
+<img src="https://i.imgur.com/hCiVYI6.png" alt="Task page"/>
 
 > NOTE: If you are the lecturer or marker, please refer to [dev.md](https://github.com/AlphabetsAlphabets/Y3-Final-Year-Project/blob/master/dev.md) instead. If you're a user, please click [here](https://y3-final-year-project.vercel.app/home) to use the application.
